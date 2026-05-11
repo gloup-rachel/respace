@@ -23,351 +23,254 @@
       display: flex;
       align-items: center;
       gap: 1.2rem;
-      border-bottom: 1px solid rgba(255,255,255,.08);
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 200;
     }
-    .back-btn {
-      color: rgba(255,255,255,.45);
-      text-decoration: none;
-      font-size: 0.82rem;
-      display: flex;
-      align-items: center;
-      gap: .35rem;
-      transition: color .15s;
-    }
+    .back-btn { color: rgba(255,255,255,.45); text-decoration: none; font-size: .82rem; display: flex; align-items: center; gap: .35rem; transition: color .15s; }
     .back-btn:hover { color: #fff; }
-    .logo {
-      font-weight: 800;
-      font-size: 0.92rem;
-      letter-spacing: 0.18em;
-      border: 1.5px solid #fff;
-      padding: 0.28rem 0.65rem;
-    }
-    .header-sub { font-size: 0.83rem; color: rgba(255,255,255,.55); }
+    .logo { font-weight: 800; font-size: .92rem; letter-spacing: .18em; border: 1.5px solid #fff; padding: .28rem .65rem; }
+    .header-sub { font-size: .83rem; color: rgba(255,255,255,.55); }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
-    .live-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #00b894;
-      background: rgba(0,184,148,.15);
-      padding: .28rem .75rem;
-      border-radius: 20px;
-    }
-    .version-badge { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,.4); }
+    .live-badge { font-size: .72rem; font-weight: 700; color: #00b894; background: rgba(0,184,148,.15); padding: .28rem .75rem; border-radius: 20px; }
+    .version-badge { font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.4); }
 
-    /* ── Layout ── */
+    /* ── INPUT PHASE ── */
     .layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-
-    /* ── Section label ── */
-    .section-label {
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #aaa;
-      margin-bottom: .75rem;
-    }
-
-    /* ── Card ── */
-    .card {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      padding: 1.75rem;
-      margin-bottom: 1.25rem;
-    }
-    .card-title {
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #111;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-    }
-    .card-title .step-badge {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #fff;
-      background: #1a1a2e;
-      padding: .15rem .5rem;
-      border-radius: 4px;
-      letter-spacing: .05em;
-    }
-
-    /* ── Form ── */
+    .section-label { font-size: .7rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #aaa; margin-bottom: .75rem; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.75rem; margin-bottom: 1.25rem; }
+    .card-title { font-size: .88rem; font-weight: 800; color: #111; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .6rem; }
+    .step-badge { font-size: .65rem; font-weight: 800; color: #fff; background: #1a1a2e; padding: .15rem .5rem; border-radius: 4px; letter-spacing: .05em; }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
     .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: .75rem; }
     .field:last-child { margin-bottom: 0; }
-    .field label { font-size: 0.73rem; font-weight: 600; color: #777; }
-    .field input, .field textarea, .field select {
-      padding: 8px 10px;
-      border: 1.5px solid #e5e5e5;
-      border-radius: 6px;
-      font-size: 13px;
-      font-family: inherit;
-      color: #111;
-      transition: border-color .15s;
-      background: #fff;
+    .field label { font-size: .73rem; font-weight: 600; color: #777; }
+    .field input, .field textarea {
+      padding: 8px 10px; border: 1.5px solid #e5e5e5; border-radius: 6px;
+      font-size: 13px; font-family: inherit; color: #111; transition: border-color .15s; background: #fff;
     }
-    .field input:focus, .field textarea:focus, .field select:focus {
-      outline: none;
-      border-color: #1a1a2e;
-    }
-    .field textarea { min-height: 72px; resize: vertical; }
+    .field input:focus, .field textarea:focus { outline: none; border-color: #1a1a2e; }
+    .field textarea { min-height: 68px; resize: vertical; }
     .form-divider { border: none; border-top: 1px solid #f0f0f0; margin: 1.25rem 0; }
 
-    /* ── Fetch button ── */
     .fetch-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .65rem 1.25rem;
-      background: #f5f5f3;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.83rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all .15s;
-      color: #333;
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .65rem 1.25rem; background: #f5f5f3; border: 1.5px solid #ddd;
+      border-radius: 8px; font-size: .83rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all .15s; color: #333;
     }
     .fetch-btn:hover { background: #ebebeb; border-color: #bbb; }
     .fetch-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    /* ── Data preview ── */
     .data-preview { display: none; margin-top: 1.25rem; }
     .data-preview.show { display: block; }
-    .data-preview-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .75rem;
-    }
-    .data-chip {
-      background: #f8f8f6;
-      border: 1px solid #e5e5e5;
-      border-radius: 8px;
-      padding: .85rem 1rem;
-    }
-    .data-chip-label { font-size: 0.7rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
-    .data-chip-value { font-size: 0.92rem; font-weight: 800; color: #1a1a2e; }
-    .data-chip-sub { font-size: 0.73rem; color: #888; margin-top: .2rem; }
+    .data-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+    .data-chip { background: #f8f8f6; border: 1px solid #e5e5e5; border-radius: 8px; padding: .85rem 1rem; }
+    .data-chip-label { font-size: .7rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
+    .data-chip-value { font-size: .92rem; font-weight: 800; color: #1a1a2e; }
+    .data-chip-sub { font-size: .73rem; color: #888; margin-top: .2rem; }
 
-    /* ── Generate button ── */
     .generate-btn {
-      display: block;
-      width: 100%;
-      padding: 1rem;
-      background: #1a1a2e;
-      color: #fff;
-      font-size: 0.95rem;
-      font-weight: 800;
-      font-family: inherit;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-      transition: opacity .15s;
-      margin-top: 1.25rem;
+      display: block; width: 100%; padding: 1rem;
+      background: #1a1a2e; color: #fff; font-size: .95rem; font-weight: 800;
+      font-family: inherit; border: none; border-radius: 8px; cursor: pointer;
+      letter-spacing: .03em; transition: opacity .15s; margin-top: 1.25rem;
     }
     .generate-btn:hover { opacity: .85; }
     .generate-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ── Progress ── */
     .progress-wrap { display: none; margin: 1rem 0; }
     .progress-wrap.show { display: block; }
     .progress-track { height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; margin-bottom: .5rem; }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #1a1a2e, #3d6be8);
-      border-radius: 2px;
-      animation: progressAnim 3s ease-in-out infinite;
-    }
-    @keyframes progressAnim { 0% { width: 0% } 60% { width: 80% } 100% { width: 90% } }
-    .progress-msg { font-size: 0.79rem; color: #888; text-align: center; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #1a1a2e, #3d6be8); border-radius: 2px; animation: prog 3s ease-in-out infinite; }
+    @keyframes prog { 0%{width:0%} 60%{width:80%} 100%{width:90%} }
+    .progress-msg { font-size: .79rem; color: #888; text-align: center; }
 
-    /* ── Error ── */
-    .error-box {
-      display: none;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      padding: .9rem 1.1rem;
-      color: #dc2626;
-      font-size: 0.83rem;
-      line-height: 1.65;
-      margin: .75rem 0;
-    }
+    .error-box { display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: .9rem 1.1rem; color: #dc2626; font-size: .83rem; line-height: 1.65; margin: .75rem 0; }
     .error-box.show { display: block; }
 
-    /* ── Output section ── */
-    #output-section { display: none; }
-    #output-section.show { display: block; }
+    /* ── FEEDBACK PHASE — 좌우 분할 ── */
+    #feedback-phase { display: none; }
+    #feedback-phase.show { display: flex; gap: 0; min-height: calc(100vh - 56px); }
 
-    .output-header {
+    /* 왼쪽: 인사이트 패널 */
+    .insight-panel {
+      width: 58%;
+      border-right: 1px solid #e5e5e5;
+      background: #fafaf8;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       gap: .75rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
+      flex-shrink: 0;
     }
-    .output-badge {
-      font-size: 0.72rem;
-      font-weight: 800;
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: .22rem .65rem;
-      border-radius: 8px;
-    }
-    .output-title { font-size: 1rem; font-weight: 800; color: #1a1a2e; }
-    .output-sub { font-size: 0.82rem; color: #888; flex: 1; }
+    .panel-title { font-size: .88rem; font-weight: 800; color: #111; flex: 1; }
+    .panel-sub { font-size: .75rem; color: #999; }
 
-    /* ── KPI strip ── */
+    /* 버전 탭 */
+    .version-tabs {
+      display: flex;
+      gap: .35rem;
+      align-items: center;
+    }
+    .ver-tab {
+      font-size: .7rem; font-weight: 700;
+      padding: .2rem .55rem; border-radius: 6px;
+      border: 1.5px solid #e5e5e5; background: #fff;
+      color: #999; cursor: pointer; transition: all .15s;
+      font-family: inherit;
+    }
+    .ver-tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    .insight-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem 3rem;
+    }
+
+    /* KPI strip (피드백 뷰) */
     .kpi-strip {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: .6rem;
-      margin-bottom: 1rem;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: 1rem;
     }
-    .kpi-chip {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 8px;
-      padding: .85rem .75rem;
-      text-align: center;
-    }
-    .kpi-label { font-size: 0.68rem; color: #aaa; font-weight: 600; margin-bottom: .25rem; }
-    .kpi-value { font-size: 0.95rem; font-weight: 800; color: #1a1a2e; }
-    .kpi-delta { font-size: 0.7rem; margin-top: .2rem; }
+    .kpi-chip { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: .75rem; text-align: center; }
+    .kpi-label { font-size: .65rem; color: #aaa; font-weight: 600; margin-bottom: .2rem; }
+    .kpi-value { font-size: .88rem; font-weight: 800; color: #1a1a2e; }
+    .kpi-delta { font-size: .68rem; margin-top: .15rem; }
     .kpi-delta.pos { color: #00b894; }
     .kpi-delta.neg { color: #e74c3c; }
     .kpi-delta.neutral { color: #aaa; }
 
-    /* ── Section cards ── */
-    .step-card {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      margin-bottom: .85rem;
-      overflow: hidden;
-    }
-    .step-card-header {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      padding: .85rem 1.25rem;
-      background: #fafaf8;
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
-      user-select: none;
-    }
-    .step-num-tag {
-      font-size: 0.67rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #fff;
-      background: #1a1a2e;
-      padding: .18rem .52rem;
-      border-radius: 4px;
-    }
-    .step-title-text { font-size: 0.88rem; font-weight: 700; color: #222; flex: 1; }
-    .step-toggle { font-size: 0.8rem; color: #ccc; transition: transform .2s; }
+    /* 섹션 카드 (피드백 뷰) */
+    .step-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: .75rem; overflow: hidden; }
+    .step-card-header { display: flex; align-items: center; gap: .65rem; padding: .75rem 1rem; background: #fafaf8; border-bottom: 1px solid #f0f0f0; cursor: pointer; user-select: none; }
+    .step-num-tag { font-size: .65rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: #1a1a2e; padding: .15rem .48rem; border-radius: 4px; }
+    .step-title-text { font-size: .84rem; font-weight: 700; color: #222; flex: 1; }
+    .step-toggle { font-size: .78rem; color: #ccc; transition: transform .2s; }
     .step-card.collapsed .step-toggle { transform: rotate(-90deg); }
-    .step-content {
-      padding: 1.1rem 1.25rem;
-      font-size: 0.84rem;
-      line-height: 1.8;
-      color: #333;
-    }
+    .step-content { padding: 1rem 1.1rem; font-size: .82rem; line-height: 1.8; color: #333; }
     .step-card.collapsed .step-content { display: none; }
 
-    /* ── Weekly report content styles (대시보드와 동일) ── */
-    .step-content .weekly-summary-card {
-      background: #f8f9fc;
-      border-left: 3px solid #1a1a2e;
-      padding: .85rem 1rem;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      line-height: 1.75;
-    }
-    .step-content .weekly-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: .75rem 0;
-      font-size: 0.82rem;
-    }
-    .step-content .weekly-table th {
-      background: #f3f3f1;
-      padding: .45rem .75rem;
-      text-align: left;
-      font-weight: 700;
-      font-size: 0.75rem;
-      color: #666;
-      border-bottom: 1px solid #e5e5e5;
-    }
-    .step-content .weekly-table td { padding: .45rem .75rem; border-bottom: 1px solid #f5f5f5; }
+    /* weekly report 콘텐츠 스타일 */
+    .step-content .weekly-summary-card { background: #f8f9fc; border-left: 3px solid #1a1a2e; padding: .75rem .9rem; border-radius: 0 8px 8px 0; margin-bottom: .85rem; font-size: .83rem; line-height: 1.75; }
+    .step-content .weekly-table { width: 100%; border-collapse: collapse; margin: .65rem 0; font-size: .8rem; }
+    .step-content .weekly-table th { background: #f3f3f1; padding: .4rem .65rem; text-align: left; font-weight: 700; font-size: .73rem; color: #666; border-bottom: 1px solid #e5e5e5; }
+    .step-content .weekly-table td { padding: .4rem .65rem; border-bottom: 1px solid #f5f5f5; }
     .step-content .weekly-table tr:last-child td { border-bottom: none; }
     .step-content .weekly-table .num { text-align: right; }
     .step-content .delta-pos { color: #00b894; font-weight: 700; }
     .step-content .delta-neg { color: #e74c3c; font-weight: 700; }
-    .step-content p { margin-bottom: .5rem; }
-    .step-content ul, .step-content ol { padding-left: 1.2rem; margin: .5rem 0; }
-    .step-content li { margin-bottom: .3rem; }
+    .step-content p { margin-bottom: .45rem; }
+    .step-content ul, .step-content ol { padding-left: 1.1rem; margin: .4rem 0; }
+    .step-content li { margin-bottom: .25rem; }
 
-    /* ── Action bar ── */
-    .action-bar {
+    /* 오른쪽: 피드백 패널 */
+    .feedback-panel {
+      width: 42%;
+      background: #fff;
       display: flex;
-      gap: .75rem;
-      margin-top: 1.5rem;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .feedback-scroll { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; }
+
+    .feedback-label { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #aaa; margin-bottom: .6rem; }
+    .feedback-textarea {
+      width: 100%; min-height: 130px; padding: .85rem 1rem;
+      border: 1.5px solid #e5e5e5; border-radius: 8px;
+      font-size: .84rem; font-family: inherit; color: #111;
+      resize: vertical; transition: border-color .15s; line-height: 1.65;
+    }
+    .feedback-textarea:focus { outline: none; border-color: #1a1a2e; }
+    .feedback-textarea:disabled { background: #fafaf8; color: #aaa; }
+
+    .feedback-hints {
+      margin-top: .6rem;
+      display: flex;
       flex-wrap: wrap;
+      gap: .35rem;
     }
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .75rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all .15s;
-      border: none;
+    .hint-chip {
+      font-size: .71rem; font-weight: 600; color: #555;
+      background: #f3f3f1; border: 1px solid #e5e5e5;
+      border-radius: 20px; padding: .22rem .65rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+      border-style: none;
     }
-    .action-btn.primary { background: #1a1a2e; color: #fff; }
-    .action-btn.primary:hover { opacity: .85; }
-    .action-btn.secondary { background: #fff; color: #333; border: 1.5px solid #ddd; }
-    .action-btn.secondary:hover { border-color: #aaa; }
-    .action-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .hint-chip:hover { background: #e8e8e4; }
 
-    /* ── Update info ── */
-    .update-info {
-      display: none;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-top: 1rem;
-      font-size: 0.83rem;
-      line-height: 1.7;
-      color: #166534;
+    .refine-btn {
+      display: block; width: 100%; padding: .85rem;
+      background: #1a1a2e; color: #fff; font-size: .88rem; font-weight: 800;
+      font-family: inherit; border: none; border-radius: 8px;
+      cursor: pointer; transition: opacity .15s; margin-top: .85rem;
+      letter-spacing: .02em;
     }
-    .update-info.show { display: block; }
+    .refine-btn:hover { opacity: .85; }
+    .refine-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    @media (max-width: 768px) {
+    /* 수정 이력 */
+    .history-section { margin-top: 1.5rem; }
+    .history-title { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #aaa; margin-bottom: .6rem; }
+    .history-item {
+      background: #f8f8f6; border: 1px solid #ebebeb;
+      border-radius: 8px; padding: .75rem 1rem;
+      margin-bottom: .5rem; font-size: .79rem;
+      line-height: 1.6;
+    }
+    .history-ver { font-size: .68rem; font-weight: 800; color: #fff; background: #1a1a2e; padding: .1rem .4rem; border-radius: 4px; margin-right: .4rem; }
+    .history-fb { color: #555; margin-top: .3rem; }
+
+    /* 대시보드 반영 버튼 영역 */
+    .panel-footer {
+      border-top: 1px solid #e5e5e5;
+      padding: 1rem 1.5rem;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .dashboard-btn {
+      display: block; width: 100%; padding: .85rem;
+      background: #00b894; color: #fff; font-size: .88rem; font-weight: 800;
+      font-family: inherit; border: none; border-radius: 8px;
+      cursor: pointer; transition: opacity .15s; letter-spacing: .02em;
+    }
+    .dashboard-btn:hover { opacity: .87; }
+    .dashboard-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .deploy-status {
+      display: none; margin-top: .65rem;
+      font-size: .78rem; line-height: 1.6;
+      padding: .65rem .85rem; border-radius: 6px;
+    }
+    .deploy-status.show { display: block; }
+    .deploy-status.ok { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .deploy-status.fail { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+
+    .restart-btn {
+      display: block; width: 100%; padding: .65rem;
+      background: #f5f5f3; color: #555; font-size: .8rem; font-weight: 700;
+      font-family: inherit; border: 1.5px solid #ddd; border-radius: 8px;
+      cursor: pointer; transition: all .15s; margin-top: .5rem; letter-spacing: .02em;
+    }
+    .restart-btn:hover { border-color: #bbb; }
+
+    /* 반응형 */
+    @media (max-width: 900px) {
+      #feedback-phase.show { flex-direction: column; }
+      .insight-panel, .feedback-panel { width: 100%; border-right: none; }
+      .insight-panel { border-bottom: 1px solid #e5e5e5; max-height: 60vh; }
+    }
+    @media (max-width: 600px) {
       .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
-      .kpi-strip { grid-template-columns: repeat(3, 1fr); }
       .data-preview-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 480px) {
       .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-      .data-preview-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -383,534 +286,468 @@
   </div>
 </header>
 
-<div class="layout">
+<!-- ════════════════════════════════════════════
+     INPUT PHASE
+════════════════════════════════════════════ -->
+<div id="input-phase">
+  <div class="layout">
 
-  <!-- ── STEP 1: 기본 정보 입력 ── -->
-  <div class="section-label">STEP 1 — 기본 정보 입력</div>
-  <div class="card" id="input-card">
+    <div class="section-label">STEP 1 — 기본 정보 입력</div>
+    <div class="card">
 
-    <div class="card-title">
-      <span class="step-badge">A</span>
-      주차 정보
-    </div>
-    <div class="form-grid-3">
-      <div class="field">
-        <label>주차 번호</label>
-        <input type="text" id="weekNum" placeholder="예: W19" />
+      <div class="card-title"><span class="step-badge">A</span> 주차 정보</div>
+      <div class="form-grid-3">
+        <div class="field"><label>주차 번호</label><input type="text" id="weekNum" placeholder="예: W19" /></div>
+        <div class="field"><label>시작일</label><input type="date" id="startDate" /></div>
+        <div class="field"><label>종료일</label><input type="date" id="endDate" /></div>
       </div>
-      <div class="field">
-        <label>시작일</label>
-        <input type="date" id="startDate" />
+      <div class="form-grid-2">
+        <div class="field"><label>미팅 날짜</label><input type="date" id="meetingDate" /></div>
+        <div class="field"><label>비교 주차 (전주)</label><input type="text" id="compareWeek" placeholder="예: W18 (4/27~5/3)" /></div>
       </div>
-      <div class="field">
-        <label>종료일</label>
-        <input type="date" id="endDate" />
+
+      <hr class="form-divider" />
+
+      <div class="card-title"><span class="step-badge">F</span> 이번 주 조정/변경 사항</div>
+      <div class="field"><label>네이버</label><textarea id="adj_naver" placeholder="없으면 빈칸"></textarea></div>
+      <div class="field"><label>구글</label><textarea id="adj_google" placeholder="없으면 빈칸"></textarea></div>
+      <div class="field"><label>Meta</label><textarea id="adj_meta" placeholder="없으면 빈칸"></textarea></div>
+
+      <hr class="form-divider" />
+
+      <div class="card-title"><span class="step-badge">G</span> 특이사항 / 이슈</div>
+      <div class="field"><textarea id="issues" rows="3" placeholder="스크립트 오류, 트래킹 문제, 외부 변수 등"></textarea></div>
+
+      <div class="card-title" style="margin-top:1rem"><span class="step-badge">H</span> 다음 주 논의 안건</div>
+      <div class="field"><textarea id="nextAgenda" rows="2" placeholder="다음 미팅 안건"></textarea></div>
+
+      <hr class="form-divider" />
+
+      <div class="card-title"><span class="step-badge">B · C · D · E</span> 광고 데이터 자동 수집</div>
+      <p style="font-size:.82rem;color:#888;margin-bottom:1rem">주차 날짜 입력 후 버튼을 누르면 대시보드와 동일한 소스(Google Sheets)에서 자동으로 데이터를 가져옵니다.</p>
+
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchData()">
+        <span id="fetchIcon">📡</span><span id="fetchLabel">데이터 수집 시작</span>
+      </button>
+
+      <div class="data-preview" id="dataPreview">
+        <div style="font-size:.75rem;font-weight:700;color:#aaa;margin:.85rem 0 .5rem;text-transform:uppercase;letter-spacing:.08em">수집 결과</div>
+        <div class="data-preview-grid" id="dataChips"></div>
       </div>
-    </div>
-    <div class="form-grid-2">
-      <div class="field">
-        <label>미팅 날짜</label>
-        <input type="date" id="meetingDate" />
+
+      <div class="error-box" id="fetchError"></div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateInsight()" disabled>✨ 인사이트 생성하기</button>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="progress-msg" id="progressMsg">데이터 분석 중...</div>
       </div>
-      <div class="field">
-        <label>비교 주차 (전주)</label>
-        <input type="text" id="compareWeek" placeholder="예: W18 (4/27~5/3)" />
-      </div>
+
+      <div class="error-box" id="generateError"></div>
     </div>
-
-    <hr class="form-divider" />
-
-    <div class="card-title">
-      <span class="step-badge">F</span>
-      이번 주 조정/변경 사항
-    </div>
-    <div class="field">
-      <label>네이버</label>
-      <textarea id="adj_naver" placeholder="없으면 빈칸으로 두세요"></textarea>
-    </div>
-    <div class="field">
-      <label>구글</label>
-      <textarea id="adj_google" placeholder="없으면 빈칸으로 두세요"></textarea>
-    </div>
-    <div class="field">
-      <label>Meta</label>
-      <textarea id="adj_meta" placeholder="없으면 빈칸으로 두세요"></textarea>
-    </div>
-
-    <hr class="form-divider" />
-
-    <div class="card-title">
-      <span class="step-badge">G</span>
-      특이사항 / 이슈
-    </div>
-    <div class="field">
-      <textarea id="issues" rows="3" placeholder="스크립트 오류, 트래킹 문제, 외부 변수 등"></textarea>
-    </div>
-
-    <div class="card-title" style="margin-top:1rem">
-      <span class="step-badge">H</span>
-      다음 주 논의 안건
-    </div>
-    <div class="field">
-      <textarea id="nextAgenda" rows="2" placeholder="다음 미팅 안건"></textarea>
-    </div>
-
-    <hr class="form-divider" />
-
-    <!-- STEP 2: 데이터 자동 수집 -->
-    <div class="card-title">
-      <span class="step-badge">B · C · D · E</span>
-      광고 데이터 자동 수집
-    </div>
-    <p style="font-size:.82rem;color:#888;margin-bottom:1rem">
-      주차 날짜 입력 후 버튼을 누르면 대시보드와 동일한 소스(Google Sheets)에서 자동으로 데이터를 가져옵니다.
-    </p>
-
-    <button class="fetch-btn" id="fetchBtn" onclick="fetchData()">
-      <span id="fetchIcon">📡</span>
-      <span id="fetchLabel">데이터 수집 시작</span>
-    </button>
-
-    <div class="data-preview" id="dataPreview">
-      <div style="font-size:.78rem;font-weight:700;color:#aaa;margin:.85rem 0 .5rem;text-transform:uppercase;letter-spacing:.08em">수집 결과</div>
-      <div class="data-preview-grid" id="dataChips"></div>
-    </div>
-
-    <div class="error-box" id="fetchError"></div>
-
-    <button class="generate-btn" id="generateBtn" onclick="generateInsight()" disabled>
-      ✨ 인사이트 생성하기
-    </button>
-
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-track"><div class="progress-fill"></div></div>
-      <div class="progress-msg" id="progressMsg">데이터 분석 중...</div>
-    </div>
-
-    <div class="error-box" id="generateError"></div>
   </div>
+</div>
 
-  <!-- ── OUTPUT ── -->
-  <div id="output-section">
-    <div class="output-header">
-      <span class="output-badge">✓ 생성 완료</span>
-      <span class="output-title" id="outputTitle"></span>
-      <span class="output-sub" id="outputSub"></span>
+<!-- ════════════════════════════════════════════
+     FEEDBACK PHASE — 좌우 분할
+════════════════════════════════════════════ -->
+<div id="feedback-phase">
+
+  <!-- ── 왼쪽: 인사이트 패널 ── -->
+  <div class="insight-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title" id="insightTitle">인사이트</div>
+        <div class="panel-sub" id="insightSub"></div>
+      </div>
+      <div class="version-tabs" id="versionTabs"></div>
     </div>
-
-    <div class="kpi-strip" id="kpiStrip"></div>
-    <div id="sectionsContainer"></div>
-
-    <div class="action-bar">
-      <button class="action-btn primary" id="downloadBtn" onclick="downloadDashboard()">
-        ⬇️ 대시보드 HTML 다운로드
-      </button>
-      <button class="action-btn secondary" onclick="resetForm()">
-        ↩ 다시 생성
-      </button>
-    </div>
-
-    <div class="update-info" id="updateInfo">
-      <strong>📌 대시보드 반영 방법</strong><br>
-      다운로드된 <code>respace_dashboard_v3.html</code> 파일을 GitHub 저장소에 업로드하면
-      대시보드의 주간 인사이트 탭에 자동으로 반영됩니다.<br>
-      <span style="color:#4a9d6f;font-size:.78rem;margin-top:.35rem;display:block">
-        ✓ 이번 주 인사이트가 WEEKLY_REPORTS 배열 최상단에 자동 삽입되었습니다.
-      </span>
+    <div class="insight-scroll" id="insightScroll">
+      <div class="kpi-strip" id="kpiStrip"></div>
+      <div id="sectionsContainer"></div>
     </div>
   </div>
 
+  <!-- ── 오른쪽: 피드백 패널 ── -->
+  <div class="feedback-panel">
+    <div class="feedback-scroll">
+
+      <div class="feedback-label">피드백 입력</div>
+      <textarea class="feedback-textarea" id="feedbackInput"
+        placeholder="수정이 필요한 부분을 자유롭게 입력해 주세요.&#10;예) 네이버 섹션에서 CAC 해석이 부족합니다. Meta 총평을 더 구체적으로 작성해 주세요."></textarea>
+
+      <div class="feedback-hints">
+        <button class="hint-chip" onclick="addHint('네이버 CAC 해석 보강 필요')">네이버 CAC 해석 보강</button>
+        <button class="hint-chip" onclick="addHint('Meta 섹션 더 구체적으로')">Meta 구체화</button>
+        <button class="hint-chip" onclick="addHint('전주 대비 수치 비교 추가')">전주 비교 추가</button>
+        <button class="hint-chip" onclick="addHint('액션 아이템 섹션 추가')">액션 아이템 추가</button>
+        <button class="hint-chip" onclick="addHint('전체 톤 더 간결하게')">톤 간결화</button>
+        <button class="hint-chip" onclick="addHint('벤치마크 대비 포지션 명시')">벤치마크 명시</button>
+      </div>
+
+      <div class="progress-wrap" id="refineProgress">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="progress-msg" id="refineProgressMsg">피드백 반영 중...</div>
+      </div>
+      <div class="error-box" id="refineError"></div>
+
+      <button class="refine-btn" id="refineBtn" onclick="refineInsight()">↩ 피드백 반영하기</button>
+
+      <!-- 수정 이력 -->
+      <div class="history-section" id="historySection" style="display:none">
+        <div class="history-title">수정 이력</div>
+        <div id="historyList"></div>
+      </div>
+
+    </div>
+
+    <!-- 하단: 대시보드 반영 -->
+    <div class="panel-footer">
+      <button class="dashboard-btn" id="dashboardBtn" onclick="updateDashboard()">
+        🚀 대시보드에 반영하기
+      </button>
+      <div class="deploy-status" id="deployStatus"></div>
+      <button class="restart-btn" onclick="restartFlow()">← 처음부터 다시</button>
+    </div>
+  </div>
 </div>
 
 <script>
   // ── 상수 ──────────────────────────────────────────────────────
-  const SHEET_ID = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
-  const SHEETS = {
-    naver:  '네이버 검색광고',
-    google: '구글 검색광고',
-    meta:   'Meta 광고',
-    leads:  '리캐치_리드',
-    deals:  '리캐치_딜'
-  };
+  const SHEET_ID    = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
+  const SHEETS      = { naver: '네이버 검색광고', google: '구글 검색광고', meta: 'Meta 광고', leads: '리캐치_리드', deals: '리캐치_딜' };
   const DASHBOARD_URL = 'https://gloup-rachel.github.io/reports/respace_dashboard_v3.html';
-  const API_URL = '/api/weekly-report';
+  const API_INSIGHT   = '/api/weekly-report';
+  const API_DEPLOY    = '/api/update-dashboard';
 
   // ── 상태 ──────────────────────────────────────────────────────
-  let collectedData = null;
-  let generatedEntry = null;
-  let dashboardHTML = null;
+  let collectedData  = null;
+  let weekInfoCache  = null;
+  let userInputsCache = null;
+  let versions       = [];   // { entry, feedback } 배열 — 버전 이력
+  let currentVerIdx  = 0;    // 현재 보고 있는 버전 인덱스
+  let dashboardHTML  = null;
 
   // ── 날짜 유틸 ─────────────────────────────────────────────────
+  const fmtD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const getDow = s => ['일','월','화','수','목','금','토'][new Date(s).getDay()];
+
   function getDateRange() {
     const s = document.getElementById('startDate').value;
     const e = document.getElementById('endDate').value;
     if (!s || !e) return null;
-    return {
-      start: new Date(s + 'T00:00:00'),
-      end:   new Date(e + 'T23:59:59')
-    };
+    return { start: new Date(s+'T00:00:00'), end: new Date(e+'T23:59:59') };
+  }
+  function getPrevRange() {
+    const r = getDateRange(); if (!r) return null;
+    const days = Math.round((r.end - r.start) / 86400000);
+    const pe = new Date(r.start); pe.setDate(pe.getDate()-1); pe.setHours(23,59,59);
+    const ps = new Date(pe); ps.setDate(ps.getDate()-days); ps.setHours(0,0,0);
+    return { start: ps, end: pe };
+  }
+  function inRange(v, r) {
+    if (!v || !r) return false;
+    const gv = String(v).match(/Date\((\d+),(\d+),(\d+)\)/);
+    const d = gv ? new Date(+gv[1],+gv[2],+gv[3]) : new Date(v);
+    return !isNaN(d) && d >= r.start && d <= r.end;
+  }
+  const fmtNum = n => Math.round(n||0).toLocaleString('ko-KR');
+  const parseNum = v => { if(v==null)return 0; if(typeof v==='number')return v; return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; };
+  const getKey = r => r['날짜']||r['일자']||r['Date']||Object.values(r)[0];
+
+  // ── gviz/tq fetch ──────────────────────────────────────────────
+  async function fetchSheet(name) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&tq=${encodeURIComponent('SELECT *')}`;
+    const t = await (await fetch(url)).text();
+    const m = t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
+    if (!m) throw new Error(`${name} 파싱 실패`);
+    return JSON.parse(m[1]).table;
+  }
+  function parseTable(t) {
+    if (!t||!t.rows) return [];
+    return t.rows.map(row => { const o={}; t.cols.forEach((c,i)=>{ o[c.label]=row.c[i]?.v??null; }); return o; });
   }
 
-  function getPrevDateRange() {
-    const range = getDateRange();
-    if (!range) return null;
-    const days = Math.round((range.end - range.start) / 86400000);
-    const prevEnd = new Date(range.start);
-    prevEnd.setDate(prevEnd.getDate() - 1);
-    prevEnd.setHours(23, 59, 59);
-    const prevStart = new Date(prevEnd);
-    prevStart.setDate(prevStart.getDate() - days);
-    prevStart.setHours(0, 0, 0);
-    return { start: prevStart, end: prevEnd };
-  }
-
-  function inRange(dateVal, range) {
-    if (!dateVal || !range) return false;
-    let d;
-    const gviz = String(dateVal).match(/Date\((\d+),(\d+),(\d+)\)/);
-    if (gviz) {
-      d = new Date(+gviz[1], +gviz[2], +gviz[3]);
-    } else {
-      d = new Date(dateVal);
-    }
-    if (isNaN(d)) return false;
-    return d >= range.start && d <= range.end;
-  }
-
-  function formatDateKo(dateStr) {
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
-  function getDayOfWeek(dateStr) {
-    return ['일','월','화','수','목','금','토'][new Date(dateStr).getDay()];
-  }
-
-  function fmtNum(n) {
-    return Math.round(n || 0).toLocaleString('ko-KR');
-  }
-
-  // ── gviz/tq fetch (대시보드와 동일 방식) ──────────────────────
-  async function fetchSheet(sheetName) {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&tq=${encodeURIComponent('SELECT *')}`;
-    const res = await fetch(url);
-    const text = await res.text();
-    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
-    if (!match) throw new Error(`${sheetName} 파싱 실패`);
-    return JSON.parse(match[1]).table;
-  }
-
-  function parseTable(table) {
-    if (!table || !table.rows) return [];
-    return table.rows.map(row => {
-      const obj = {};
-      table.cols.forEach((col, idx) => {
-        obj[col.label] = row.c[idx]?.v ?? null;
-      });
-      return obj;
+  // ── 집계 ─────────────────────────────────────────────────────
+  function aggNaver(rows, r) {
+    const grps={}; let ts=0,ti=0,tc=0,tv=0;
+    rows.forEach(row => {
+      if (!inRange(getKey(row),r)) return;
+      const s=parseNum(row['비용']||row['광고비']||0),i=parseNum(row['노출수']||row['노출']||0),
+            c=parseNum(row['클릭수']||row['클릭']||0),v=parseNum(row['전환수']||row['전환']||0),
+            g=row['광고그룹']||row['캠페인']||row['그룹']||'기타';
+      ts+=s;ti+=i;tc+=c;tv+=v;
+      if(!grps[g])grps[g]={spend:0,impressions:0,clicks:0,conv:0};
+      grps[g].spend+=s;grps[g].impressions+=i;grps[g].clicks+=c;grps[g].conv+=v;
     });
+    return {totalSpend:ts,totalImpressions:ti,totalClicks:tc,totalConv:tv,groups:grps};
   }
-
-  // ── 집계 함수 ─────────────────────────────────────────────────
-  function parseNum(v) {
-    if (v == null) return 0;
-    if (typeof v === 'number') return v;
-    return parseFloat(String(v).replace(/[^0-9.-]/g, '')) || 0;
-  }
-
-  function getDateKey(row) {
-    return row['날짜'] || row['일자'] || row['Date'] || Object.values(row)[0];
-  }
-
-  function aggregateNaver(rows, range) {
-    const groups = {};
-    let totalSpend = 0, totalImpressions = 0, totalClicks = 0, totalConv = 0;
-    rows.forEach(r => {
-      if (!inRange(getDateKey(r), range)) return;
-      const spend = parseNum(r['비용'] || r['광고비'] || 0);
-      const imp   = parseNum(r['노출수'] || r['노출'] || 0);
-      const click = parseNum(r['클릭수'] || r['클릭'] || 0);
-      const conv  = parseNum(r['전환수'] || r['전환'] || 0);
-      const grp   = r['광고그룹'] || r['캠페인'] || r['그룹'] || '기타';
-      totalSpend += spend; totalImpressions += imp; totalClicks += click; totalConv += conv;
-      if (!groups[grp]) groups[grp] = { spend: 0, impressions: 0, clicks: 0, conv: 0 };
-      groups[grp].spend += spend; groups[grp].impressions += imp;
-      groups[grp].clicks += click; groups[grp].conv += conv;
+  function aggGoogle(rows, r) {
+    let ts=0,ti=0,tc=0,tv=0;
+    rows.forEach(row => {
+      if (!inRange(getKey(row),r)) return;
+      ts+=parseNum(row['비용']||row['광고비']||0);ti+=parseNum(row['노출수']||row['노출']||0);
+      tc+=parseNum(row['클릭수']||row['클릭']||0);tv+=parseNum(row['전환수']||row['전환']||0);
     });
-    return { totalSpend, totalImpressions, totalClicks, totalConv, groups };
+    return {totalSpend:ts,totalImpressions:ti,totalClicks:tc,totalConv:tv};
   }
-
-  function aggregateGoogle(rows, range) {
-    let totalSpend = 0, totalImpressions = 0, totalClicks = 0, totalConv = 0;
-    rows.forEach(r => {
-      if (!inRange(getDateKey(r), range)) return;
-      totalSpend += parseNum(r['비용'] || r['광고비'] || 0);
-      totalImpressions += parseNum(r['노출수'] || r['노출'] || 0);
-      totalClicks += parseNum(r['클릭수'] || r['클릭'] || 0);
-      totalConv += parseNum(r['전환수'] || r['전환'] || 0);
+  function aggMeta(rows, r) {
+    const camps={}; let ts=0,ti=0,tc=0,tv=0;
+    rows.forEach(row => {
+      if (!inRange(getKey(row),r)) return;
+      const s=parseNum(row['비용']||row['광고비']||0),i=parseNum(row['노출수']||row['노출']||0),
+            c=parseNum(row['클릭수']||row['클릭']||0),v=parseNum(row['전환수']||row['전환']||0),
+            k=row['캠페인']||row['캠페인명']||'기타';
+      ts+=s;ti+=i;tc+=c;tv+=v;
+      if(!camps[k])camps[k]={spend:0,impressions:0,clicks:0,conv:0};
+      camps[k].spend+=s;camps[k].impressions+=i;camps[k].clicks+=c;camps[k].conv+=v;
     });
-    return { totalSpend, totalImpressions, totalClicks, totalConv };
+    return {totalSpend:ts,totalImpressions:ti,totalClicks:tc,totalConv:tv,campaigns:camps};
   }
-
-  function aggregateMeta(rows, range) {
-    const campaigns = {};
-    let totalSpend = 0, totalImpressions = 0, totalClicks = 0, totalConv = 0;
-    rows.forEach(r => {
-      if (!inRange(getDateKey(r), range)) return;
-      const spend = parseNum(r['비용'] || r['광고비'] || 0);
-      const imp   = parseNum(r['노출수'] || r['노출'] || 0);
-      const click = parseNum(r['클릭수'] || r['클릭'] || 0);
-      const conv  = parseNum(r['전환수'] || r['전환'] || 0);
-      const camp  = r['캠페인'] || r['캠페인명'] || '기타';
-      totalSpend += spend; totalImpressions += imp; totalClicks += click; totalConv += conv;
-      if (!campaigns[camp]) campaigns[camp] = { spend: 0, impressions: 0, clicks: 0, conv: 0 };
-      campaigns[camp].spend += spend; campaigns[camp].impressions += imp;
-      campaigns[camp].clicks += click; campaigns[camp].conv += conv;
-    });
-    return { totalSpend, totalImpressions, totalClicks, totalConv, campaigns };
-  }
-
-  function aggregateCount(rows, range) {
-    return rows.filter(r => inRange(getDateKey(r), range)).length;
-  }
+  function aggCount(rows, r) { return rows.filter(row=>inRange(getKey(row),r)).length; }
 
   // ── 데이터 수집 ────────────────────────────────────────────────
   async function fetchData() {
     const range = getDateRange();
-    if (!range) { showFetchError('시작일과 종료일을 먼저 입력해 주세요.'); return; }
-
+    if (!range) { showErr('fetchError','시작일과 종료일을 먼저 입력해 주세요.'); return; }
     const btn = document.getElementById('fetchBtn');
-    const errEl = document.getElementById('fetchError');
-    btn.disabled = true;
-    document.getElementById('fetchIcon').textContent = '⏳';
-    document.getElementById('fetchLabel').textContent = '수집 중...';
-    errEl.className = 'error-box';
-    document.getElementById('dataPreview').className = 'data-preview';
-
+    btn.disabled=true;
+    document.getElementById('fetchIcon').textContent='⏳';
+    document.getElementById('fetchLabel').textContent='수집 중...';
+    document.getElementById('fetchError').className='error-box';
+    document.getElementById('dataPreview').className='data-preview';
     try {
-      const prevRange = getPrevDateRange();
-
-      const [naverT, googleT, metaT, leadsT, dealsT] = await Promise.all([
-        fetchSheet(SHEETS.naver),
-        fetchSheet(SHEETS.google),
-        fetchSheet(SHEETS.meta),
-        fetchSheet(SHEETS.leads),
-        fetchSheet(SHEETS.deals)
-      ]);
-
-      const naverRows  = parseTable(naverT);
-      const googleRows = parseTable(googleT);
-      const metaRows   = parseTable(metaT);
-      const leadsRows  = parseTable(leadsT);
-      const dealsRows  = parseTable(dealsT);
-
-      const naver  = aggregateNaver(naverRows, range);
-      const google = aggregateGoogle(googleRows, range);
-      const meta   = aggregateMeta(metaRows, range);
-      const leads  = aggregateCount(leadsRows, range);
-      const deals  = aggregateCount(dealsRows, range);
-
+      const pr = getPrevRange();
+      const [nT,gT,mT,lT,dT] = await Promise.all([fetchSheet(SHEETS.naver),fetchSheet(SHEETS.google),fetchSheet(SHEETS.meta),fetchSheet(SHEETS.leads),fetchSheet(SHEETS.deals)]);
+      const nR=parseTable(nT),gR=parseTable(gT),mR=parseTable(mT),lR=parseTable(lT),dR=parseTable(dT);
       collectedData = {
-        naver, google, meta, leads, deals,
-        prevNaver:  prevRange ? aggregateNaver(naverRows, prevRange)   : null,
-        prevGoogle: prevRange ? aggregateGoogle(googleRows, prevRange) : null,
-        prevMeta:   prevRange ? aggregateMeta(metaRows, prevRange)     : null,
-        prevLeads:  prevRange ? aggregateCount(leadsRows, prevRange)   : null,
-        prevDeals:  prevRange ? aggregateCount(dealsRows, prevRange)   : null
+        naver:aggNaver(nR,range), google:aggGoogle(gR,range), meta:aggMeta(mR,range),
+        leads:aggCount(lR,range), deals:aggCount(dR,range),
+        prevNaver:pr?aggNaver(nR,pr):null, prevGoogle:pr?aggGoogle(gR,pr):null,
+        prevMeta:pr?aggMeta(mR,pr):null, prevLeads:pr?aggCount(lR,pr):null, prevDeals:pr?aggCount(dR,pr):null
       };
-
-      renderDataChips(naver, google, meta, leads, deals);
-      document.getElementById('fetchIcon').textContent = '✅';
-      document.getElementById('fetchLabel').textContent = '수집 완료 — 다시 수집하기';
-      btn.disabled = false;
-      document.getElementById('generateBtn').disabled = false;
-
-    } catch (err) {
-      showFetchError(`데이터 수집 실패: ${err.message}`);
-      document.getElementById('fetchIcon').textContent = '📡';
-      document.getElementById('fetchLabel').textContent = '다시 시도하기';
-      btn.disabled = false;
+      renderChips();
+      document.getElementById('fetchIcon').textContent='✅';
+      document.getElementById('fetchLabel').textContent='수집 완료 — 다시 수집하기';
+      btn.disabled=false;
+      document.getElementById('generateBtn').disabled=false;
+    } catch(e) {
+      showErr('fetchError',`데이터 수집 실패: ${e.message}`);
+      document.getElementById('fetchIcon').textContent='📡';
+      document.getElementById('fetchLabel').textContent='다시 시도하기';
+      btn.disabled=false;
     }
   }
 
-  function renderDataChips(naver, google, meta, leads, deals) {
-    const total = naver.totalSpend + google.totalSpend + meta.totalSpend;
-    const chips = [
-      { label: '네이버', value: `₩${fmtNum(naver.totalSpend)}`, sub: `전환 ${naver.totalConv}건` },
-      { label: '구글', value: `₩${fmtNum(google.totalSpend)}`, sub: `전환 ${google.totalConv}건` },
-      { label: 'Meta', value: `₩${fmtNum(meta.totalSpend)}`, sub: `전환 ${meta.totalConv}건` },
-      { label: '리드', value: `${leads}건`, sub: '리캐치 리드' },
-      { label: '딜', value: `${deals}건`, sub: '리캐치 딜' },
-      { label: '총 광고비', value: `₩${fmtNum(total)}`, sub: '3매체 합산' }
-    ];
-    document.getElementById('dataChips').innerHTML = chips.map(c => `
-      <div class="data-chip">
-        <div class="data-chip-label">${c.label}</div>
-        <div class="data-chip-value">${c.value}</div>
-        <div class="data-chip-sub">${c.sub}</div>
-      </div>`).join('');
-    document.getElementById('dataPreview').className = 'data-preview show';
-  }
-
-  function showFetchError(msg) {
-    const el = document.getElementById('fetchError');
-    el.textContent = msg;
-    el.className = 'error-box show';
+  function renderChips() {
+    const {naver:n,google:g,meta:m,leads:l,deals:d} = collectedData;
+    const total = n.totalSpend+g.totalSpend+m.totalSpend;
+    document.getElementById('dataChips').innerHTML = [
+      {label:'네이버',value:`₩${fmtNum(n.totalSpend)}`,sub:`전환 ${n.totalConv}건`},
+      {label:'구글',value:`₩${fmtNum(g.totalSpend)}`,sub:`전환 ${g.totalConv}건`},
+      {label:'Meta',value:`₩${fmtNum(m.totalSpend)}`,sub:`전환 ${m.totalConv}건`},
+      {label:'리드',value:`${l}건`,sub:'리캐치 리드'},
+      {label:'딜',value:`${d}건`,sub:'리캐치 딜'},
+      {label:'총 광고비',value:`₩${fmtNum(total)}`,sub:'3매체 합산'}
+    ].map(c=>`<div class="data-chip"><div class="data-chip-label">${c.label}</div><div class="data-chip-value">${c.value}</div><div class="data-chip-sub">${c.sub}</div></div>`).join('');
+    document.getElementById('dataPreview').className='data-preview show';
   }
 
   // ── 인사이트 생성 ──────────────────────────────────────────────
   async function generateInsight() {
-    if (!collectedData) { showGenerateError('먼저 데이터를 수집해 주세요.'); return; }
+    if (!collectedData) { showErr('generateError','먼저 데이터를 수집해 주세요.'); return; }
+    const weekNum=document.getElementById('weekNum').value.trim();
+    const startDate=document.getElementById('startDate').value;
+    const endDate=document.getElementById('endDate').value;
+    const meetingDate=document.getElementById('meetingDate').value;
+    const compareWeek=document.getElementById('compareWeek').value.trim();
+    if (!weekNum||!startDate||!endDate) { showErr('generateError','주차 번호와 날짜를 모두 입력해 주세요.'); return; }
 
-    const weekNum    = document.getElementById('weekNum').value.trim();
-    const startDate  = document.getElementById('startDate').value;
-    const endDate    = document.getElementById('endDate').value;
-    const meetingDate = document.getElementById('meetingDate').value;
-    const compareWeek = document.getElementById('compareWeek').value.trim();
+    const sFmt=fmtD(new Date(startDate)), eFmt=fmtD(new Date(endDate));
+    weekInfoCache = {
+      id:`${new Date(startDate).getFullYear()}-${weekNum}`,
+      weekLabel:`${weekNum} (${sFmt.slice(5).replace('-','/')}~${eFmt.slice(5).replace('-','/')})`,
+      meetingDate: meetingDate?`${fmtD(new Date(meetingDate))} (${getDow(meetingDate)})`:'',
+      periodLabel:`${sFmt} ~ ${eFmt}`,
+      comparePeriod:compareWeek?`지난 주 ${compareWeek}`:'전주 데이터 기준'
+    };
+    userInputsCache = {
+      adjustments:[
+        document.getElementById('adj_naver').value?`네이버: ${document.getElementById('adj_naver').value}`:'',
+        document.getElementById('adj_google').value?`구글: ${document.getElementById('adj_google').value}`:'',
+        document.getElementById('adj_meta').value?`Meta: ${document.getElementById('adj_meta').value}`:''
+      ].filter(Boolean).join('\n')||'없음',
+      issues:document.getElementById('issues').value||'없음',
+      nextAgenda:document.getElementById('nextAgenda').value||'없음'
+    };
 
-    if (!weekNum || !startDate || !endDate) {
-      showGenerateError('주차 번호와 날짜를 모두 입력해 주세요.');
-      return;
+    setGenerating(true);
+    try {
+      const entry = await callAPI({ mode:'generate', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache });
+      versions = [{ entry, feedback: null }];
+      currentVerIdx = 0;
+      await loadDashboardHTML(entry);
+      switchToFeedbackPhase();
+      renderInsightPanel(currentVerIdx);
+      renderVersionTabs();
+    } catch(e) {
+      showErr('generateError', `인사이트 생성 실패: ${e.message}`);
+    } finally {
+      setGenerating(false);
     }
+  }
 
-    const sFmt = formatDateKo(startDate);
-    const eFmt = formatDateKo(endDate);
-    const mFmt = meetingDate ? `${formatDateKo(meetingDate)} (${getDayOfWeek(meetingDate)})` : '';
-    const yr   = new Date(startDate).getFullYear();
-
-    const weekInfo = {
-      id:            `${yr}-${weekNum}`,
-      weekLabel:     `${weekNum} (${sFmt.slice(5).replace('-','/')}~${eFmt.slice(5).replace('-','/')})`,
-      meetingDate:   mFmt,
-      periodLabel:   `${sFmt} ~ ${eFmt}`,
-      comparePeriod: compareWeek ? `지난 주 ${compareWeek}` : '전주 데이터 기준'
-    };
-
-    const userInputs = {
-      adjustments: [
-        document.getElementById('adj_naver').value  ? `네이버: ${document.getElementById('adj_naver').value}`  : '',
-        document.getElementById('adj_google').value ? `구글: ${document.getElementById('adj_google').value}` : '',
-        document.getElementById('adj_meta').value   ? `Meta: ${document.getElementById('adj_meta').value}`   : ''
-      ].filter(Boolean).join('\n') || '없음',
-      issues:     document.getElementById('issues').value     || '없음',
-      nextAgenda: document.getElementById('nextAgenda').value || '없음'
-    };
-
-    // UI 상태 전환
-    document.getElementById('generateBtn').disabled = true;
-    document.getElementById('progressWrap').className = 'progress-wrap show';
+  function setGenerating(on) {
+    document.getElementById('generateBtn').disabled = on;
+    document.getElementById('progressWrap').className = on ? 'progress-wrap show' : 'progress-wrap';
     document.getElementById('generateError').className = 'error-box';
+    if (on) startProgressMsg('progressMsg', ['데이터 분석 중...','인사이트 도출 중...','섹션 작성 중...','최종 검토 중...']);
+    else stopProgressMsg();
+  }
 
-    const msgs = ['데이터 분석 중...', '인사이트 도출 중...', '섹션 작성 중...', '최종 검토 중...'];
-    let mi = 0;
-    const timer = setInterval(() => {
-      document.getElementById('progressMsg').textContent = msgs[mi = (mi+1) % msgs.length];
-    }, 2500);
+  // ── 피드백 반영 ────────────────────────────────────────────────
+  async function refineInsight() {
+    const feedback = document.getElementById('feedbackInput').value.trim();
+    if (!feedback) { showErr('refineError','피드백 내용을 입력해 주세요.'); return; }
+
+    const prevEntry = versions[currentVerIdx].entry;
+    document.getElementById('refineBtn').disabled = true;
+    document.getElementById('refineProgress').className = 'progress-wrap show';
+    document.getElementById('refineError').className = 'error-box';
+    startProgressMsg('refineProgressMsg',['피드백 분석 중...','섹션 수정 중...','검토 중...']);
 
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weekInfo, rawData: collectedData, userInputs })
+      const entry = await callAPI({
+        mode: 'refine',
+        weekInfo: weekInfoCache,
+        rawData: collectedData,
+        userInputs: userInputsCache,
+        previousEntry: prevEntry,
+        feedback
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error || '알 수 없는 오류');
 
-      generatedEntry = json.entry;
-      clearInterval(timer);
-      document.getElementById('progressWrap').className = 'progress-wrap';
-      document.getElementById('generateBtn').disabled = false;
+      // 현재 버전 이후 항목 제거 후 새 버전 추가
+      versions = versions.slice(0, currentVerIdx + 1);
+      versions.push({ entry, feedback });
+      currentVerIdx = versions.length - 1;
 
-      // 대시보드 HTML 업데이트
-      await loadAndUpdateDashboard(generatedEntry);
-      renderOutput(generatedEntry);
+      await loadDashboardHTML(entry);
+      renderInsightPanel(currentVerIdx);
+      renderVersionTabs();
+      addHistory(feedback, currentVerIdx);
 
-    } catch (err) {
-      clearInterval(timer);
-      document.getElementById('progressWrap').className = 'progress-wrap';
-      document.getElementById('generateBtn').disabled = false;
-      showGenerateError(`인사이트 생성 실패: ${err.message}`);
+      document.getElementById('feedbackInput').value = '';
+    } catch(e) {
+      showErr('refineError', `피드백 반영 실패: ${e.message}`);
+    } finally {
+      document.getElementById('refineBtn').disabled = false;
+      document.getElementById('refineProgress').className = 'progress-wrap';
+      stopProgressMsg();
     }
   }
 
-  function showGenerateError(msg) {
-    const el = document.getElementById('generateError');
-    el.textContent = msg;
-    el.className = 'error-box show';
+  // ── API 호출 공통 ──────────────────────────────────────────────
+  async function callAPI(body) {
+    const res = await fetch(API_INSIGHT, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const json = await res.json();
+    if (!res.ok || !json.ok) throw new Error(json.error || '알 수 없는 오류');
+    return json.entry;
   }
 
-  // ── 대시보드 HTML 로드 & WEEKLY_REPORTS 업데이트 ──────────────
-  async function loadAndUpdateDashboard(entry) {
+  // ── 대시보드 HTML 로드 & 삽입 ──────────────────────────────────
+  async function loadDashboardHTML(entry) {
     try {
       const res = await fetch(DASHBOARD_URL);
-      if (!res.ok) throw new Error(`${res.status}`);
-      const html = await res.text();
-      dashboardHTML = insertEntry(html, entry);
-    } catch (err) {
-      console.warn('대시보드 로드 실패:', err.message);
+      if (!res.ok) throw new Error(res.status);
+      dashboardHTML = insertEntry(await res.text(), entry);
+    } catch(e) {
+      console.warn('대시보드 로드 실패:', e.message);
       dashboardHTML = null;
     }
   }
 
   function insertEntry(html, entry) {
-    // 기존 isLatest: true → false
-    let updated = html.replace(/isLatest:\s*true/g, 'isLatest: false');
-
+    let out = html.replace(/isLatest:\s*true/g, 'isLatest: false');
     const marker = 'const WEEKLY_REPORTS = [';
-    const idx = updated.indexOf(marker);
+    const idx = out.indexOf(marker);
     if (idx === -1) throw new Error('WEEKLY_REPORTS를 찾을 수 없습니다.');
-
-    const entryStr = buildEntryJS(entry);
-    const insertPos = idx + marker.length;
-    return updated.slice(0, insertPos) + '\n' + entryStr + ',' + updated.slice(insertPos);
+    return out.slice(0, idx+marker.length) + '\n' + buildEntryJS(entry) + ',' + out.slice(idx+marker.length);
   }
 
   function buildEntryJS(e) {
-    const kpisStr = e.kpis.map(k =>
-      `                { label: ${JSON.stringify(k.label)}, value: ${JSON.stringify(k.value)}, delta: ${JSON.stringify(k.delta)}, trend: ${JSON.stringify(k.trend)} }`
+    const kStr = e.kpis.map(k =>
+      `                { label:${JSON.stringify(k.label)}, value:${JSON.stringify(k.value)}, delta:${JSON.stringify(k.delta)}, trend:${JSON.stringify(k.trend)} }`
     ).join(',\n');
-
-    const sectionsStr = e.sections.map(s => {
-      // html 내 백틱·역슬래시 이스케이프
-      const safeHtml = (s.html || '').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
-      return `                {
-                    title: ${JSON.stringify(s.title)},
-                    html: \`${safeHtml}\`
-                }`;
+    const sStr = e.sections.map(s => {
+      const h = (s.html||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$\{/g,'\\${');
+      return `                {\n                    title:${JSON.stringify(s.title)},\n                    html:\`${h}\`\n                }`;
     }).join(',\n');
-
     return `            {
-                id: ${JSON.stringify(e.id)},
-                weekLabel: ${JSON.stringify(e.weekLabel)},
-                meetingDate: ${JSON.stringify(e.meetingDate)},
-                periodLabel: ${JSON.stringify(e.periodLabel)},
-                comparePeriod: ${JSON.stringify(e.comparePeriod)},
-                isLatest: true,
-                oneLineSummary: ${JSON.stringify(e.oneLineSummary)},
-                kpis: [
-${kpisStr}
-                ],
-                sections: [
-${sectionsStr}
-                ]
+                id:${JSON.stringify(e.id)},
+                weekLabel:${JSON.stringify(e.weekLabel)},
+                meetingDate:${JSON.stringify(e.meetingDate)},
+                periodLabel:${JSON.stringify(e.periodLabel)},
+                comparePeriod:${JSON.stringify(e.comparePeriod)},
+                isLatest:true,
+                oneLineSummary:${JSON.stringify(e.oneLineSummary)},
+                kpis:[\n${kStr}\n                ],
+                sections:[\n${sStr}\n                ]
             }`;
   }
 
-  // ── 결과 렌더링 ────────────────────────────────────────────────
-  function renderOutput(entry) {
-    document.getElementById('outputTitle').textContent = entry.weekLabel;
-    document.getElementById('outputSub').textContent = entry.oneLineSummary;
+  // ── 대시보드 자동 반영 ────────────────────────────────────────
+  async function updateDashboard() {
+    if (!dashboardHTML) { showDeployStatus('fail','대시보드 HTML이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.'); return; }
+    const btn = document.getElementById('dashboardBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 업로드 중...';
+    showDeployStatus('', '');
 
-    document.getElementById('kpiStrip').innerHTML = entry.kpis.map(k => `
+    try {
+      const res = await fetch(API_DEPLOY, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ content:dashboardHTML, weekLabel:weekInfoCache?.weekLabel||'' })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error||'업로드 실패');
+      showDeployStatus('ok', `✓ ${json.message}${json.commitUrl ? `\n<a href="${json.commitUrl}" target="_blank" style="color:#15803d">커밋 확인 →</a>` : ''}`);
+      btn.textContent = '✓ 반영 완료';
+    } catch(e) {
+      showDeployStatus('fail', `✗ ${e.message}`);
+      btn.disabled = false;
+      btn.textContent = '🚀 대시보드에 반영하기';
+    }
+  }
+
+  function showDeployStatus(type, msg) {
+    const el = document.getElementById('deployStatus');
+    el.innerHTML = msg;
+    el.className = type ? `deploy-status show ${type}` : 'deploy-status';
+  }
+
+  // ── UI 전환 ────────────────────────────────────────────────────
+  function switchToFeedbackPhase() {
+    document.getElementById('input-phase').style.display = 'none';
+    document.getElementById('feedback-phase').className = 'show';
+  }
+
+  function renderInsightPanel(vIdx) {
+    const entry = versions[vIdx].entry;
+    document.getElementById('insightTitle').textContent = entry.weekLabel;
+    document.getElementById('insightSub').textContent = entry.oneLineSummary;
+
+    document.getElementById('kpiStrip').innerHTML = entry.kpis.map(k=>`
       <div class="kpi-chip">
         <div class="kpi-label">${k.label}</div>
         <div class="kpi-value">${k.value}</div>
-        <div class="kpi-delta ${k.trend === 'pos' ? 'pos' : k.trend === 'neg' ? 'neg' : 'neutral'}">${k.delta}</div>
+        <div class="kpi-delta ${k.trend==='pos'?'pos':k.trend==='neg'?'neg':'neutral'}">${k.delta}</div>
       </div>`).join('');
 
-    document.getElementById('sectionsContainer').innerHTML = entry.sections.map((s, i) => `
+    document.getElementById('sectionsContainer').innerHTML = entry.sections.map((s,i)=>`
       <div class="step-card" id="step-${i}">
-        <div class="step-card-header" onclick="toggleSection(${i})">
+        <div class="step-card-header" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')">
           <span class="step-num-tag">STEP ${i+1}</span>
           <span class="step-title-text">${s.title}</span>
           <span class="step-toggle">▼</span>
@@ -918,42 +755,69 @@ ${sectionsStr}
         <div class="step-content">${s.html}</div>
       </div>`).join('');
 
-    const dlBtn = document.getElementById('downloadBtn');
-    dlBtn.disabled = !dashboardHTML;
-    if (!dashboardHTML) dlBtn.title = '대시보드 로드 실패 — 수동으로 적용해 주세요';
-
-    document.getElementById('output-section').className = 'show';
-    document.getElementById('updateInfo').className = 'update-info show';
-    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('insightScroll').scrollTop = 0;
   }
 
-  function toggleSection(i) {
-    document.getElementById(`step-${i}`).classList.toggle('collapsed');
+  function renderVersionTabs() {
+    document.getElementById('versionTabs').innerHTML = versions.map((_,i)=>`
+      <button class="ver-tab ${i===currentVerIdx?'active':''}" onclick="switchVersion(${i})">v${i+1}</button>
+    `).join('');
   }
 
-  // ── 다운로드 ───────────────────────────────────────────────────
-  function downloadDashboard() {
-    if (!dashboardHTML) return;
-    const blob = new Blob([dashboardHTML], { type: 'text/html;charset=utf-8' });
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(blob),
-      download: 'respace_dashboard_v3.html'
-    });
-    a.click();
-    URL.revokeObjectURL(a.href);
+  function switchVersion(i) {
+    currentVerIdx = i;
+    renderInsightPanel(i);
+    renderVersionTabs();
   }
 
-  // ── 초기화 ────────────────────────────────────────────────────
-  function resetForm() {
-    collectedData = generatedEntry = dashboardHTML = null;
-    document.getElementById('output-section').className = '';
-    document.getElementById('dataPreview').className = 'data-preview';
-    document.getElementById('generateBtn').disabled = true;
-    document.getElementById('fetchIcon').textContent = '📡';
-    document.getElementById('fetchLabel').textContent = '데이터 수집 시작';
-    document.getElementById('fetchBtn').disabled = false;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function addHistory(feedback, vIdx) {
+    const section = document.getElementById('historySection');
+    const list = document.getElementById('historyList');
+    section.style.display = 'block';
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `<span class="history-ver">v${vIdx+1}</span><span style="font-size:.73rem;color:#aaa">${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span><div class="history-fb">${feedback}</div>`;
+    list.prepend(item);
   }
+
+  function addHint(text) {
+    const ta = document.getElementById('feedbackInput');
+    ta.value = ta.value ? ta.value + ' ' + text : text;
+    ta.focus();
+  }
+
+  function restartFlow() {
+    collectedData=null; weekInfoCache=null; userInputsCache=null;
+    versions=[]; currentVerIdx=0; dashboardHTML=null;
+    document.getElementById('feedback-phase').className='';
+    document.getElementById('input-phase').style.display='';
+    document.getElementById('generateBtn').disabled=true;
+    document.getElementById('fetchIcon').textContent='📡';
+    document.getElementById('fetchLabel').textContent='데이터 수집 시작';
+    document.getElementById('fetchBtn').disabled=false;
+    document.getElementById('historySection').style.display='none';
+    document.getElementById('historyList').innerHTML='';
+    document.getElementById('feedbackInput').value='';
+    document.getElementById('dashboardBtn').disabled=false;
+    document.getElementById('dashboardBtn').textContent='🚀 대시보드에 반영하기';
+    document.getElementById('deployStatus').className='deploy-status';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ── 에러 표시 ──────────────────────────────────────────────────
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'error-box show';
+  }
+
+  // ── 진행 메시지 타이머 ─────────────────────────────────────────
+  let _progTimer = null;
+  function startProgressMsg(elId, msgs) {
+    let i = 0;
+    _progTimer = setInterval(()=>{ document.getElementById(elId).textContent=msgs[i=(i+1)%msgs.length]; }, 2500);
+  }
+  function stopProgressMsg() { clearInterval(_progTimer); _progTimer=null; }
 </script>
 </body>
 </html>

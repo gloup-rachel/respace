@@ -5,6 +5,7 @@
     { "source": "/dashboard",       "destination": "/respace_dashboard_v3.html" },
     { "source": "/fraud-analyzer",  "destination": "/fraud-analyzer.html"       },
     { "source": "/insight",         "destination": "/insight-generator.html"    },
-    { "source": "/api/weekly-report", "destination": "/api/weekly-report.js"   }
+    { "source": "/api/weekly-report",    "destination": "/api/weekly-report.js"    },
+    { "source": "/api/update-dashboard", "destination": "/api/update-dashboard.js" }
   ]
 }

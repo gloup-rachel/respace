@@ -5,10 +5,17 @@
  * respace-weekly-report 스킬 기반으로 재구현.
  * 대시보드 WEEKLY_REPORTS 배열에 삽입할 엔트리를 생성한다.
  *
- * POST body:
- *   weekInfo   { weekNum, weekLabel, meetingDate, periodLabel, comparePeriod, startDate, endDate }
- *   rawData    { naver, google, meta, leads, prevNaver, prevGoogle, prevMeta, prevLeads }
+ * POST body (mode: "generate"):
+ *   weekInfo   { id, weekLabel, meetingDate, periodLabel, comparePeriod }
+ *   rawData    { naver, google, meta, leads, deals, prevNaver, prevGoogle, prevMeta, prevLeads, prevDeals }
  *   userInputs { adjustments, issues, nextAgenda }
+ *
+ * POST body (mode: "refine"):
+ *   weekInfo      (동일)
+ *   rawData       (동일)
+ *   userInputs    (동일)
+ *   previousEntry { oneLineSummary, kpis, sections } — 직전 버전 엔트리
+ *   feedback      string — 퍼포먼스 마케터 피드백
  */
 
 const SYSTEM_PROMPT = `당신은 리스페이스(RESPACE) 전담 B2B 퍼포먼스 마케팅 애널리스트입니다.
@@ -108,13 +115,18 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: '서버 설정 오류입니다.' });
 
-  const { weekInfo, rawData, userInputs } = req.body || {};
+  const { mode = 'generate', weekInfo, rawData, userInputs, previousEntry, feedback } = req.body || {};
 
   if (!weekInfo || !rawData) {
     return res.status(400).json({ error: '주차 정보와 데이터가 필요합니다.' });
   }
+  if (mode === 'refine' && (!previousEntry || !feedback)) {
+    return res.status(400).json({ error: 'refine 모드에는 이전 인사이트와 피드백이 필요합니다.' });
+  }
 
-  const userMessage = buildUserMessage(weekInfo, rawData, userInputs);
+  const userMessage = mode === 'refine'
+    ? buildRefineMessage(weekInfo, rawData, userInputs, previousEntry, feedback)
+    : buildUserMessage(weekInfo, rawData, userInputs);
 
   try {
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
@@ -161,6 +173,29 @@ module.exports = async function handler(req, res) {
   }
 };
 
+
+// ── 피드백 refine 메시지 ──────────────────────────────────────────
+function buildRefineMessage(weekInfo, raw, inputs, prev, feedback) {
+  return `아래는 이번 주(${weekInfo.weekLabel}) 퍼포먼스 인사이트의 직전 버전과 퍼포먼스 마케터의 피드백입니다.
+피드백을 반영하여 수정된 인사이트를 생성해 주세요.
+
+## 원본 데이터
+${buildUserMessage(weekInfo, raw, inputs)}
+
+## 직전 인사이트 버전
+oneLineSummary: ${prev.oneLineSummary}
+섹션 목록:
+${(prev.sections || []).map((s, i) => `${i + 1}. ${s.title}`).join('\n')}
+
+## 퍼포먼스 마케터 피드백
+${feedback}
+
+## 지침
+- 피드백이 언급한 섹션을 우선 수정하되, 전체 맥락 일관성도 유지해 주세요.
+- 수정되지 않은 섹션도 동일한 JSON 구조로 포함해 주세요.
+- oneLineSummary도 변경 내용을 반영하여 업데이트해 주세요.
+- 반드시 동일한 JSON 형식으로만 출력하세요.`;
+}
 
 // ── 사용자 메시지 구성 ──────────────────────────────────────────
 function buildUserMessage(weekInfo, raw, inputs) {
