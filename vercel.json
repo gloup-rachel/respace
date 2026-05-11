@@ -4,6 +4,7 @@
     { "source": "/meeting",         "destination": "/meeting.html"              },
     { "source": "/dashboard",       "destination": "/respace_dashboard_v3.html" },
     { "source": "/fraud-analyzer",  "destination": "/fraud-analyzer.html"       },
-    { "source": "/insight",         "destination": "/insight-generator.html"    }
+    { "source": "/insight",         "destination": "/insight-generator.html"    },
+    { "source": "/api/weekly-report", "destination": "/api/weekly-report.js"   }
   ]
 }
