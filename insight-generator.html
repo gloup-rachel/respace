@@ -517,6 +517,9 @@
     return {totalSpend:ts,totalImpressions:ti,totalClicks:tc,totalConv:tv,campaigns:camps};
   }
   function aggCount(rows, r) { return rows.filter(row=>inRange(getKey(row),r)).length; }
+  // 리캐치 전용 — 대시보드와 동일한 컬럼명 직접 사용
+  function aggLeads(rows, r) { return rows.filter(row=>inRange(row['생성일'],r)).length; }
+  function aggDeals(rows, r) { return rows.filter(row=>inRange(row['폼 제출 일자'],r)).length; }
 
   // ── 데이터 수집 ────────────────────────────────────────────────
   async function fetchData() {
@@ -550,9 +553,9 @@
       const nR=parseTable(nT),gR=parseTable(gT),mR=parseTable(mT),lR=parseTable(lT),dR=parseTable(dT);
       collectedData = {
         naver:aggNaver(nR,range), google:aggGoogle(gR,range), meta:aggMeta(mR,range),
-        leads:aggCount(lR,range), deals:aggCount(dR,range),
+        leads:aggLeads(lR,range), deals:aggDeals(dR,range),
         prevNaver:pr?aggNaver(nR,pr):null, prevGoogle:pr?aggGoogle(gR,pr):null,
-        prevMeta:pr?aggMeta(mR,pr):null, prevLeads:pr?aggCount(lR,pr):null, prevDeals:pr?aggCount(dR,pr):null
+        prevMeta:pr?aggMeta(mR,pr):null, prevLeads:pr?aggLeads(lR,pr):null, prevDeals:pr?aggDeals(dR,pr):null
       };
       renderChips();
       document.getElementById('fetchIcon').textContent = failedSheets.length ? '⚠️' : '✅';
