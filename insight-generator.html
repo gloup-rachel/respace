@@ -449,7 +449,7 @@
   }
   function inRange(v, r) {
     if (!v || !r) return false;
-    const gv = String(v).match(/Date\((\d+),(\d+),(\d+)\)/);
+    const gv = String(v).match(/Date\((\d+),(\d+),(\d+)/);
     const d = gv ? new Date(+gv[1],+gv[2],+gv[3]) : new Date(v);
     return !isNaN(d) && d >= r.start && d <= r.end;
   }
