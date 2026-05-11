@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RESPACE — 퍼포먼스 인사이트 생성</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #f5f5f3;
+      color: #111;
+      min-height: 100vh;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .back-btn { color: rgba(255,255,255,.45); text-decoration: none; font-size: 0.82rem; display: flex; align-items: center; gap: .35rem; transition: color .15s; }
+    .back-btn:hover { color: #fff; }
+    .logo { font-weight: 800; font-size: 0.92rem; letter-spacing: 0.18em; border: 1.5px solid #fff; padding: 0.28rem 0.65rem; }
+    .header-sub { font-size: 0.83rem; color: rgba(255,255,255,.55); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
+    .live-badge { font-size: 0.72rem; font-weight: 700; color: #74b9ff; background: rgba(116,185,255,.18); padding: .28rem .75rem; border-radius: 20px; }
+    .version-badge { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,.4); }
+    .header-divider { color: rgba(255,255,255,.2); }
+
+    /* ── Layout ── */
+    .layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: .75rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Input Form ── */
+    #input-section {}
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .channel-block {
+      border: 1px solid #ebebeb;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #fafaf8;
+    }
+    .channel-block-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: .75rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: .65rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { font-size: 0.73rem; font-weight: 600; color: #777; }
+    .field input, .field textarea, .field select {
+      padding: 7px 10px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #111;
+      transition: border-color .15s;
+      background: #fff;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+    .period-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .period-row label { font-size: 0.78rem; font-weight: 600; color: #555; white-space: nowrap; }
+    .period-row input { padding: 7px 10px; border: 1.5px solid #e5e5e5; border-radius: 6px; font-size: 13px; font-family: inherit; }
+    .period-row input:focus { outline: none; border-color: #3498db; }
+
+    .form-divider { border: none; border-top: 1px solid #f0f0f0; margin: 1.25rem 0; }
+
+    .generate-btn {
+      display: block; width: 100%; padding: 1rem;
+      background: #1a1a2e; color: #fff;
+      font-size: 0.95rem; font-weight: 800; font-family: inherit;
+      border: none; border-radius: 8px; cursor: pointer;
+      letter-spacing: 0.03em; transition: opacity .15s;
+      margin-top: 1.25rem;
+    }
+    .generate-btn:hover { opacity: .85; }
+    .generate-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Collapsed input bar ── */
+    .input-collapsed {
+      display: none;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-collapsed.show { display: flex; }
+    .collapsed-period { font-size: 0.85rem; font-weight: 700; color: #1a1a2e; }
+    .collapsed-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .collapsed-tag {
+      font-size: 0.71rem;
+      font-weight: 700;
+      background: #f0f4ff;
+      color: #3d6be8;
+      padding: .2rem .55rem;
+      border-radius: 6px;
+    }
+    .edit-input-btn {
+      margin-left: auto;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #888;
+      background: none;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: .28rem .7rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .edit-input-btn:hover { border-color: #aaa; color: #333; }
+
+    /* ── Progress ── */
+    .progress-wrap { display: none; margin: 1rem 0; }
+    .progress-track { height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; margin-bottom: .5rem; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #1a1a2e, #3d6be8); border-radius: 2px; animation: progressAnim 2.5s ease-in-out infinite; }
+    @keyframes progressAnim { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 90%; } }
+    .progress-msg { font-size: 0.79rem; color: #888; text-align: center; }
+
+    /* ── Error ── */
+    .error-box {
+      display: none;
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 8px; padding: .9rem 1.1rem;
+      color: #dc2626; font-size: 0.83rem; line-height: 1.65;
+      margin: .75rem 0;
+    }
+
+    /* ── Output header ── */
+    .output-header {
+      display: flex; align-items: center; gap: .75rem;
+      margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .output-version-label {
+      font-size: 0.72rem; font-weight: 800;
+      background: #e8f0fe; color: #1a73e8;
+      padding: .22rem .6rem; border-radius: 8px;
+      letter-spacing: 0.05em;
+    }
+    .output-period { font-size: 1rem; font-weight: 800; color: #1a1a2e; }
+    .output-summary { font-size: 0.83rem; color: #555; margin-left: .25rem; }
+
+    /* ── Single panel / Compare mode toggle ── */
+    #output-section { display: none; }
+    #output-section.show { display: block; }
+
+    /* ── Section cards (single mode) ── */
+    .step-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      margin-bottom: .85rem;
+      overflow: hidden;
+    }
+    .step-card-header {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .85rem 1.25rem;
+      background: #fafaf8;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .step-num-tag {
+      font-size: 0.67rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #fff; background: #1a1a2e;
+      padding: .18rem .52rem; border-radius: 4px;
+    }
+    .step-title-text { font-size: 0.88rem; font-weight: 700; color: #222; flex: 1; }
+    .step-toggle { font-size: 0.8rem; color: #ccc; transition: transform .2s; }
+    .step-card.collapsed .step-toggle { transform: rotate(-90deg); }
+    .step-content {
+      padding: 1.1rem 1.25rem;
+      font-size: 0.84rem;
+      line-height: 1.8;
+      color: #333;
+    }
+    .step-card.collapsed .step-content { display: none; }
+
+    /* ── Insight content rendering ── */
+    .step-content table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: 0.82rem; }
+    .step-content th { background: #f3f3f1; padding: .45rem .75rem; text-align: left; font-weight: 700; font-size: 0.75rem; color: #666; border-bottom: 1px solid #e5e5e5; }
+    .step-content td { padding: .45rem .75rem; border-bottom: 1px solid #f5f5f5; }
+    .step-content tr:last-child td { border-bottom: none; }
+    .step-content ul, .step-content ol { padding-left: 1.2rem; margin: .5rem 0; }
+    .step-content li { margin-bottom: .3rem; }
+    .step-content strong { font-weight: 700; color: #111; }
+    .step-content .check-note {
+      background: #fffde7; border-left: 3px solid #f59e0b;
+      padding: .6rem .9rem; border-radius: 0 6px 6px 0;
+      font-size: 0.8rem; color: #78350f; margin: .75rem 0; line-height: 1.7;
+    }
+    .step-content .grade-good  { color: #15803d; font-weight: 700; }
+    .step-content .grade-ok    { color: #0369a1; font-weight: 700; }
+    .step-content .grade-warn  { color: #d97706; font-weight: 700; }
+    .step-content .grade-bad   { color: #dc2626; font-weight: 700; }
+
+    /* ── Compare mode ── */
+    .compare-wrap { display: none; }
+    .compare-wrap.show { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .compare-col { }
+    .compare-col-header {
+      display: flex; align-items: center; gap: .5rem;
+      margin-bottom: .75rem; padding: .6rem 1rem;
+      border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+    }
+    .compare-col-header.prev { background: #f5f5f3; color: #666; }
+    .compare-col-header.next { background: #e8f0fe; color: #1a73e8; }
+    .compare-step-card { border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: .75rem; overflow: hidden; }
+    .compare-step-header { padding: .65rem 1rem; background: #fafaf8; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: .5rem; }
+    .compare-step-content { padding: .9rem 1rem; font-size: 0.81rem; line-height: 1.75; color: #333; }
+    .compare-step-content.changed { border-left: 3px solid #3d6be8; }
+    /* 변경된 섹션 하이라이트 */
+    .compare-col.next .compare-step-card.changed { border-color: #93c5fd; }
+    .compare-col.next .compare-step-card.changed .compare-step-header { background: #eff6ff; }
+
+    /* ── Feedback area ── */
+    .feedback-area {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.25rem;
+    }
+    .feedback-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-bottom: .75rem; }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 10px 12px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-family: inherit;
+      resize: vertical;
+      color: #111;
+      line-height: 1.65;
+      transition: border-color .15s;
+    }
+    .feedback-textarea:focus { outline: none; border-color: #3d6be8; }
+    .feedback-actions { display: flex; gap: .75rem; margin-top: .9rem; }
+    .refine-btn {
+      flex: 1; padding: .8rem;
+      background: #fff; color: #1a1a2e;
+      border: 2px solid #1a1a2e;
+      border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: all .15s;
+    }
+    .refine-btn:hover { background: #1a1a2e; color: #fff; }
+    .refine-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .ok-btn {
+      padding: .8rem 1.75rem;
+      background: #15803d; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 800; font-family: inherit;
+      cursor: pointer; transition: opacity .15s; white-space: nowrap;
+    }
+    .ok-btn:hover { opacity: .85; }
+    .ok-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── OK 완료 배너 ── */
+    .ok-banner {
+      display: none;
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: 10px; padding: 1rem 1.25rem;
+      color: #15803d; font-size: 0.85rem; font-weight: 600;
+      margin-top: 1rem; line-height: 1.6;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .form-grid-3 { grid-template-columns: 1fr; }
+      .compare-wrap.show { grid-template-columns: 1fr; }
+      .compare-col-header.prev { display: none; }
+    }
+    @media (max-width: 600px) {
+      .layout { padding: 1.5rem 1rem 4rem; }
+      header { padding: .8rem 1rem; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">← 홈</a>
+  <span class="header-divider">|</span>
+  <div class="logo">RESPACE</div>
+  <div class="header-sub">퍼포먼스 인사이트 생성</div>
+  <div class="header-right">
+    <span class="version-badge" id="headerVersion"></span>
+    <span class="live-badge">● Live</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ════ INPUT SECTION ════ -->
+  <div id="input-section">
+    <div class="section-label">데이터 입력</div>
+    <div class="card">
+
+      <!-- 분석 기간 -->
+      <div class="period-row">
+        <label>분석 기간</label>
+        <input id="f-period" type="text" placeholder="예: 2026년 4월 (4/1~4/30)" style="width:260px" />
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- 광고 매체 -->
+      <div class="section-label">광고 매체 데이터</div>
+      <div class="form-grid-3">
+
+        <div class="channel-block">
+          <div class="channel-block-title">네이버 검색광고</div>
+          <div class="field-row">
+            <div class="field"><label>광고비</label><input id="nv-spend" placeholder="₩0" /></div>
+            <div class="field"><label>클릭수</label><input id="nv-clicks" placeholder="0" /></div>
+            <div class="field"><label>노출수</label><input id="nv-imp" placeholder="0" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>CTR</label><input id="nv-ctr" placeholder="0.00%" /></div>
+            <div class="field"><label>CPC</label><input id="nv-cpc" placeholder="₩0" /></div>
+            <div class="field"><label>전환수</label><input id="nv-conv" placeholder="0" /></div>
+          </div>
+        </div>
+
+        <div class="channel-block">
+          <div class="channel-block-title">구글 검색광고</div>
+          <div class="field-row">
+            <div class="field"><label>광고비</label><input id="gg-spend" placeholder="₩0" /></div>
+            <div class="field"><label>클릭수</label><input id="gg-clicks" placeholder="0" /></div>
+            <div class="field"><label>노출수</label><input id="gg-imp" placeholder="0" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>CTR</label><input id="gg-ctr" placeholder="0.00%" /></div>
+            <div class="field"><label>CPC</label><input id="gg-cpc" placeholder="₩0" /></div>
+            <div class="field"><label>전환수</label><input id="gg-conv" placeholder="0" /></div>
+          </div>
+        </div>
+
+        <div class="channel-block">
+          <div class="channel-block-title">Meta 광고</div>
+          <div class="field-row">
+            <div class="field"><label>광고비</label><input id="mt-spend" placeholder="₩0" /></div>
+            <div class="field"><label>클릭수</label><input id="mt-clicks" placeholder="0" /></div>
+            <div class="field"><label>노출수</label><input id="mt-imp" placeholder="0" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>CTR</label><input id="mt-ctr" placeholder="0.00%" /></div>
+            <div class="field"><label>CPC</label><input id="mt-cpc" placeholder="₩0" /></div>
+            <div class="field"><label>전환수</label><input id="mt-conv" placeholder="0" /></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- 퍼널 전환 -->
+      <div class="section-label">퍼널 전환 — GA4 & 리캐치</div>
+      <div class="form-grid-2">
+        <div class="channel-block">
+          <div class="channel-block-title">GA4 세션 & 전환이벤트</div>
+          <div class="field-row">
+            <div class="field"><label>GA4 세션수</label><input id="fn-sess" placeholder="0" /></div>
+            <div class="field"><label>전환이벤트 합계</label><input id="fn-events" placeholder="0" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>click_contact</label><input id="fn-contact" placeholder="0건" /></div>
+            <div class="field"><label>click_download</label><input id="fn-download" placeholder="0건" /></div>
+          </div>
+        </div>
+        <div class="channel-block">
+          <div class="channel-block-title">실제 리드 & 딜 (리캐치 CRM)</div>
+          <div class="field-row">
+            <div class="field"><label>실제 리드 수</label><input id="fn-lead" placeholder="0건" /></div>
+            <div class="field"><label>실제 딜 수</label><input id="fn-deal" placeholder="0건" /></div>
+          </div>
+          <div class="field"><label>특이사항 / 메모</label><input id="fn-note" placeholder="예: 리드 중 2건은 비적격 제외" /></div>
+        </div>
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- 채널별 트래픽 -->
+      <div class="section-label">채널별 트래픽 (GA4)</div>
+      <div class="field">
+        <label>채널명 / 세션 / 참여율 / click_contact 기여 / click_download 기여 — 한 줄씩 입력</label>
+        <textarea id="f-channels" placeholder="예:
+Organic Search / 세션 312 / 참여율 64.2% / click_contact 18건 / click_download 24건
+Paid Search (네이버) / 세션 187 / 참여율 58.3% / click_contact 12건 / click_download 8건
+Referral / 세션 94 / 참여율 71.2% / click_contact 4건 / click_download 6건
+Direct / 세션 63 / 참여율 54.0% / click_contact 2건 / click_download 3건"></textarea>
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- Meta 페르소나 -->
+      <div class="section-label">Meta 페르소나별 성과 (Core A/B/C · Strategic A/B)</div>
+      <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:.65rem;">
+        <div class="channel-block">
+          <div class="channel-block-title" style="font-size:.65rem">Core A<br>엔터프라이즈</div>
+          <div class="field"><label>CTR</label><input id="pa-ctr" placeholder="0.00%" /></div>
+          <div class="field"><label>CPC</label><input id="pa-cpc" placeholder="₩0" /></div>
+          <div class="field"><label>전환수</label><input id="pa-conv" placeholder="0건" /></div>
+        </div>
+        <div class="channel-block">
+          <div class="channel-block-title" style="font-size:.65rem">Core B<br>글로벌 브랜드</div>
+          <div class="field"><label>CTR</label><input id="pb-ctr" placeholder="0.00%" /></div>
+          <div class="field"><label>CPC</label><input id="pb-cpc" placeholder="₩0" /></div>
+          <div class="field"><label>전환수</label><input id="pb-conv" placeholder="0건" /></div>
+        </div>
+        <div class="channel-block">
+          <div class="channel-block-title" style="font-size:.65rem">Core C<br>엔터/IP</div>
+          <div class="field"><label>CTR</label><input id="pc-ctr" placeholder="0.00%" /></div>
+          <div class="field"><label>CPC</label><input id="pc-cpc" placeholder="₩0" /></div>
+          <div class="field"><label>전환수</label><input id="pc-conv" placeholder="0건" /></div>
+        </div>
+        <div class="channel-block">
+          <div class="channel-block-title" style="font-size:.65rem">Strategic A<br>이커머스/D2C</div>
+          <div class="field"><label>CTR</label><input id="sa-ctr" placeholder="0.00%" /></div>
+          <div class="field"><label>CPC</label><input id="sa-cpc" placeholder="₩0" /></div>
+          <div class="field"><label>전환수</label><input id="sa-conv" placeholder="0건" /></div>
+        </div>
+        <div class="channel-block">
+          <div class="channel-block-title" style="font-size:.65rem">Strategic B<br>공공기관</div>
+          <div class="field"><label>CTR</label><input id="sb-ctr" placeholder="0.00%" /></div>
+          <div class="field"><label>CPC</label><input id="sb-cpc" placeholder="₩0" /></div>
+          <div class="field"><label>전환수</label><input id="sb-conv" placeholder="0건" /></div>
+        </div>
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- 트렌드 & 메모 -->
+      <div class="form-grid-2">
+        <div class="field">
+          <label>시계열/트렌드 메모 (주간 패턴, spike 등)</label>
+          <textarea id="f-trend" placeholder="예: 3주차에 리드 7건 집중 (캠페인 집행 시작일과 일치). 주말 전환 거의 없음 (B2B 패턴 확인)"></textarea>
+        </div>
+        <div class="field">
+          <label>기타 컨텍스트 (특이사항, 외부 변수 등)</label>
+          <textarea id="f-notes" placeholder="예: 4월 중순 추가 예산 집행, Meta 크리에이티브 교체, 경쟁사 팝플리 신규 캠페인 런칭 감지"></textarea>
+        </div>
+      </div>
+
+      <!-- 에러 -->
+      <div class="error-box" id="errorBox"></div>
+      <!-- 프로그레스 -->
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="progress-msg" id="progressMsg">데이터 분석 중...</div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateInsight()">
+        인사이트 생성
+      </button>
+    </div>
+  </div>
+
+  <!-- ════ COLLAPSED INPUT BAR ════ -->
+  <div class="input-collapsed" id="inputCollapsed">
+    <span class="collapsed-period" id="collapsedPeriod"></span>
+    <div class="collapsed-tags" id="collapsedTags"></div>
+    <button class="edit-input-btn" onclick="editInput()">입력 수정</button>
+  </div>
+
+  <!-- ════ OUTPUT SECTION ════ -->
+  <div id="output-section">
+
+    <!-- 출력 헤더 -->
+    <div class="output-header">
+      <span class="output-version-label" id="versionLabel"></span>
+      <span class="output-period" id="outputPeriod"></span>
+      <span class="output-summary" id="outputSummary"></span>
+    </div>
+
+    <!-- 단일 패널 (초안) -->
+    <div id="single-panel"></div>
+
+    <!-- 비교 패널 (피드백 후) -->
+    <div class="compare-wrap" id="compare-wrap">
+      <div class="compare-col" id="col-prev">
+        <div class="compare-col-header prev">이전 버전</div>
+        <div id="col-prev-content"></div>
+      </div>
+      <div class="compare-col" id="col-next">
+        <div class="compare-col-header next">피드백 반영 버전</div>
+        <div id="col-next-content"></div>
+      </div>
+    </div>
+
+    <!-- 피드백 영역 -->
+    <div class="feedback-area">
+      <div class="feedback-label">피드백 입력</div>
+      <textarea class="feedback-textarea" id="feedbackText"
+        placeholder="수정이 필요한 부분을 구체적으로 입력하세요.&#10;예: STEP 1 네이버 분석에서 CPC 해석이 잘못됨. 전환수 기준으로 재분석 요청. STEP 6 액션 아이템에 Meta 예산 배분 방향 추가 요청"></textarea>
+      <div class="feedback-actions">
+        <button class="refine-btn" id="refineBtn" onclick="refineInsight()">피드백 반영 재생성</button>
+        <button class="ok-btn" id="okBtn" onclick="confirmInsight()">최종 확정 (OK)</button>
+      </div>
+    </div>
+
+    <div class="ok-banner" id="okBanner">
+      최종 인사이트가 확정되었습니다. 대시보드 자동 반영 기능은 reports.json 연동 작업 완료 후 활성화됩니다.<br>
+      현재는 아래 내용을 복사해 수동으로 적용해 주세요.
+    </div>
+
+  </div><!-- /output-section -->
+
+</div><!-- /layout -->
+
+<script>
+// ══════════════════════════════════════════════════════════
+// State
+// ══════════════════════════════════════════════════════════
+let state = {
+  version: 0,
+  inputData: null,
+  history: [],   // [{result, feedback}]
+  current: null, // 현재 result
+  comparing: false,
+};
+
+const STEP_ORDER = ['step1','step2','step3','step4','step5','step6'];
+const STEP_LABELS = {
+  step1: 'STEP 1', step2: 'STEP 2', step3: 'STEP 3',
+  step4: 'STEP 4', step5: 'STEP 5', step6: 'STEP 6',
+};
+
+// ══════════════════════════════════════════════════════════
+// Input 수집
+// ══════════════════════════════════════════════════════════
+function collectInput() {
+  const v = id => document.getElementById(id)?.value?.trim() || '';
+  return {
+    period: v('f-period'),
+    naver:   { spend: v('nv-spend'), clicks: v('nv-clicks'), impressions: v('nv-imp'), ctr: v('nv-ctr'), cpc: v('nv-cpc'), conv: v('nv-conv') },
+    google:  { spend: v('gg-spend'), clicks: v('gg-clicks'), impressions: v('gg-imp'), ctr: v('gg-ctr'), cpc: v('gg-cpc'), conv: v('gg-conv') },
+    meta:    { spend: v('mt-spend'), clicks: v('mt-clicks'), impressions: v('mt-imp'), ctr: v('mt-ctr'), cpc: v('mt-cpc'), conv: v('mt-conv') },
+    funnel: {
+      sessions: v('fn-sess'), total_events: v('fn-events'),
+      click_contact: v('fn-contact'), click_download: v('fn-download'),
+      actual_lead: v('fn-lead'), actual_deal: v('fn-deal'), note: v('fn-note'),
+    },
+    channels: v('f-channels'),
+    personas: {
+      core_a: { ctr: v('pa-ctr'), cpc: v('pa-cpc'), conv: v('pa-conv') },
+      core_b: { ctr: v('pb-ctr'), cpc: v('pb-cpc'), conv: v('pb-conv') },
+      core_c: { ctr: v('pc-ctr'), cpc: v('pc-cpc'), conv: v('pc-conv') },
+      str_a:  { ctr: v('sa-ctr'), cpc: v('sa-cpc'), conv: v('sa-conv') },
+      str_b:  { ctr: v('sb-ctr'), cpc: v('sb-cpc'), conv: v('sb-conv') },
+    },
+    trend: v('f-trend'),
+    notes: v('f-notes'),
+  };
+}
+
+// ══════════════════════════════════════════════════════════
+// UI helpers
+// ══════════════════════════════════════════════════════════
+function showProgress(msg) {
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progressMsg').textContent = msg;
+  document.getElementById('errorBox').style.display = 'none';
+}
+function hideProgress() { document.getElementById('progressWrap').style.display = 'none'; }
+function showError(msg) {
+  hideProgress();
+  const b = document.getElementById('errorBox');
+  b.textContent = msg; b.style.display = 'block';
+}
+function setLoading(on) {
+  document.getElementById('generateBtn').disabled = on;
+  document.getElementById('refineBtn') && (document.getElementById('refineBtn').disabled = on);
+}
+
+function collapseInput(period) {
+  document.getElementById('input-section').style.display = 'none';
+  const bar = document.getElementById('inputCollapsed');
+  bar.classList.add('show');
+  document.getElementById('collapsedPeriod').textContent = period || '기간 미입력';
+  const tags = ['네이버', '구글', 'Meta', 'GA4', '페르소나'];
+  document.getElementById('collapsedTags').innerHTML =
+    tags.map(t => `<span class="collapsed-tag">${t}</span>`).join('');
+}
+
+function editInput() {
+  document.getElementById('input-section').style.display = 'block';
+  document.getElementById('inputCollapsed').classList.remove('show');
+  document.getElementById('output-section').classList.remove('show');
+  state.version = 0; state.current = null; state.history = [];
+}
+
+// ══════════════════════════════════════════════════════════
+// Markdown → HTML 변환 (간략)
+// ══════════════════════════════════════════════════════════
+function md2html(text) {
+  if (!text) return '';
+  return text
+    // 내부 확인 필요 블럭
+    .replace(/>>[ ]?내부 확인 필요:([^\n]*)/g,
+      '<div class="check-note"><strong>내부 확인 필요</strong>$1</div>')
+    // 표
+    .replace(/\|(.+)\|/g, (m) => {
+      const cells = m.split('|').filter(c => c.trim());
+      return '<tr>' + cells.map(c => {
+        const t = c.trim();
+        return t.startsWith('-') ? '' : `<td>${t}</td>`;
+      }).join('') + '</tr>';
+    })
+    // 제목
+    .replace(/^### (.+)$/gm, '<h4 style="font-size:.82rem;font-weight:800;color:#1a1a2e;margin:.8rem 0 .3rem">$1</h4>')
+    .replace(/^## (.+)$/gm,  '<h3 style="font-size:.88rem;font-weight:800;color:#111;margin:1rem 0 .4rem">$1</h3>')
+    // bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // 등급 표시
+    .replace(/\(우수\)/g, '<span class="grade-good">(우수)</span>')
+    .replace(/\(양호\)/g, '<span class="grade-ok">(양호)</span>')
+    .replace(/\(주의\)/g, '<span class="grade-warn">(주의)</span>')
+    .replace(/\(위험\)/g, '<span class="grade-bad">(위험)</span>')
+    // 목록
+    .replace(/^[-•] (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    // 줄바꿈
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+function wrapTable(html) {
+  // <tr> 블럭을 table로 감싸기
+  return html.replace(/(<tr>.*?<\/tr>\s*)+/gs, m =>
+    `<table><tbody>${m}</tbody></table>`
+  );
+}
+
+function renderContent(raw) {
+  let html = md2html(raw);
+  html = wrapTable(html);
+  return `<p>${html}</p>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// 단일 패널 렌더링
+// ══════════════════════════════════════════════════════════
+function renderSingle(result) {
+  const panel = document.getElementById('single-panel');
+  panel.innerHTML = '';
+  document.getElementById('compare-wrap').classList.remove('show');
+  panel.style.display = '';
+
+  STEP_ORDER.forEach(key => {
+    const sec = result.sections[key];
+    if (!sec) return;
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    card.innerHTML = `
+      <div class="step-card-header" onclick="toggleStep(this)">
+        <span class="step-num-tag">${STEP_LABELS[key]}</span>
+        <span class="step-title-text">${sec.title}</span>
+        <span class="step-toggle">▾</span>
+      </div>
+      <div class="step-content">${renderContent(sec.content)}</div>`;
+    panel.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// 비교 패널 렌더링
+// ══════════════════════════════════════════════════════════
+function renderCompare(prevResult, nextResult) {
+  document.getElementById('single-panel').style.display = 'none';
+  document.getElementById('compare-wrap').classList.add('show');
+
+  const prevEl = document.getElementById('col-prev-content');
+  const nextEl = document.getElementById('col-next-content');
+  prevEl.innerHTML = ''; nextEl.innerHTML = '';
+
+  STEP_ORDER.forEach(key => {
+    const prev = prevResult.sections[key];
+    const next = nextResult.sections[key];
+    if (!prev || !next) return;
+    const changed = prev.content !== next.content;
+
+    prevEl.appendChild(makeCompareCard(STEP_LABELS[key], prev, false));
+    nextEl.appendChild(makeCompareCard(STEP_LABELS[key], next, changed));
+  });
+}
+
+function makeCompareCard(label, sec, changed) {
+  const div = document.createElement('div');
+  div.className = 'compare-step-card' + (changed ? ' changed' : '');
+  div.innerHTML = `
+    <div class="compare-step-header">
+      <span class="step-num-tag">${label}</span>
+      <span style="font-size:.81rem;font-weight:700;color:#333;margin-left:.4rem">${sec.title}</span>
+      ${changed ? '<span style="margin-left:auto;font-size:.68rem;font-weight:700;color:#3d6be8">수정됨</span>' : ''}
+    </div>
+    <div class="compare-step-content ${changed ? 'changed' : ''}">${renderContent(sec.content)}</div>`;
+  return div;
+}
+
+// ══════════════════════════════════════════════════════════
+// 헤더/버전 업데이트
+// ══════════════════════════════════════════════════════════
+function updateOutputHeader(result, version) {
+  document.getElementById('versionLabel').textContent = `v${version}`;
+  document.getElementById('outputPeriod').textContent = result.period || '';
+  document.getElementById('outputSummary').textContent = result.summary ? `— ${result.summary}` : '';
+  document.getElementById('headerVersion').textContent = `v${version}`;
+}
+
+function toggleStep(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// ══════════════════════════════════════════════════════════
+// API 호출 공통
+// ══════════════════════════════════════════════════════════
+async function callAPI(body) {
+  const resp = await fetch('/api/insight-generator', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await resp.json();
+  if (!resp.ok || !data.ok) throw new Error(data.error || '알 수 없는 오류');
+  return data.result;
+}
+
+// ══════════════════════════════════════════════════════════
+// 인사이트 첫 생성
+// ══════════════════════════════════════════════════════════
+async function generateInsight() {
+  const input = collectInput();
+  if (!input.period) { showError('분석 기간을 입력해 주세요.'); return; }
+
+  setLoading(true);
+  showProgress('데이터 분석 중 — 6-STEP 인사이트 도출 중...');
+
+  try {
+    const result = await callAPI({ mode: 'generate', input_data: input });
+    state.version = 1;
+    state.inputData = input;
+    state.current = result;
+    state.history = [{ result }];
+    state.comparing = false;
+
+    hideProgress();
+    collapseInput(input.period);
+
+    document.getElementById('output-section').classList.add('show');
+    updateOutputHeader(result, 1);
+    renderSingle(result);
+    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    showError('인사이트 생성 실패: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 피드백 반영 재생성
+// ══════════════════════════════════════════════════════════
+async function refineInsight() {
+  const feedback = document.getElementById('feedbackText').value.trim();
+  if (!feedback) { alert('피드백 내용을 입력해 주세요.'); return; }
+
+  const prevResult = state.current;
+  setLoading(true);
+  showProgress('피드백 반영 중...');
+  document.getElementById('progressWrap').style.display = 'block';
+
+  try {
+    const result = await callAPI({
+      mode: 'refine',
+      input_data: state.inputData,
+      previous_output: prevResult,
+      feedback,
+    });
+
+    state.version += 1;
+    state.history.push({ result, feedback });
+    const prevForCompare = state.current;
+    state.current = result;
+    state.comparing = true;
+
+    hideProgress();
+    updateOutputHeader(result, state.version);
+    renderCompare(prevForCompare, result);
+    document.getElementById('feedbackText').value = '';
+    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    showError('재생성 실패: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 최종 확정
+// ══════════════════════════════════════════════════════════
+function confirmInsight() {
+  document.getElementById('okBtn').disabled = true;
+  document.getElementById('refineBtn').disabled = true;
+  document.getElementById('feedbackText').disabled = true;
+  document.getElementById('okBanner').style.display = 'block';
+  document.getElementById('okBanner').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

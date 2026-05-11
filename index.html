@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RESPACE AI 시스템</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #f5f5f3;
+      color: #111;
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 1.4rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 1.2rem; }
+    .logo {
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.18em;
+      border: 1.5px solid #fff;
+      padding: 0.28rem 0.65rem;
+    }
+    .header-title { font-size: 0.9rem; color: rgba(255,255,255,.55); }
+    .header-badge {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,.35);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 4rem 2.5rem 3.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 1rem;
+      color: rgba(255,255,255,.55);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ── Grid ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ── System Card ── */
+    .sys-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 14px;
+      padding: 2rem 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: box-shadow .2s, transform .15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .sys-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      transform: translateY(-2px);
+    }
+    .sys-card.disabled {
+      opacity: .5;
+      pointer-events: none;
+    }
+    .sys-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .sys-card.blue::before   { background: #0057ff; }
+    .sys-card.green::before  { background: #00b894; }
+    .sys-card.purple::before { background: #6c5ce7; }
+    .sys-card.orange::before { background: #e67e22; }
+    .sys-card.teal::before   { background: #00b4d8; }
+
+    .sys-number {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #bbb;
+      text-transform: uppercase;
+    }
+    .sys-icon { font-size: 2.2rem; }
+    .sys-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .sys-desc {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.7;
+      flex: 1;
+    }
+    .sys-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: .5rem;
+    }
+    .sys-status {
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: .28rem .7rem;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+    .status-live    { background: #e8f5e9; color: #2e7d32; }
+    .status-beta    { background: #fff8e1; color: #f57f17; }
+    .status-soon    { background: #f3f3f3; color: #999; }
+    .sys-arrow {
+      font-size: 1.1rem;
+      color: #ccc;
+      transition: color .15s, transform .15s;
+    }
+    .sys-card:hover .sys-arrow { color: #111; transform: translateX(3px); }
+
+    /* ── Footer note ── */
+    .footer-note {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: 0.78rem;
+      color: #bbb;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .76rem;
+      color: #ccc;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .container { padding: 2rem 1rem 4rem; }
+      header { padding: 1rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">RESPACE</div>
+    <div class="header-title">AI 자동화 시스템</div>
+  </div>
+  <div class="header-badge">Powered by Claude AI</div>
+</header>
+
+<div class="hero">
+  <h1>리스페이스<br>AI 업무 자동화</h1>
+  <p>B2B 콘텐츠 피드백, 미팅 정리, 데이터 분석까지<br>리스페이스 전용 AI 도구 모음</p>
+</div>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- System 1: 뉴스레터 피드백 -->
+    <a href="/newsletter" class="sys-card blue">
+      <div class="sys-number">System 01</div>
+      <div class="sys-icon">📰</div>
+      <div class="sys-title">뉴스레터<br>콘텐츠 피드백</div>
+      <div class="sys-desc">
+        PDF 또는 텍스트를 업로드하면 리스페이스 B2B 기준으로
+        제목, 구조, CTA, 브랜드 보이스, 법적 리스크를 자동 분석합니다.
+      </div>
+      <div class="sys-meta">
+        <span class="sys-status status-live">● Live</span>
+        <span class="sys-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- System 2: 주간 미팅 정리 -->
+    <a href="/meeting" class="sys-card green">
+      <div class="sys-number">System 02</div>
+      <div class="sys-icon">📋</div>
+      <div class="sys-title">주간 미팅<br>정리 자동화</div>
+      <div class="sys-desc">
+        미팅 노트나 녹취록을 붙여넣으면 아젠다 요약, 결정 사항,
+        액션 아이템, 다음 미팅 준비 사항을 자동으로 정리합니다.
+      </div>
+      <div class="sys-meta">
+        <span class="sys-status status-live">● Live</span>
+        <span class="sys-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- System 3: 데이터 대시보드 -->
+    <a href="/dashboard" class="sys-card purple">
+      <div class="sys-number">System 03</div>
+      <div class="sys-icon">📊</div>
+      <div class="sys-title">데이터 통합<br>대시보드</div>
+      <div class="sys-desc">
+        광고 성과, GA 데이터, 리드·딜 현황을 한 화면에서 시각화하고
+        Claude가 자동으로 주간 인사이트를 도출합니다.
+      </div>
+      <div class="sys-meta">
+        <span class="sys-status status-live">● Live</span>
+        <span class="sys-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- System 4: 부정클릭 분석 -->
+    <a href="/fraud-analyzer" class="sys-card orange">
+      <div class="sys-number">System 04</div>
+      <div class="sys-icon">🛡️</div>
+      <div class="sys-title">부정클릭<br>자동 분석기</div>
+      <div class="sys-desc">
+        에이스카운터 중복유입 XLS를 업로드하면 IP별 위험 스코어링 →
+        Excel 분석 보고서 + 네이버 SA 이의신청용 CSV를 자동으로 생성합니다.
+      </div>
+      <div class="sys-meta">
+        <span class="sys-status status-live">● Live</span>
+        <span class="sys-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- System 5: 퍼포먼스 인사이트 생성기 -->
+    <a href="/insight" class="sys-card teal">
+      <div class="sys-number">System 05</div>
+      <div class="sys-icon">💡</div>
+      <div class="sys-title">퍼포먼스<br>인사이트 생성기</div>
+      <div class="sys-desc">
+        광고·GA4·CRM 데이터를 입력하면 6-STEP 인사이트를 자동 생성합니다.
+        피드백을 반영해 비교·수정하고 최종 확정까지 한 화면에서 진행합니다.
+      </div>
+      <div class="sys-meta">
+        <span class="sys-status status-live">● Live</span>
+        <span class="sys-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="footer-note">
+    분석 비용은 운영자 Anthropic 계정에 청구됩니다. 사용자는 별도 가입·결제 없이 이용 가능합니다.
+  </div>
+</div>
+
+<footer>
+  RESPACE AI 시스템 &nbsp;|&nbsp; Powered by Claude AI (Anthropic) &nbsp;|&nbsp; Built by 글로업(GLOUP)
+</footer>
+
+</body>
+</html>

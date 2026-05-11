@@ -1,0 +1,9 @@
+{
+  "name": "respace-ai-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "리스페이스 AI 자동화 시스템 — Vercel 배포용",
+  "engines": {
+    "node": ">=20.x"
+  }
+}

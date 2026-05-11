@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/newsletter",      "destination": "/newsletter.html"           },
+    { "source": "/meeting",         "destination": "/meeting.html"              },
+    { "source": "/dashboard",       "destination": "/respace_dashboard_v3.html" },
+    { "source": "/fraud-analyzer",  "destination": "/fraud-analyzer.html"       },
+    { "source": "/insight",         "destination": "/insight-generator.html"    }
+  ]
+}

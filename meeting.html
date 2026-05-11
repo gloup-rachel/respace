@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RESPACE — 주간 미팅 정리</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #f5f5f3;
+      color: #111;
+      min-height: 100vh;
+      line-height: 1.65;
+      font-size: 15px;
+    }
+    a { color: #00b894; }
+
+    /* ── Header ── */
+    header {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .back-btn {
+      color: rgba(255,255,255,.45);
+      text-decoration: none;
+      font-size: 0.82rem;
+      display: flex; align-items: center; gap: .35rem;
+      transition: color .15s;
+    }
+    .back-btn:hover { color: #fff; }
+    .header-divider { color: rgba(255,255,255,.2); }
+    .logo {
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.18em;
+      border: 1.5px solid #fff;
+      padding: 0.28rem 0.65rem;
+    }
+    .header-sub { font-size: 0.83rem; color: rgba(255,255,255,.55); }
+    .system-badge {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,.3);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 800px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.1rem;
+    }
+    .card-label {
+      font-size: 0.71rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Date row ── */
+    .date-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: 1rem;
+    }
+    .date-row label { font-size: .82rem; color: #666; white-space: nowrap; }
+    input[type="date"] {
+      padding: .42rem .7rem;
+      border: 1.5px solid #e5e5e5; border-radius: 6px;
+      font-size: .82rem; font-family: inherit;
+      background: #fff; color: #555; cursor: pointer;
+    }
+    input[type="date"]:focus { outline: none; border-color: #00b894; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: .4rem; margin-bottom: 1.1rem; }
+    .tab-btn {
+      padding: .45rem 1.1rem;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 0.83rem; font-weight: 600;
+      background: #fff; color: #888;
+      cursor: pointer; transition: all .15s;
+      font-family: inherit;
+    }
+    .tab-btn.active { background: #111; color: #fff; border-color: #111; }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%; padding: .7rem 1rem;
+      border: 1.5px solid #e0e0e0; border-radius: 8px;
+      font-size: .9rem; font-family: inherit; color: #111;
+      min-height: 220px; resize: vertical;
+      transition: border-color .2s;
+    }
+    textarea:focus { outline: none; border-color: #00b894; }
+    .textarea-hint {
+      font-size: .76rem;
+      color: #bbb;
+      margin-top: .5rem;
+    }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 2.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      user-select: none;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: #00b894; background: #f0faf7; }
+    .upload-icon { font-size: 2.2rem; margin-bottom: .6rem; }
+    .upload-main { font-size: .9rem; color: #444; font-weight: 600; }
+    .upload-sub  { font-size: .78rem; color: #aaa; margin-top: .3rem; }
+    input[type="file"] { display: none; }
+    .file-badge {
+      display: none; margin-top: .9rem;
+      padding: .55rem .9rem;
+      background: #f3f3f3; border-radius: 6px;
+      font-size: .82rem; color: #555;
+    }
+
+    /* ── Model select ── */
+    .model-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-top: 1rem;
+    }
+    .model-row label { font-size: .8rem; color: #999; white-space: nowrap; }
+    select {
+      padding: .42rem .7rem;
+      border: 1.5px solid #e5e5e5; border-radius: 6px;
+      font-size: .82rem; font-family: inherit;
+      background: #fff; color: #555; cursor: pointer;
+    }
+    select:focus { outline: none; border-color: #00b894; }
+
+    /* ── Button ── */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: .55rem;
+      width: 100%; padding: .9rem 2rem;
+      background: #00b894; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: .95rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-primary:hover:not(:disabled) { background: #009e7f; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-sm {
+      padding: .5rem .9rem;
+      background: #f3f3f3; color: #555;
+      border: none; border-radius: 6px;
+      font-size: .82rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-sm:hover { background: #e5e5e5; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 17px; height: 17px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Progress message ── */
+    .progress-msg {
+      display: none;
+      text-align: center;
+      font-size: .82rem; color: #999;
+      margin-top: .75rem;
+    }
+
+    /* ── Error ── */
+    .error-box {
+      display: none; margin-top: .9rem;
+      padding: .7rem 1rem;
+      background: #fdecea; color: #b71c1c;
+      border-radius: 8px; font-size: .85rem;
+    }
+
+    /* ── Results ── */
+    #results-section { display: none; }
+    .results-header {
+      display: flex;
+      justify-content: space-between; align-items: center;
+      margin-bottom: 1.3rem;
+      padding-bottom: .9rem;
+      border-bottom: 1.5px solid #eee;
+    }
+    .results-title { font-size: 1rem; font-weight: 700; }
+    .results-actions { display: flex; gap: .4rem; }
+
+    /* ── Markdown styles ── */
+    .md h1, .md h2 {
+      font-size: .97rem; font-weight: 700;
+      margin: 1.6rem 0 .65rem;
+      padding-bottom: .38rem;
+      border-bottom: 1px solid #eee; color: #111;
+    }
+    .md h1:first-child, .md h2:first-child { margin-top: 0; }
+    .md h3 { font-size: .9rem; font-weight: 700; margin: 1.2rem 0 .45rem; color: #444; }
+    .md p  { font-size: .9rem; color: #333; margin-bottom: .65rem; line-height: 1.75; }
+    .md ul, .md ol { margin: .4rem 0 .7rem 1.4rem; font-size: .9rem; color: #333; }
+    .md li { margin-bottom: .25rem; line-height: 1.7; }
+    .md strong { font-weight: 700; color: #111; }
+    .md code {
+      background: #f3f3f3; padding: .15rem .4rem;
+      border-radius: 4px; font-size: .83em; font-family: monospace; color: #00b894;
+    }
+    .md blockquote {
+      border-left: 3px solid #ddd; padding: .5rem 1rem;
+      margin: .7rem 0; background: #f9f9f9;
+      border-radius: 0 6px 6px 0; color: #555; font-size: .88rem;
+    }
+    .md hr { border: none; border-top: 1.5px solid #eee; margin: 1.4rem 0; }
+    .md table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: .7rem 0 1rem; }
+    .md th {
+      background: #f0faf7; padding: .55rem .7rem;
+      text-align: left; font-weight: 700;
+      font-size: .78rem; color: #555; border: 1px solid #e0f0eb;
+    }
+    .md td { padding: .55rem .7rem; border: 1px solid #e5e5e5; vertical-align: top; line-height: 1.55; }
+    .md tr:hover td { background: #fafafa; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; padding: 2rem;
+      font-size: .76rem; color: #ccc;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 1rem 1.25rem; flex-wrap: wrap; gap: .6rem; }
+      .system-badge { display: none; }
+      .container { padding: 1.5rem 1rem 3rem; }
+      .card { padding: 1.35rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">← 홈</a>
+  <span class="header-divider">|</span>
+  <div class="logo">RESPACE</div>
+  <div class="header-sub">주간 미팅 정리</div>
+  <div class="system-badge">SYSTEM 02</div>
+</header>
+
+<div class="container">
+
+  <!-- Step 1: 미팅 정보 입력 -->
+  <div class="card">
+    <div class="card-label">Step 1 — 미팅 내용 입력</div>
+
+    <!-- 날짜 입력 -->
+    <div class="date-row">
+      <label for="meeting-date">미팅 날짜</label>
+      <input type="date" id="meeting-date" />
+    </div>
+
+    <!-- 탭 -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('text', this)">📝 노트 붙여넣기</button>
+      <button class="tab-btn" onclick="switchTab('file', this)">📎 파일 업로드</button>
+    </div>
+
+    <!-- 텍스트 입력 -->
+    <div id="tab-text">
+      <textarea id="text-input"
+        placeholder="미팅 노트, 녹취록, 메모를 자유롭게 붙여넣으세요.
+
+예시:
+- 광고 성과 리뷰: 지난 주 CPC 450원, 리드 12건
+- 뉴스레터 방향: B2B 톤 강화 필요, 다음 호 주제 팝업 성공 사례
+- 액션: 레이첼 → 다음 주까지 광고 소재 3개 제작
+- 다음 미팅: 5월 14일"></textarea>
+      <div class="textarea-hint">형식 제한 없음 — 키워드, 문장, 글머리기호 모두 가능합니다</div>
+    </div>
+
+    <!-- 파일 업로드 -->
+    <div id="tab-file" style="display:none;">
+      <div class="upload-zone" id="drop-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-main">파일을 드래그하거나 클릭해서 업로드</div>
+        <div class="upload-sub">지원 형식: .txt · .md · .html · .pdf</div>
+      </div>
+      <input type="file" id="file-input" accept=".txt,.md,.html,.htm,.pdf" onchange="onFileSelect(event)" />
+      <div class="file-badge" id="file-badge">📄 <span id="file-name-text"></span></div>
+    </div>
+
+    <!-- 모델 선택 -->
+    <div class="model-row">
+      <label for="model-select">분석 모델</label>
+      <select id="model-select">
+        <option value="claude-sonnet-4-6">Sonnet — 고품질 (권장)</option>
+        <option value="claude-haiku-4-5-20251001">Haiku — 빠른 초안</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Step 2: 정리 실행 -->
+  <div class="card">
+    <div class="card-label">Step 2 — 자동 정리</div>
+    <button class="btn-primary" id="analyze-btn" onclick="runAnalysis()">
+      <span id="btn-label">📋 미팅 내용 정리 시작</span>
+      <div class="spinner" id="spinner" style="display:none;"></div>
+    </button>
+    <div class="progress-msg" id="progress-msg">Claude가 미팅 내용을 정리 중입니다... (10~20초)</div>
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="card" id="results-section">
+    <div class="results-header">
+      <div class="results-title">📋 미팅 정리 결과</div>
+      <div class="results-actions">
+        <button class="btn-sm" onclick="copyMd()">📋 복사</button>
+        <button class="btn-sm" onclick="downloadMd()">⬇ 다운로드</button>
+      </div>
+    </div>
+    <div class="md" id="results-body"></div>
+  </div>
+
+</div>
+
+<footer>
+  RESPACE AI 시스템 — System 02 주간 미팅 정리 &nbsp;|&nbsp; Powered by Claude AI (Anthropic) &nbsp;|&nbsp; Built by 글로업(GLOUP)
+</footer>
+
+<script>
+/* ── 초기화: 오늘 날짜 자동 설정 ── */
+(function() {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('meeting-date').value = today;
+})();
+
+marked.setOptions({ breaks: true, gfm: true });
+
+/* ── 상태 ── */
+let activeTab    = 'text';
+let parsedText   = '';
+let lastMarkdown = '';
+
+/* ── PDF.js (파일 탭용, 지연 로드) ── */
+let pdfLoaded = false;
+function loadPdfJs() {
+  if (pdfLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfLoaded = true;
+      resolve();
+    };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+/* ── 탭 전환 ── */
+function switchTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-text').style.display = tab === 'text' ? 'block' : 'none';
+  document.getElementById('tab-file').style.display = tab === 'file' ? 'block' : 'none';
+}
+
+/* ── 파일 처리 ── */
+function onFileSelect(e) { handleFile(e.target.files[0]); }
+function onDrop(e) { e.preventDefault(); onDragLeave(); handleFile(e.dataTransfer.files[0]); }
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag'); }
+function onDragLeave()  { document.getElementById('drop-zone').classList.remove('drag'); }
+
+async function handleFile(file) {
+  if (!file) return;
+  document.getElementById('file-name-text').textContent = file.name;
+  document.getElementById('file-badge').style.display = 'block';
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'pdf') {
+    await loadPdfJs();
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(it => it.str).join(' ') + '\n';
+    }
+    parsedText = text;
+  } else {
+    parsedText = await file.text();
+  }
+}
+
+/* ── 정리 실행 ── */
+async function runAnalysis() {
+  const content = activeTab === 'text'
+    ? document.getElementById('text-input').value.trim()
+    : parsedText;
+  const model = document.getElementById('model-select').value;
+  const meetingDate = document.getElementById('meeting-date').value;
+
+  hideError();
+
+  if (!content || content.trim().length < 30) {
+    showError('미팅 내용을 입력해 주세요. (메모, 키워드, 문장 등 자유 형식 가능)');
+    return;
+  }
+
+  setLoading(true);
+  document.getElementById('results-section').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/meeting', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ content, model, meetingDate })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || `서버 오류 (${res.status})`);
+    }
+
+    lastMarkdown = data.result;
+    document.getElementById('results-body').innerHTML = marked.parse(lastMarkdown);
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ── UI 헬퍼 ── */
+function setLoading(on) {
+  document.getElementById('analyze-btn').disabled = on;
+  document.getElementById('btn-label').textContent = on ? '정리 중...' : '📋 미팅 내용 정리 시작';
+  document.getElementById('spinner').style.display  = on ? 'block' : 'none';
+  document.getElementById('progress-msg').style.display = on ? 'block' : 'none';
+}
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+/* ── 복사 & 다운로드 ── */
+function copyMd() {
+  navigator.clipboard.writeText(lastMarkdown).then(() => {
+    const btn = event.currentTarget;
+    btn.textContent = '✅ 복사됨';
+    setTimeout(() => btn.textContent = '📋 복사', 2000);
+  });
+}
+function downloadMd() {
+  const date = document.getElementById('meeting-date').value.replace(/-/g, '') ||
+               new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const blob = new Blob([lastMarkdown], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `respace_meeting_${date}.md`
+  });
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
