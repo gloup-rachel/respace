@@ -417,7 +417,8 @@
   // ── 상수 ──────────────────────────────────────────────────────
   const SHEET_ID    = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
   const SHEETS      = { naver: '네이버 검색광고', google: '구글 검색광고', meta: 'Meta 광고', leads: '리캐치_리드', deals: '리캐치_딜' };
-  const DASHBOARD_URL = 'https://gloup-rachel.github.io/reports/respace_dashboard_v3.html';
+  // raw.githubusercontent.com = CDN 캐시 없이 항상 최신 커밋 파일을 반환 (CORS 허용)
+  const DASHBOARD_URL = 'https://raw.githubusercontent.com/gloup-rachel/respace/main/respace_dashboard_v3.html';
   const API_INSIGHT   = '/api/weekly-report';
   const API_DEPLOY    = '/api/update-dashboard';
 
@@ -454,15 +455,25 @@
   }
   const fmtNum = n => Math.round(n||0).toLocaleString('ko-KR');
   const parseNum = v => { if(v==null)return 0; if(typeof v==='number')return v; return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; };
-  const getKey = r => r['날짜']||r['일자']||r['Date']||Object.values(r)[0];
+  // 날짜 컬럼명 후보: 광고 매체 + 리캐치 CRM 공통 대응
+  const getKey = r =>
+    r['날짜']||r['일자']||r['Date']||r['date']||
+    r['생성일']||r['생성일시']||r['등록일']||r['신청일']||
+    r['리드 생성일']||r['리드생성일']||r['접수일']||r['문의일']||
+    Object.values(r)[0];
 
-  // ── gviz/tq fetch ──────────────────────────────────────────────
+  // ── gviz/tq fetch — 에러 시 null 반환 (대시보드 방식 동일) ──────
   async function fetchSheet(name) {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&tq=${encodeURIComponent('SELECT *')}`;
-    const t = await (await fetch(url)).text();
-    const m = t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
-    if (!m) throw new Error(`${name} 파싱 실패`);
-    return JSON.parse(m[1]).table;
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&tq=${encodeURIComponent('SELECT *')}`;
+      const t = await (await fetch(url)).text();
+      const m = t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+      if (!m) throw new Error(`${name}: gviz 파싱 실패`);
+      return JSON.parse(m[1]).table;
+    } catch(e) {
+      console.error(`fetchSheet 오류 (${name}):`, e.message);
+      return null;   // null → parseTable → []로 안전 처리
+    }
   }
   function parseTable(t) {
     if (!t||!t.rows) return [];
@@ -519,7 +530,23 @@
     document.getElementById('dataPreview').className='data-preview';
     try {
       const pr = getPrevRange();
-      const [nT,gT,mT,lT,dT] = await Promise.all([fetchSheet(SHEETS.naver),fetchSheet(SHEETS.google),fetchSheet(SHEETS.meta),fetchSheet(SHEETS.leads),fetchSheet(SHEETS.deals)]);
+      // 각 시트를 독립 fetch — 하나 실패해도 나머지는 정상 수집
+      const [nT,gT,mT,lT,dT] = await Promise.all([
+        fetchSheet(SHEETS.naver), fetchSheet(SHEETS.google), fetchSheet(SHEETS.meta),
+        fetchSheet(SHEETS.leads), fetchSheet(SHEETS.deals)
+      ]);
+
+      // 실패 시트 경고 (null = fetch 오류)
+      const failedSheets = [
+        !nT && '네이버 검색광고', !gT && '구글 검색광고', !mT && 'Meta 광고',
+        !lT && '리캐치_리드',    !dT && '리캐치_딜'
+      ].filter(Boolean);
+      if (failedSheets.length) {
+        showErr('fetchError', `⚠️ 일부 시트 수집 실패 (나머지는 정상): ${failedSheets.join(', ')}\n브라우저 콘솔(F12)에서 상세 오류를 확인하세요.`);
+      } else {
+        document.getElementById('fetchError').className='error-box';
+      }
+
       const nR=parseTable(nT),gR=parseTable(gT),mR=parseTable(mT),lR=parseTable(lT),dR=parseTable(dT);
       collectedData = {
         naver:aggNaver(nR,range), google:aggGoogle(gR,range), meta:aggMeta(mR,range),
@@ -528,7 +555,7 @@
         prevMeta:pr?aggMeta(mR,pr):null, prevLeads:pr?aggCount(lR,pr):null, prevDeals:pr?aggCount(dR,pr):null
       };
       renderChips();
-      document.getElementById('fetchIcon').textContent='✅';
+      document.getElementById('fetchIcon').textContent = failedSheets.length ? '⚠️' : '✅';
       document.getElementById('fetchLabel').textContent='수집 완료 — 다시 수집하기';
       btn.disabled=false;
       document.getElementById('generateBtn').disabled=false;
