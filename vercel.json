@@ -1,4 +1,8 @@
 {
+  "functions": {
+    "api/weekly-report.js":    { "maxDuration": 60 },
+    "api/update-dashboard.js": { "maxDuration": 30 }
+  },
   "rewrites": [
     { "source": "/newsletter",      "destination": "/newsletter.html"           },
     { "source": "/meeting",         "destination": "/meeting.html"              },

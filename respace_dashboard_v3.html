@@ -1,3 +1,6 @@
+HTTP 200 
+Content-Type: text/html; charset=utf-8
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -4267,12 +4270,258 @@
         // ============================================================
         const WEEKLY_REPORTS = [
             {
+                id: '2026-W19',
+                weekLabel: 'W19 (5/4~5/10)',
+                meetingDate: '2026-05-12 (화)',
+                periodLabel: '2026-05-04 (월) ~ 2026-05-10 (일)',
+                comparePeriod: '지난 주 W18 (2026-04-27 ~ 2026-05-03)',
+                isLatest: true,
+                oneLineSummary: '총 광고비 ₩642,470(+0.3%) · 구글 전환 69건(+46.8%) · Meta 잠재고객 복귀 CVR 10.0% · 딜 12건 · 리드 9건 · 네이버 팝업스토어 전환 추적 오류 점검 필요',
+                kpis: [
+                    { label: '총 광고비', value: '₩642,470', delta: '+0.3% vs W18', trend: 'neg' },
+                    { label: '총 전환(3매체)', value: '119건', delta: '+4.4% vs W18(114건)', trend: 'pos' },
+                    { label: '구글 전환', value: '69건', delta: '+46.8% vs W18(47건)', trend: 'pos' },
+                    { label: '실제 딜', value: '12건', delta: '리드 9건 · 리캐치 기준', trend: 'pos' },
+                    { label: '네이버 CAC', value: '₩8,049', delta: '+46.0% vs W18(₩5,512)', trend: 'neg' },
+                    { label: 'Meta 전환(잠재)', value: '23건', delta: 'CVR 10.0% · CPC ₩602', trend: 'pos' }
+                ],
+                sections: [
+                    {
+                        title: '1. 통합 데이터 기반 인사이트',
+                        html: `
+                        <div class="weekly-summary-card">
+                            <strong>총 광고비 ₩642,470으로 W18(₩640,842) 대비 사실상 동일 — 구글이 이번 주 성과를 주도, 네이버 팝업스토어 그룹 이상 징후 확인 필요.</strong>
+                            구글 전환 47→69건(+46.8%), CAC ₩4,645→₩4,164(-10.4%) 개선. 네이버는 전환 47→27건(-42.6%), CAC ₩5,512→₩8,049(+46.0%) 악화. Meta 잠재고객 목표 복귀 후 CVR 10.0% 회복.
+                        </div>
+                        <table class="weekly-table">
+                            <thead><tr><th>매체</th><th class="num">W19 비용</th><th class="num">전환</th><th class="num">CAC</th><th class="num">W18 CAC</th><th class="num">증감</th></tr></thead>
+                            <tbody>
+                                <tr style="background:#fff3cd"><td>네이버</td><td class="num">₩217,317</td><td class="num">27건</td><td class="num"><strong style="color:#e74c3c">₩8,049</strong></td><td class="num">₩5,512</td><td class="delta-neg">+46.0% ↑</td></tr>
+                                <tr style="background:#f0fdf4"><td>구글</td><td class="num">₩287,283</td><td class="num">69건</td><td class="num"><strong style="color:#059669">₩4,164</strong></td><td class="num">₩4,645</td><td class="delta-pos">-10.4% ✓</td></tr>
+                                <tr style="background:#f0fdf4"><td>Meta</td><td class="num">₩137,870</td><td class="num">23건</td><td class="num">₩5,994</td><td class="num">₩8,173</td><td class="delta-pos">-26.6% ✓</td></tr>
+                                <tr style="font-weight:bold;background:#f5f5f5"><td>합계</td><td class="num">₩642,470</td><td class="num">119건</td><td class="num">—</td><td class="num">W18 ₩640,842 / 114건</td><td class="delta-pos">+0.3% / 전환 +4.4%</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card weekly-summary-card-highlight">
+                            <strong>W19 통합 총평</strong>
+                            <ul style="margin-top: 8px; padding-left: 20px;">
+                                <li>총 광고비 ₩642,470 (W18 ₩640,842 대비 +0.3%) — 예산 규모 유지, 구글 비중 확대(₩218K→₩287K)</li>
+                                <li>구글 CAC ₩4,164(-10.4%) — 제외키워드 28개 적용 1주차, CVR 22.5%→26.8% 회복, 전환 +46.8% 급증</li>
+                                <li>네이버 전환 47→27건(-42.6%), CAC ₩5,512→₩8,049 — 팝업스토어 그룹 전환 15→3건(-80%) 이상. 자상호명도 26→13건 감소</li>
+                                <li>Meta CVR 10.0% 회복 — 잠재고객 목표 복귀 효과. CAC ₩5,994로 W18(₩8,173) 대비 개선</li>
+                                <li>실제 딜 12건 · 리드 9건(8개 기업) — 리캐치 기준. 딜은 W18(13건) 대비 -1건 수준 유지. 소개서 다운로드 중심 유입.</li>
+                            </ul>
+                        </div>
+                        `
+                    },
+                    {
+                        title: '2-1. 네이버 검색광고 — 전환 47→27건(-42.6%) · 팝업스토어 그룹 이상 · 박람회/부스 CPC 하향 효과 확인',
+                        html: `
+                        <p><strong>주간 지표 변화</strong>: 비용 ₩259,053→₩217,317(-16.2%), 클릭 91→77(-15.4%), 전환 47→27건(-42.6%), CAC ₩5,512→₩8,049(+46.0%)</p>
+                        <p>비용·클릭 감소보다 전환 감소폭이 훨씬 커 CAC 악화. <strong>팝업스토어 그룹 전환 15→3건(-80%) 급감이 주요 원인.</strong></p>
+                        <h4 class="weekly-section-subtitle">광고그룹별 W19 vs W18 비교</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>광고그룹</th><th class="num">W19 비용</th><th class="num">W18 비용</th><th class="num">증감</th><th class="num">W19 전환</th><th class="num">W18 전환</th><th class="num">W19 CAC</th></tr></thead>
+                            <tbody>
+                                <tr style="background:#fef2f2"><td><strong>팝업스토어</strong> ⚠️</td><td class="num">₩106,588</td><td class="num">₩106,411</td><td class="num">+0.2%</td><td class="num delta-neg"><strong>3</strong></td><td class="num">15</td><td class="num" style="color:#e74c3c"><strong>₩35,529</strong></td></tr>
+                                <tr style="background:#fffbe6"><td><strong>자상호명</strong></td><td class="num">₩2,156</td><td class="num">₩2,557</td><td class="num delta-pos">-15.7%</td><td class="num">13</td><td class="num">26</td><td class="num">₩166</td></tr>
+                                <tr><td>행사_일반 키워드</td><td class="num">₩20,117</td><td class="num">₩13,147</td><td class="num">+53.1%</td><td class="num">2</td><td class="num">0</td><td class="num">₩10,058</td></tr>
+                                <tr><td>고의도_행사</td><td class="num">₩14,868</td><td class="num">₩24,894</td><td class="num delta-pos">-40.3%</td><td class="num">2</td><td class="num">2</td><td class="num">₩7,434</td></tr>
+                                <tr><td>행사_기업/관공서</td><td class="num">₩25,321</td><td class="num">—</td><td class="num">신규</td><td class="num">1</td><td class="num">—</td><td class="num">₩25,321</td></tr>
+                                <tr><td>축제/페스티벌</td><td class="num">₩19,362</td><td class="num">—</td><td class="num">신규</td><td class="num">1</td><td class="num">—</td><td class="num">₩19,362</td></tr>
+                                <tr style="background:#e8f5e9"><td><strong>행사_박람회/부스</strong> ✓</td><td class="num"><strong>₩8,333</strong></td><td class="num">₩77,192</td><td class="num delta-pos"><strong>-89.2%</strong></td><td class="num">0</td><td class="num">1</td><td class="num">—</td></tr>
+                                <tr style="font-weight:bold;background:#f5f5f5"><td>합계</td><td class="num">₩217,317</td><td class="num">₩259,053</td><td class="num delta-pos">-16.2%</td><td class="num">27</td><td class="num">47</td><td class="num" style="color:#e74c3c">₩8,049</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card" style="border-left:4px solid #e74c3c;">
+                            <strong>⚠️ 팝업스토어 그룹 전환 급감 — GA4 교차 분석 결과: 네이버 전환 추적 오류 가능성 높음</strong><br>
+                            비용 ₩106,588 유지(W18 ₩106,411과 거의 동일)하는데 네이버 SA 전환이 15→3건(-80%) 급감. CAC ₩7,094→₩35,529(+401%).<br><br>
+                            <strong>① GA4 교차 분석:</strong> GA4 기준 팝업스토어 캠페인(naver/sa_pc/05_popup) 이벤트는 W18 28건 → W19 19건(-32%)으로, 네이버 SA -80% 급감과 괴리가 크다. GA4에서는 클릭 후 전환 이벤트(click_contact 11건, click_download_intro 5건 등)가 W19에도 정상 발생 중 → 실제 성과 급락보다는 <strong>네이버 전환 태그 수집 오류</strong>에 가깝다는 판단.<br><br>
+                            <strong>② 4/22 공통스크립트 추가 영향 분석:</strong> 4/22에 "접수완료" 페이지에 공통 전환스크립트가 추가됨. GA4 이벤트는 4/22 직후(4/22~4/28) 일평균 48.7건 → 52.9건으로 오히려 증가 — GA4 추적 자체에는 문제 없음. 그러나 네이버 SA는 별도의 전환 태그를 사용하므로, <strong>공통스크립트가 네이버 픽셀 태그와 충돌하거나 기존 전환 이벤트 경로를 변경했을 가능성</strong>이 있다. W18(4/27~5/3)에는 전환 15건으로 정상이었다가 W19(5/4~5/10)에서 3건으로 급락한 점은 스크립트 추가(4/22) 이후 시차를 두고 영향이 나타났을 가능성을 시사.<br><br>
+                            <strong>확인 필요:</strong> 네이버 광고 관리자 → 전환추적 → 팝업스토어 그룹 전환 태그 정상 동작 여부 / "접수완료" 페이지에서 네이버 픽셀과 공통스크립트 태그 순서·충돌 점검.
+                        </div>
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>✅ 행사_박람회/부스 CPC 하향 효과 확인 — 운영 방향 논의 필요</strong><br>
+                            W19 비용 ₩8,333(W18 ₩77,192 대비 -89.2%). 노출 및 전환 모두 하락 확인. 5주 누계 CAC ₩120,895. CPC 하향 이후 사실상 소멸 수준으로, <strong>완전 off 할지 vs 적은 노출이라도 브랜드 노출 목적으로 유지할지 W20 미팅에서 논의 필요.</strong>
+                        </div>
+                        `
+                    },
+                    {
+                        title: '2-2. 구글 검색광고 — 전환 47→69건(+46.8%) · CAC ₩4,164(-10.4%) · 제외키워드 효과 1주차',
+                        html: `
+                        <div class="weekly-kpi-grid">
+                            <div class="weekly-kpi-box"><div class="weekly-kpi-label">CPC</div><div class="weekly-kpi-value">₩1,118</div><div class="weekly-kpi-delta neg">+₩73 vs W18</div></div>
+                            <div class="weekly-kpi-box"><div class="weekly-kpi-label">전환수</div><div class="weekly-kpi-value">69건</div><div class="weekly-kpi-delta pos">+46.8% vs W18</div></div>
+                            <div class="weekly-kpi-box"><div class="weekly-kpi-label">CVR</div><div class="weekly-kpi-value">26.8%</div><div class="weekly-kpi-delta pos">+4.3%p vs W18</div></div>
+                            <div class="weekly-kpi-box"><div class="weekly-kpi-label">CAC</div><div class="weekly-kpi-value">₩4,164</div><div class="weekly-kpi-delta pos">-10.4% vs W18</div></div>
+                        </div>
+                        <h4 class="weekly-section-subtitle">W17 → W18 → W19 추이 비교</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>지표</th><th class="num">W17</th><th class="num">W18</th><th class="num">W19</th><th class="num">W18→W19</th></tr></thead>
+                            <tbody>
+                                <tr><td>비용</td><td class="num">₩158,002</td><td class="num">₩218,322</td><td class="num">₩287,283</td><td class="num delta-neg">+31.6%</td></tr>
+                                <tr><td>클릭</td><td class="num">118</td><td class="num">209</td><td class="num">257</td><td class="num delta-neg">+22.9%</td></tr>
+                                <tr><td>전환</td><td class="num">42.5</td><td class="num">47</td><td class="num"><strong>69</strong></td><td class="num delta-pos">+46.8% ✓</td></tr>
+                                <tr><td>CPC</td><td class="num">₩1,339</td><td class="num">₩1,045</td><td class="num">₩1,118</td><td class="num">+7.0%</td></tr>
+                                <tr><td>CVR</td><td class="num">36.0%</td><td class="num">22.5%</td><td class="num"><strong>26.8%</strong></td><td class="num delta-pos">+4.3%p ✓</td></tr>
+                                <tr><td>CAC</td><td class="num">₩3,718</td><td class="num">₩4,645</td><td class="num"><strong>₩4,164</strong></td><td class="num delta-pos">-10.4% ✓</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card">
+                            <strong>핵심 해석</strong>: 제외키워드 28개 적용 1주차, CVR 22.5%→26.8%(+4.3%p) 부분 회복. 클릭(+22.9%)·비용(+31.6%) 증가에도 전환(+46.8%)이 더 크게 늘어 CAC 개선. W17 CVR(36%) 완전 회복까지는 추가 작업 여지 있음.
+                        </div>
+                        <div class="weekly-callout">
+                            <div class="weekly-callout-title">📌 다음 주 체크 포인트</div>
+                            ① CVR 26.8% → 30%+ 추가 개선 여부<br>
+                            ② 전환 가치 가중치 적용 후 최적화 방향 논의<br>
+                            ③ 키워드 랜딩 연관도 개선 효과 확인
+                        </div>
+                        `
+                    },
+                    {
+                        title: '2-3. 검색 광고 총평 — 구글 효율 개선, 네이버 팝업 그룹 이상이 CAC 끌어올려',
+                        html: `
+                        <h4 class="weekly-section-subtitle">매체별 효율 비교 (W19 기준)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>매체</th><th class="num">비용</th><th class="num">전환</th><th class="num">CAC</th><th class="num">CVR</th><th class="num">전주 CAC</th><th class="num">평가</th></tr></thead>
+                            <tbody>
+                                <tr style="background:#fff3cd"><td>네이버</td><td class="num">₩217,317</td><td class="num">27</td><td class="num" style="color:#e74c3c"><strong>₩8,049</strong></td><td class="num">35.1%</td><td class="num">₩5,512</td><td class="delta-neg">+46.0% — 팝업이상</td></tr>
+                                <tr style="background:#f0fdf4"><td>구글</td><td class="num">₩287,283</td><td class="num">69</td><td class="num" style="color:#059669"><strong>₩4,164</strong></td><td class="num">26.8%</td><td class="num">₩4,645</td><td class="delta-pos">-10.4% ✓</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card" style="border-left:4px solid #e74c3c;">
+                            <strong>네이버 CAC 악화의 실체 — 팝업스토어 그룹 전환 추적 이상 가능성</strong><br>
+                            팝업스토어 비용 ₩106K는 그대로인데 전환만 15→3건 급락. 정상적인 성과 하락이 아닐 수 있음 — 전환 태그·랜딩 이슈 점검 권고.
+                        </div>
+                        <div class="weekly-summary-card weekly-summary-card-highlight">
+                            <strong>이번 주 우선 확인 사항</strong>
+                            <ul style="margin-top:8px;padding-left:20px;">
+                                <li>팝업스토어 그룹 전환 태그 정상 작동 여부 확인</li>
+                                <li>구글 CVR 회복세 지속 여부 — 제외키워드 2주차 효과 확인</li>
+                            </ul>
+                        </div>
+                        <h4 class="weekly-section-subtitle">당장 실행 가능한 조치</h4>
+                        <p><strong>① 네이버</strong> — 팝업스토어 전환 태그/랜딩 점검. 행사_박람회/부스 W20부터 완전 중단.</p>
+                        <p><strong>② 구글</strong> — CVR 추이 2주 연속 확인. 전환 가치 가중치 적용 방향 논의.</p>
+                        `
+                    },
+                    {
+                        title: '3. Meta 광고 — 잠재고객 복귀 첫 주 · 전환 23건 · CVR 10.0% · CPC ₩602(-20.1%)',
+                        html: `
+                        <div class="weekly-summary-card">
+                            <strong>잠재고객 목표 복귀 첫 주 — C타겟 CVR 12.6% + GA4 매칭률 75~78%로 전환 품질 최우수. B타겟 신규 매칭률 27%로 하락 — 점검 필요.</strong>
+                        </div>
+                        <h4 class="weekly-section-subtitle">캠페인별 W19 성과</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>캠페인</th><th class="num">비용</th><th class="num">클릭</th><th class="num">전환</th><th class="num">CPC</th><th class="num">CVR</th><th class="num">CAC</th></tr></thead>
+                            <tbody>
+                                <tr><td>(4/20) A타겟 (엔터프라이즈)</td><td class="num">₩43,112</td><td class="num">62</td><td class="num">4</td><td class="num">₩695</td><td class="num">6.5%</td><td class="num">₩10,778</td></tr>
+                                <tr style="background:#e8f5e9"><td>(4/20) B타겟 (글로벌)</td><td class="num">₩45,199</td><td class="num">81</td><td class="num">8</td><td class="num">₩558</td><td class="num">9.9%</td><td class="num">₩5,650</td></tr>
+                                <tr style="background:#f0fdf4"><td>(4/20) C타겟 (엔터/IP)</td><td class="num">₩50,449</td><td class="num">87</td><td class="num"><strong>11</strong></td><td class="num">₩579</td><td class="num delta-pos"><strong>12.6%</strong></td><td class="num delta-pos"><strong>₩4,586</strong></td></tr>
+                                <tr style="background:#fffbe6"><td>(5/07) A타겟 신규 <small style="color:#888">5/7~5/8, 2일</small></td><td class="num">₩21,573</td><td class="num">161</td><td class="num">2</td><td class="num">₩133</td><td class="num">1.2%</td><td class="num">₩10,787</td></tr>
+                                <tr style="background:#fffbe6"><td>(5/07) B타겟 신규 <small style="color:#888">5/7~5/8, 2일</small></td><td class="num">₩12,801</td><td class="num">30</td><td class="num">3</td><td class="num">₩426</td><td class="num delta-pos">10.0%</td><td class="num">₩4,267</td></tr>
+                                <tr style="background:#e8f5e9"><td>(5/07) C타겟 신규 <small style="color:#888">5/7~5/8, 2일</small></td><td class="num">₩16,069</td><td class="num">37</td><td class="num"><strong>5</strong></td><td class="num">₩434</td><td class="num delta-pos"><strong>13.5%</strong></td><td class="num delta-pos"><strong>₩3,214</strong></td></tr>
+                                <tr style="font-weight:bold;background:#f5f5f5"><td>합계</td><td class="num">₩137,870</td><td class="num">229</td><td class="num">35</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+                            </tbody>
+                        </table>
+
+                        `
+                    },
+                    {
+                        title: '4. 지난주 변화 사항 중심 인사이트',
+                        html: `
+                        <h4 class="weekly-section-subtitle">(1) 네이버 — 부스 계열 CPC 추가 하향(6,000→5,000원)</h4>
+                        <div class="weekly-summary-card">행사_박람회/부스 비용 ₩77,192→₩8,333(-89.2%). 노출·전환 모두 하락. 완전 off 또는 소규모 유지 여부는 W20 미팅에서 논의.</div>
+                        <h4 class="weekly-section-subtitle">(2) 구글 — 제외키워드 28개 적용 1주차</h4>
+                        <div class="weekly-summary-card">CVR 22.5%→26.8%(+4.3%p) 부분 회복. 전환 +46.8% 개선. 추가 제외키워드 작업 여지 있음.</div>
+                        <h4 class="weekly-section-subtitle">(3) Meta — 잠재고객 복귀 + B타겟 랜딩 변경 + UTM term 정렬</h4>
+                        <div class="weekly-summary-card">CVR 10.0% 즉각 회복. GA4-Meta 매칭률 개선 기대.</div>
+                        `
+                    },
+                    {
+                        title: '5. [P0] 키워드 조정 현황 — 네이버 CPC 하향 효과 · 구글 제외키워드 성과',
+                        html: `
+                        <div class="weekly-summary-card">
+                            <table class="weekly-table" style="margin-top:8px">
+                                <thead><tr><th>매체</th><th>조치</th><th class="num">W19 효과</th></tr></thead>
+                                <tbody>
+                                    <tr style="background:#f0fdf4"><td>네이버</td><td>부스 계열 CPC 6K→5K</td><td class="num delta-pos">비용 -89.2% · 사실상 소멸</td></tr>
+                                    <tr style="background:#f0fdf4"><td>구글</td><td>제외키워드 28개</td><td class="num delta-pos">CVR +4.3%p · 전환 +46.8%</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h4 class="weekly-section-subtitle">행사_박람회/부스 그룹 5주 추이</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>주차</th><th class="num">비용</th><th class="num">전환</th><th class="num">비고</th></tr></thead>
+                            <tbody>
+                                <tr><td>W15</td><td class="num">₩32,290</td><td class="num">0</td><td>—</td></tr>
+                                <tr><td>W17</td><td class="num">₩123,975</td><td class="num">1</td><td>1차 하향 직전</td></tr>
+                                <tr><td>W18</td><td class="num">₩77,192</td><td class="num">1</td><td>1차 하향 후</td></tr>
+                                <tr style="background:#f0fdf4"><td><strong>W19</strong></td><td class="num delta-pos"><strong>₩8,333</strong></td><td class="num">0</td><td><strong>2차 하향 → 소멸</strong></td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card">5주 누계 ₩241,790 / 전환 2건 / 평균 CAC ₩120,895. <strong>W20부터 완전 중단 권고.</strong></div>
+                        `
+                    },
+                    {
+                        title: '7. Meta 세팅 변경 후 성과 — 5/7 신규 캠페인 1주차 · 잠재고객 목표 변경 재세팅',
+                        html: `
+                        <div class="weekly-summary-card weekly-summary-card-highlight">
+                            <strong>캠페인 재세팅 시점: 2026-05-07 — 5/7 세팅 신규 캠페인 1주차 초기 데이터</strong><br>
+                            잠재고객 목표 변경에 따른 캠페인 재세팅은 5월 7일에 완료. W19 분석의 핵심은 5/7 이후 신규 캠페인(B신규, C신규)의 초기 성과 확인이며, 4/20 기존 캠페인(A/B/C타겟)과 구분하여 평가해야 함.
+                        </div>
+                        <h4 class="weekly-section-subtitle">5/7 신규 캠페인 vs 4/20 기존 캠페인 비교 (RAW 기준)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>캠페인</th><th class="num">세팅일</th><th class="num">비용</th><th class="num">노출</th><th class="num">CTR</th><th class="num">CPC</th><th class="num">전환</th><th class="num">CVR</th></tr></thead>
+                            <tbody>
+                                <tr><td>A타겟 (엔터프라이즈)</td><td class="num">4/20</td><td class="num">₩48,606</td><td class="num">3,385</td><td class="num">2.07%</td><td class="num">₩694</td><td class="num">5</td><td class="num">7.1%</td></tr>
+                                <tr><td>B타겟 (글로벌)</td><td class="num">4/20</td><td class="num">₩49,876</td><td class="num">4,156</td><td class="num">2.24%</td><td class="num">₩536</td><td class="num">9</td><td class="num">9.7%</td></tr>
+                                <tr style="background:#e8f5e9"><td>C타겟 (엔터/IP)</td><td class="num">4/20</td><td class="num">₩50,449</td><td class="num">3,917</td><td class="num">2.22%</td><td class="num">₩579</td><td class="num"><strong>11</strong></td><td class="num delta-pos"><strong>12.6%</strong></td></tr>
+                                <tr style="background:#fff3cd"><td><strong>(5/07) A타겟 신규</strong></td><td class="num"><strong>5/7</strong></td><td class="num">₩21,573</td><td class="num">2,573</td><td class="num delta-neg"><strong>6.26%</strong></td><td class="num delta-pos">₩133</td><td class="num">2</td><td class="num delta-neg">1.2%</td></tr>
+                                <tr style="background:#fffbe6"><td><strong>(5/07) B타겟 신규</strong></td><td class="num"><strong>5/7</strong></td><td class="num">₩12,801</td><td class="num">1,328</td><td class="num">2.26%</td><td class="num">₩426</td><td class="num">3</td><td class="num delta-pos">10.0%</td></tr>
+                                <tr style="background:#e8f5e9"><td><strong>(5/07) C타겟 신규</strong></td><td class="num"><strong>5/7</strong></td><td class="num">₩16,069</td><td class="num">1,706</td><td class="num">2.17%</td><td class="num">₩434</td><td class="num"><strong>5</strong></td><td class="num delta-pos"><strong>13.5%</strong></td></tr>
+                            </tbody>
+                        </table>
+                        <div class="weekly-summary-card">
+                            <strong>5/7 신규 캠페인 초기 해석 (5/7~5/8 기준)</strong><br>
+                            <strong>C타겟 신규: 전환 5건·CVR 13.5%·GA4 매칭률 78%</strong> — 전환 수량·효율·품질 모두 최우수. 4/20 C타겟(CVR 12.6%, 매칭률 75%)에서 소폭 개선, 세팅 변경 효과 확인.<br>
+                            B타겟 신규: 매칭률 47%→27%로 하락 — CVR 10.0%로 보이지만 GA4에서 확인되는 실제 리드 의도 비중이 낮아 <strong>전환 품질 저하</strong> 가능성. 소재·타겟 재검토 필요.<br>
+                            A타겟 신규: CTR 6.26%로 비정상적으로 높고 CPC ₩133이지만 CVR 1.2%, 매칭률은 22%→50%로 개선 — 클릭은 늘었으나 리드 의도로 이어지는 비율이 절반에 그침.
+                        </div>
+                        <h4 class="weekly-section-subtitle">GA4 매칭률 분석 (4/21~5/11, 5/7 기점 전후 비교)</h4>
+                        <div class="weekly-summary-card" style="font-size:0.85em; color:#555; margin-bottom:4px;">
+                            기준: GA4 리드의도 이벤트(click_contact + click_project_inquiry) ÷ Meta 전환수
+                        </div>
+                        <table class="weekly-table">
+                            <thead><tr><th>타겟</th><th>캠페인 (이전 4/20)</th><th>캠페인 (이후 5/7)</th><th class="num">이전 매칭률</th><th class="num">이후 매칭률</th><th class="num">변화</th><th>판단</th></tr></thead>
+                            <tbody>
+                                <tr><td>A타겟</td><td>(4/20)01_core_A타겟_신규</td><td>(5/07)01_core_A타겟</td><td class="num">22%</td><td class="num">50%</td><td class="num delta-pos">▲28%p</td><td>개선 ✅ — 단, 절반은 여전히 리드 의도 미확인</td></tr>
+                                <tr style="background:#fff3cd"><td>B타겟</td><td>(4/20)02_CORE_B타겟_신규</td><td>(5/07)02_CORE_B타겟</td><td class="num">47%</td><td class="num delta-neg"><strong>27%</strong></td><td class="num delta-neg">▼20%p ⚠️</td><td>전환 품질 저하 — 소재·타겟 재검토</td></tr>
+                                <tr style="background:#e8f5e9"><td>C타겟</td><td>(4/20)03_core_C타겟_신규</td><td>(5/07)03_core_C타겟</td><td class="num">75%</td><td class="num delta-pos"><strong>78%</strong></td><td class="num delta-pos">▲3%p ✅</td><td>전환 품질 최우수 · 안정 유지</td></tr>
+                                <tr style="font-weight:bold;background:#f5f5f5"><td>전체</td><td>—</td><td>—</td><td class="num">47%</td><td class="num">47%</td><td class="num">±0%p</td><td>전체 균형 유지</td></tr>
+                            </tbody>
+                        </table>
+                        <h4 class="weekly-section-subtitle">Action Items</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>#</th><th>Action</th><th>시점</th><th>근거</th></tr></thead>
+                            <tbody>
+                                <tr><td>1</td><td>B타겟 신규 소재·타겟 재검토 — GA4 매칭률 47%→27% 하락</td><td>W20 미팅 전</td><td>CVR 10%로 보이나 리드 의도 품질 저하</td></tr>
+                                <tr><td>2</td><td>C타겟 신규 예산 확대 검토 — CVR 13.5% + 매칭률 78% 동시 최우수</td><td>W20 미팅</td><td>수량·효율·품질 3박자 확인</td></tr>
+                                <tr><td>3</td><td>A타겟 신규 CTR 6.26% 이상치 점검 — 매칭률 50%로 개선됐으나 절반은 리드 의도 미확인</td><td>W20 미팅</td><td>CTR↑ CPC↓ CVR↓ 패턴 지속 모니터링</td></tr>
+
+                            </tbody>
+                        </table>
+                        `
+                    }
+                ]
+            },
+            {
                 id: '2026-W18',
                 weekLabel: 'W18 (4/27~5/3)',
                 meetingDate: '2026-05-06 (수)',
                 periodLabel: '2026-04-27 (월) ~ 2026-05-03 (일)',
                 comparePeriod: '지난 주 W17 (2026-04-20 ~ 2026-04-26)',
-                isLatest: true,
+                isLatest: false,
                 oneLineSummary: '총 광고비 ₩640,842(-7.4%) · 총 전환 98건(+20.2%) · 네이버 CAC ₩5,512(-48.9%) · 4/29 박람회부스 하향 조정 효과 · 실제 리드·딜 각 13건(+44.4%) · ※ 실질 4영업일(4/27~4/30, 5/1 노동절+주말 제외)',
                 kpis: [
                     { label: '총 광고비', value: '₩640,842', delta: '-7.4%', trend: 'pos' },
@@ -5541,6 +5790,7 @@
                 renderWeeklyReportContent(WEEKLY_REPORTS[0].id);
             }
         });
+
         window.addEventListener('beforeunload', () => {
             if (autoRefreshTimer) clearInterval(autoRefreshTimer);
         });
