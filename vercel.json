@@ -1,6 +1,5 @@
 {
   "functions": {
-    "api/weekly-report.js":    { "maxDuration": 60 },
     "api/update-dashboard.js": { "maxDuration": 30 }
   },
   "rewrites": [

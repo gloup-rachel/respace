@@ -1,6 +1,6 @@
 /**
  * RESPACE 주간 인사이트 생성 API — System 05 (v2)
- * Vercel Serverless Function — Node.js 20.x
+ * Vercel Edge Runtime — 스트리밍 타임아웃 없음
  *
  * respace-weekly-report 스킬 기반으로 재구현.
  * 대시보드 WEEKLY_REPORTS 배열에 삽입할 엔트리를 생성한다.
@@ -123,128 +123,162 @@ Strategic A(이커머스/D2C), Strategic B(공공기관)
 - trend 값: "pos" (좋음) / "neg" (나쁨) / "neutral"`;
 
 
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+// ── Edge Runtime 선언 — 스트리밍 타임아웃 없음 ─────────────────────
+export const config = { runtime: 'edge' };
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용됩니다.' });
+export default async function handler(req) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers: corsHeaders });
+  }
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'POST만 허용됩니다.' }), {
+      status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: '서버 설정 오류입니다.' });
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: '서버 설정 오류입니다.' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
-  const { mode = 'generate', weekInfo, rawData, userInputs, previousEntry, feedback } = req.body || {};
+  let body;
+  try {
+    body = await req.json();
+  } catch (_) {
+    return new Response(JSON.stringify({ error: '요청 바디 파싱 오류입니다.' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  const { mode = 'generate', weekInfo, rawData, userInputs, previousEntry, feedback } = body;
 
   if (!weekInfo || !rawData) {
-    return res.status(400).json({ error: '주차 정보와 데이터가 필요합니다.' });
+    return new Response(JSON.stringify({ error: '주차 정보와 데이터가 필요합니다.' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
   if (mode === 'refine' && (!previousEntry || !feedback)) {
-    return res.status(400).json({ error: 'refine 모드에는 이전 인사이트와 피드백이 필요합니다.' });
+    return new Response(JSON.stringify({ error: 'refine 모드에는 이전 인사이트와 피드백이 필요합니다.' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
   const userMessage = mode === 'refine'
     ? buildRefineMessage(weekInfo, rawData, userInputs, previousEntry, feedback)
     : buildUserMessage(weekInfo, rawData, userInputs);
 
-  // ── SSE 스트리밍 응답 설정 ──────────────────────────────────────
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no'); // Vercel 버퍼링 비활성화
-
-  const sendEvent = (data) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  // ── SSE 스트리밍 응답 (Edge Runtime — 타임아웃 없음) ──────────────
+  const sseHeaders = {
+    ...corsHeaders,
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'X-Accel-Buffering': 'no',
   };
 
-  try {
-    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 8000,
-        stream: true,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMessage }]
-      })
-    });
+  const stream = new ReadableStream({
+    async start(controller) {
+      const enc = new TextEncoder();
+      const send = (data) => controller.enqueue(enc.encode(`data: ${JSON.stringify(data)}\n\n`));
 
-    if (!upstream.ok) {
-      const errData = await upstream.json().catch(() => ({}));
-      sendEvent({ type: 'error', message: errData.error?.message || `API 오류 (${upstream.status})` });
-      return res.end();
-    }
+      try {
+        const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 8000,
+            stream: true,
+            system: SYSTEM_PROMPT,
+            messages: [{ role: 'user', content: userMessage }],
+          }),
+        });
 
-    // Anthropic SSE 스트림 읽기 + 클라이언트로 진행 상황 전달
-    let fullText = '';
-    let charCount = 0;
-    const reader = upstream.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
+        if (!upstream.ok) {
+          const errData = await upstream.json().catch(() => ({}));
+          send({ type: 'error', message: errData.error?.message || `API 오류 (${upstream.status})` });
+          controller.close();
+          return;
+        }
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+        // Anthropic SSE 스트림 → 클라이언트로 릴레이
+        let fullText = '';
+        let charCount = 0;
+        const reader = upstream.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // 마지막 불완전 라인은 다음 청크로
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const raw = line.slice(6).trim();
-        if (raw === '[DONE]') continue;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
 
-        try {
-          const event = JSON.parse(raw);
-          if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-            const text = event.delta.text;
-            fullText += text;
-            charCount += text.length;
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6).trim();
+            if (raw === '[DONE]') continue;
 
-            // 50자마다 진행 상황 전송 (너무 잦은 전송 방지)
-            if (charCount % 50 < text.length) {
-              sendEvent({ type: 'progress', chars: fullText.length });
+            let event;
+            try { event = JSON.parse(raw); } catch (_) { continue; }
+
+            if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+              const text = event.delta.text;
+              fullText += text;
+              charCount += text.length;
+              if (charCount % 50 < text.length) {
+                send({ type: 'progress', chars: fullText.length });
+              }
             }
           }
-        } catch (_) { /* JSON 파싱 실패 무시 */ }
+        }
+
+        // 전체 텍스트에서 JSON 파싱
+        const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          send({ type: 'error', message: '인사이트 파싱 실패 — JSON을 찾을 수 없습니다.' });
+          controller.close();
+          return;
+        }
+
+        const insight = JSON.parse(jsonMatch[0]);
+        const entry = {
+          id: weekInfo.id,
+          weekLabel: weekInfo.weekLabel,
+          meetingDate: weekInfo.meetingDate,
+          periodLabel: weekInfo.periodLabel,
+          comparePeriod: weekInfo.comparePeriod,
+          isLatest: true,
+          oneLineSummary: insight.oneLineSummary,
+          kpis: insight.kpis,
+          sections: insight.sections,
+        };
+
+        send({ type: 'done', entry });
+        controller.close();
+
+      } catch (err) {
+        const enc2 = new TextEncoder();
+        controller.enqueue(enc2.encode(`data: ${JSON.stringify({ type: 'error', message: `인사이트 생성 중 오류: ${err.message}` })}\n\n`));
+        controller.close();
       }
     }
+  });
 
-    // 전체 텍스트에서 JSON 파싱
-    const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      sendEvent({ type: 'error', message: '인사이트 파싱 실패 — Claude 응답에서 JSON을 찾을 수 없습니다.' });
-      return res.end();
-    }
-
-    const insight = JSON.parse(jsonMatch[0]);
-
-    // WEEKLY_REPORTS 엔트리 형식으로 조립
-    const entry = {
-      id: weekInfo.id,
-      weekLabel: weekInfo.weekLabel,
-      meetingDate: weekInfo.meetingDate,
-      periodLabel: weekInfo.periodLabel,
-      comparePeriod: weekInfo.comparePeriod,
-      isLatest: true,
-      oneLineSummary: insight.oneLineSummary,
-      kpis: insight.kpis,
-      sections: insight.sections
-    };
-
-    sendEvent({ type: 'done', entry });
-    return res.end();
-
-  } catch (err) {
-    sendEvent({ type: 'error', message: `인사이트 생성 중 오류: ${err.message}` });
-    return res.end();
-  }
+  return new Response(stream, { status: 200, headers: sseHeaders });
 };
 
 
