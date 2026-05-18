@@ -342,7 +342,8 @@
 
       <div class="error-box" id="fetchError"></div>
 
-      <button class="generate-btn" id="generateBtn" onclick="generateInsight()" disabled>✨ 인사이트 생성하기</button>
+      <button class="generate-btn" id="generateBtn" onclick="generateInsight()" disabled
+        title="먼저 위의 '데이터 수집 시작' 버튼을 눌러 데이터를 수집해 주세요.">✨ 인사이트 생성하기</button>
 
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-track"><div class="progress-fill"></div></div>
@@ -591,7 +592,11 @@
 
   // ── 인사이트 생성 ──────────────────────────────────────────────
   async function generateInsight() {
-    if (!collectedData) { showErr('generateError','먼저 데이터를 수집해 주세요.'); return; }
+    if (!collectedData) {
+      showErr('generateError','⬆️ 먼저 위의 [데이터 수집 시작] 버튼을 눌러 데이터를 수집해 주세요.');
+      document.getElementById('fetchBtn').scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
     const weekNum=document.getElementById('weekNum').value.trim();
     const startDate=document.getElementById('startDate').value;
     const endDate=document.getElementById('endDate').value;
@@ -619,7 +624,10 @@
 
     setGenerating(true);
     try {
-      const entry = await callAPI({ mode:'generate', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache });
+      const entry = await callAPI(
+        { mode:'generate', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache },
+        (chars) => updateGeneratingProgress(chars)
+      );
       versions = [{ entry, feedback: null }];
       currentVerIdx = 0;
       await loadDashboardHTML(entry);
@@ -637,8 +645,22 @@
     document.getElementById('generateBtn').disabled = on;
     document.getElementById('progressWrap').className = on ? 'progress-wrap show' : 'progress-wrap';
     document.getElementById('generateError').className = 'error-box';
-    if (on) startProgressMsg('progressMsg', ['데이터 분석 중...','인사이트 도출 중...','섹션 작성 중...','최종 검토 중...']);
-    else stopProgressMsg();
+    if (on) {
+      startProgressMsg('progressMsg', ['Claude가 데이터 분석 중...','인사이트 도출 중...','섹션 작성 중...','최종 검토 중...']);
+    } else {
+      stopProgressMsg();
+      const msg = document.getElementById('progressMsg');
+      if (msg) msg.textContent = '';
+    }
+  }
+
+  function updateGeneratingProgress(chars) {
+    const msg = document.getElementById('progressMsg');
+    if (!msg) return;
+    if (chars < 500) msg.textContent = 'Claude가 데이터 분석 중...';
+    else if (chars < 2000) msg.textContent = `인사이트 도출 중... (${chars.toLocaleString()}자)`;
+    else if (chars < 5000) msg.textContent = `섹션 작성 중... (${chars.toLocaleString()}자)`;
+    else msg.textContent = `거의 완료... (${chars.toLocaleString()}자)`;
   }
 
   // ── 피드백 반영 ────────────────────────────────────────────────
@@ -660,7 +682,7 @@
         userInputs: userInputsCache,
         previousEntry: prevEntry,
         feedback
-      });
+      }, null);
 
       // 현재 버전 이후 항목 제거 후 새 버전 추가
       versions = versions.slice(0, currentVerIdx + 1);
@@ -682,12 +704,53 @@
     }
   }
 
-  // ── API 호출 공통 ──────────────────────────────────────────────
-  async function callAPI(body) {
-    const res = await fetch(API_INSIGHT, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-    const json = await res.json();
-    if (!res.ok || !json.ok) throw new Error(json.error || '알 수 없는 오류');
-    return json.entry;
+  // ── API 호출 공통 (SSE 스트리밍) ──────────────────────────────
+  async function callAPI(body, onProgress) {
+    const res = await fetch(API_INSIGHT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok || !res.body) {
+      // SSE 이전 단계 에러 (400, 500 등)
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `서버 오류 (${res.status})`);
+    }
+
+    // SSE 스트림 읽기
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // 마지막 불완전 라인은 다음 청크로
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        let event;
+        try {
+          event = JSON.parse(raw);
+        } catch (_) {
+          continue; // 불완전한 JSON 청크 무시
+        }
+        if (event.type === 'progress' && onProgress) {
+          onProgress(event.chars);
+        } else if (event.type === 'done') {
+          return event.entry;
+        } else if (event.type === 'error') {
+          throw new Error(event.message || '인사이트 생성 오류');
+        }
+      }
+    }
+
+    throw new Error('응답 스트림이 예기치 않게 종료되었습니다.');
   }
 
   // ── 대시보드 HTML 로드 & 삽입 ──────────────────────────────────

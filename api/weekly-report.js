@@ -147,6 +147,16 @@ module.exports = async function handler(req, res) {
     ? buildRefineMessage(weekInfo, rawData, userInputs, previousEntry, feedback)
     : buildUserMessage(weekInfo, rawData, userInputs);
 
+  // ── SSE 스트리밍 응답 설정 ──────────────────────────────────────
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Vercel 버퍼링 비활성화
+
+  const sendEvent = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
   try {
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -158,17 +168,60 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 8000,
+        stream: true,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userMessage }]
       })
     });
 
-    const data = await upstream.json();
-    if (!upstream.ok) throw new Error(data.error?.message || `API 오류 (${upstream.status})`);
+    if (!upstream.ok) {
+      const errData = await upstream.json().catch(() => ({}));
+      sendEvent({ type: 'error', message: errData.error?.message || `API 오류 (${upstream.status})` });
+      return res.end();
+    }
 
-    const raw = data.content[0].text.trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('인사이트 파싱 실패 — JSON을 찾을 수 없습니다.');
+    // Anthropic SSE 스트림 읽기 + 클라이언트로 진행 상황 전달
+    let fullText = '';
+    let charCount = 0;
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // 마지막 불완전 라인은 다음 청크로
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') continue;
+
+        try {
+          const event = JSON.parse(raw);
+          if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+            const text = event.delta.text;
+            fullText += text;
+            charCount += text.length;
+
+            // 50자마다 진행 상황 전송 (너무 잦은 전송 방지)
+            if (charCount % 50 < text.length) {
+              sendEvent({ type: 'progress', chars: fullText.length });
+            }
+          }
+        } catch (_) { /* JSON 파싱 실패 무시 */ }
+      }
+    }
+
+    // 전체 텍스트에서 JSON 파싱
+    const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      sendEvent({ type: 'error', message: '인사이트 파싱 실패 — Claude 응답에서 JSON을 찾을 수 없습니다.' });
+      return res.end();
+    }
 
     const insight = JSON.parse(jsonMatch[0]);
 
@@ -185,10 +238,12 @@ module.exports = async function handler(req, res) {
       sections: insight.sections
     };
 
-    return res.status(200).json({ ok: true, entry });
+    sendEvent({ type: 'done', entry });
+    return res.end();
 
   } catch (err) {
-    return res.status(500).json({ error: `인사이트 생성 중 오류: ${err.message}` });
+    sendEvent({ type: 'error', message: `인사이트 생성 중 오류: ${err.message}` });
+    return res.end();
   }
 };
 
