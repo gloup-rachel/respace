@@ -4267,12 +4267,560 @@
         // ============================================================
         const WEEKLY_REPORTS = [
             {
+                id: '2026-W20',
+                weekLabel: 'W20 (5/11~5/17)',
+                meetingDate: '2026-05-19 (월)',
+                periodLabel: '2026-05-11 (월) ~ 2026-05-17 (일)',
+                comparePeriod: '지난 주 W19 (2026-05-04 ~ 2026-05-10)',
+                isLatest: true,
+                oneLineSummary: '총 광고비 ₩686,789(+6.9%) · 총 전환 197건(+65.5%) · 구글 CAC ₩2,363(-43.3%) · Meta CPC ₩366 역대 최저 · 딜 12건 · 리드 23건(+155.6%) · 네이버 롱테일 38개·구글 확장검색 5개 투입 첫 주',
+                kpis: [
+                    { label: '총 광고비', value: '₩686,789', delta: '+6.9% vs W19', trend: 'neg' },
+                    { label: '총 전환(3매체)', value: '197건', delta: '+65.5% vs W19(119건)', trend: 'pos' },
+                    { label: '구글 CAC', value: '₩2,363', delta: '-43.3% vs W19(₩4,164)', trend: 'pos' },
+                    { label: '실제 딜', value: '12건', delta: '리드 23건(+155.6%) · 리캐치 기준', trend: 'pos' },
+                    { label: '네이버 CAC', value: '₩5,943', delta: '-26.2% vs W19(₩8,049)', trend: 'pos' },
+                    { label: 'Meta CPC', value: '₩366', delta: '-39.2% vs W19(₩602) · 역대 최저', trend: 'pos' }
+                ],
+                sections: [
+                    {
+                        title: '1. 통합 데이터 기반 인사이트',
+                        html: `
+                        <div class="weekly-summary-card">
+                            <strong>총 광고비 ₩692,251(-1.7% vs W19), 총 전환 214건(+48.6%) — 비용은 줄고 전환은 폭증. 구글 행사그룹 주도·실 상담 전환 +262%, 네이버 회복세, Meta 신규캠페인 ×4배.</strong>
+                            ※ 05/16~05/17(토·일) 구글·Meta 데이터 미포함 — 실질 5영업일 기준.
+                        </div>
+
+                        <table class="weekly-table">
+                            <thead>
+                                <tr><th>매체</th><th class="num">W18 전환</th><th class="num">W19 전환</th><th class="num">W20 전환</th><th class="num">W20 CAC</th><th class="num">W19 CAC</th><th class="num">W19→W20</th><th>W18 대비</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>네이버</td>
+                                    <td class="num">47건</td>
+                                    <td class="num" style="color:#e74c3c">27건</td>
+                                    <td class="num" style="color:#d97706"><strong>38건</strong></td>
+                                    <td class="num" style="color:#d97706">₩5,943</td>
+                                    <td class="num">₩8,049</td>
+                                    <td class="delta-pos">+40.7%</td>
+                                    <td style="color:#e74c3c">⚠️ -19.1%</td>
+                                </tr>
+                                <tr style="background:#f0fdf4">
+                                    <td>구글</td>
+                                    <td class="num">47건</td>
+                                    <td class="num">82건</td>
+                                    <td class="num" style="color:#059669"><strong>131건</strong></td>
+                                    <td class="num" style="color:#059669">₩2,097</td>
+                                    <td class="num">₩3,601</td>
+                                    <td class="delta-pos">+59.9%</td>
+                                    <td style="color:#059669">✅ +178.7%</td>
+                                </tr>
+                                <tr>
+                                    <td>Meta</td>
+                                    <td class="num">—</td>
+                                    <td class="num">35건</td>
+                                    <td class="num">45건</td>
+                                    <td class="num">₩4,256</td>
+                                    <td class="num">₩5,696</td>
+                                    <td class="delta-pos">+28.6%</td>
+                                    <td>— (W19 기준)</td>
+                                </tr>
+                                <tr style="font-weight:bold;background:#f5f5f5">
+                                    <td>합계</td>
+                                    <td class="num">94건</td>
+                                    <td class="num">144건</td>
+                                    <td class="num" style="color:#059669">214건</td>
+                                    <td class="num" style="color:#059669">₩3,235</td>
+                                    <td class="num">₩4,888</td>
+                                    <td class="delta-pos" style="color:#059669">+48.6%</td>
+                                    <td style="color:#059669">✅ 전환 +127.7%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="display:flex;gap:12px;margin:16px 0;flex-wrap:wrap;">
+                            <div class="weekly-kpi-box">
+                                <div class="weekly-kpi-label">W20 총 광고비</div>
+                                <div class="weekly-kpi-value">₩692,251</div>
+                                <div class="weekly-kpi-delta pos">-1.7% vs W19</div>
+                            </div>
+                            <div class="weekly-kpi-box">
+                                <div class="weekly-kpi-label">W20 총 전환</div>
+                                <div class="weekly-kpi-value">214건</div>
+                                <div class="weekly-kpi-delta pos">+48.6% vs W19</div>
+                            </div>
+                            <div class="weekly-kpi-box">
+                                <div class="weekly-kpi-label">종합 CAC</div>
+                                <div class="weekly-kpi-value">₩3,235</div>
+                                <div class="weekly-kpi-delta pos">-33.8% vs W19</div>
+                            </div>
+                            <div class="weekly-kpi-box">
+                                <div class="weekly-kpi-label">실 상담 전환 (구글)</div>
+                                <div class="weekly-kpi-value">18.1건</div>
+                                <div class="weekly-kpi-delta pos">+262% vs W19</div>
+                            </div>
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>✅ 구글 — 네이버 고비용 CPC 커버 전략 적중 · 실 상담 전환 ×3.6배 (데이터 검증 완료)</strong><br>
+                            네이버 CPC(₩2,429) 대비 구글 CPC(₩838)이 약 3배 저렴한 구조를 활용, 행사/행사디자인 그룹에 예산 집중 → W20 전환 131건으로 W18(47건) 대비 +178.7%. 핵심 검증 지표: respace.cargo 프로젝트 문의 완료 <strong>18.1건(+262%)</strong> — 단순 클릭·다운로드가 아닌 실질 상담 요청이 3배 이상 증가하여 전환 품질 개선 확인. 월-화 주초 집중 패턴 확인.
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #f59e0b;">
+                            <strong>⚠️ 네이버 — W19 기저효과 포함 회복세 · W18(47건) 미회복 · 자상호명 2차 귀인 분석 필요</strong><br>
+                            W19(27건) 비정상 저점 대비 +40.7% 반등. 자상호명 그룹이 회복 주도 — Meta 광고·뉴스레터·콜드메일 등 간접 터치포인트를 통해 브랜드 인지 후 네이버 자상호명 검색으로 전환하는 2차 귀인 경로 존재. W20 Direct 채널 CVR 2.4%(W19 0.3%)로 급등, 자상호명 연관 패턴과 일치. UTM 추적 장치 세팅으로 기여 매체 특정 예정.
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #8b5cf6;">
+                            <strong>📋 Meta — 신규 캠페인(5/07) 전환 ×4.4배 도약 · Core B(26건, CAC ₩1,996) 최고 효율</strong><br>
+                            신규캠페인(5/07) W19 10건 → W20 44건(+340%). 구 캠페인(4/20) CAC ₩15,152 대비 신규 CAC ₩4,009로 압도적 우위 확인. 페르소나별: Core B(글로벌) 26건/CAC ₩1,996 최고 효율, Core A(엔터프라이즈) 15건/₩3,019. CPC ₩366으로 역대 최저 기록. 노출 17,065→22,691(+33.0%), CTR 2.80%→1.99%로 노출 확대에 따른 CTR 자연 희석 패턴.
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #3b82f6;">
+                            <strong>🔄 광고→GA4→리드/딜 퍼널 — 세션·이벤트 모두 증가, 리드 23건(+155.6%) · 딜 12건 확인</strong><br>
+                            GA4 세션 1,811→2,338(+29.1%), 전환이벤트 38→79건(+107.9%). 리캐치 리드 9→23건(+155.6%), 딜 12건(현대백화점·KT·아이더 등 포함). Direct 채널 CVR W19 0.3% → W20 2.4% 급등 — 자상호명 검색 유입의 직접 전환 패턴 확인. 광고 전환 214건 대비 리드 23건은 퍼널 하단 전환율 개선 여지 존재 — 리캐치 팝업 노출 조건·랜딩 CTA 최적화 W21 검토 예정.
+                        </div>
+                        `
+                    },
+
+                    {
+                        title: '2-1. 네이버 검색광고 — 전환 27→38건(+40.7%) · CAC ₩5,943(-26.2%) · W18(47건) 대비 회복 진행 중',
+                        html: `
+                            <div class="weekly-kpi-grid">
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">비용</div><div class="weekly-kpi-value">₩225,843</div><div class="weekly-kpi-delta neg">+3.9% vs W19</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">전환수</div><div class="weekly-kpi-value">38건</div><div class="weekly-kpi-delta pos">+40.7% vs W19</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">CPC</div><div class="weekly-kpi-value">₩2,429</div><div class="weekly-kpi-delta pos">-13.8% vs W19</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">CAC</div><div class="weekly-kpi-value">₩5,943</div><div class="weekly-kpi-delta pos">-26.2% vs W19</div></div>
+                            </div>
+
+                            <h4 class="weekly-section-subtitle">W18 → W19 → W20 추이</h4>
+                            <table class="weekly-table">
+                                <thead><tr><th>지표</th><th class="num">W18</th><th class="num">W19</th><th class="num">W20</th><th class="num">W19→W20</th><th class="num">W18 대비</th></tr></thead>
+                                <tbody>
+                                    <tr><td>비용</td><td class="num">₩259,053</td><td class="num">₩217,317</td><td class="num">₩225,843</td><td class="num delta-neg">+3.9%</td><td class="num delta-neg">-12.9%</td></tr>
+                                    <tr><td>클릭</td><td class="num">91</td><td class="num">77</td><td class="num">93</td><td class="num delta-pos">+20.8%</td><td class="num">+2.2%</td></tr>
+                                    <tr><td>CTR</td><td class="num">0.66%</td><td class="num">0.53%</td><td class="num">0.63%</td><td class="num">+0.10%p</td><td class="num delta-neg">-0.03%p</td></tr>
+                                    <tr><td>CPC</td><td class="num">₩2,846</td><td class="num">₩2,819</td><td class="num">₩2,429</td><td class="num delta-pos">-13.8%</td><td class="num delta-pos">-14.7%</td></tr>
+                                    <tr><td>전환</td><td class="num"><strong>47</strong></td><td class="num" style="color:#e74c3c">27</td><td class="num" style="color:#d97706"><strong>38</strong></td><td class="num delta-pos">+40.7%</td><td class="num delta-neg" style="color:#e74c3c">-19.1% ⚠️</td></tr>
+                                    <tr><td>CAC</td><td class="num">₩5,512</td><td class="num" style="color:#e74c3c">₩8,049</td><td class="num" style="color:#d97706"><strong>₩5,943</strong></td><td class="num delta-pos">-26.2%</td><td class="num delta-neg">+7.8%</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="weekly-section-subtitle">광고그룹별 전환 추이</h4>
+                            <table class="weekly-table">
+                                <thead><tr><th>광고그룹</th><th class="num">W18</th><th class="num">W19</th><th class="num">W20</th><th class="num">W19→W20</th><th>상태</th></tr></thead>
+                                <tbody>
+                                    <tr><td>자상호명</td><td class="num" style="color:#888">미수집</td><td class="num">13건</td><td class="num"><strong>22건</strong></td><td class="num delta-pos">+9건</td><td>✅ 회복 주역</td></tr>
+                                    <tr><td>팝업스토어</td><td class="num">15건</td><td class="num" style="color:#e74c3c">3건</td><td class="num" style="color:#d97706">6건</td><td class="num delta-pos">+3건</td><td>⚠️ W18 대비 미회복</td></tr>
+                                    <tr><td>기타 그룹</td><td class="num" style="color:#888">미수집</td><td class="num">11건</td><td class="num">10건</td><td class="num">-1건</td><td>보합</td></tr>
+                                </tbody>
+                            </table>
+                            <p style="font-size:12px;color:#888;margin:4px 0 16px;">※ W18 그룹별 전환 데이터는 해당 기간 추적 설정 전으로 미수집 (W18 합계 47건만 확인)</p>
+
+                            <div class="weekly-summary-card" style="border-left:4px solid #d97706;">
+                                <strong>W20 성과 요약 — 자상호명 주도 회복, W18 기준선 미회복</strong>
+                                <ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;">
+                                    <li>자상호명 그룹이 W19 13건→W20 22건으로 W20 회복을 이끔</li>
+                                    <li>팝업스토어 그룹 6건 회복 중이나 W18(15건) 대비 60% 수준</li>
+                                    <li>팝업스토어기획 키워드 — 내부 확인 진행 중, 완료 후 반영 예정</li>
+                                    <li>롱테일 38개(5/14 투입): 비용 소진 0, 노출 0 확인 — 키워드 세팅 점검 필요</li>
+                                </ul>
+                            </div>
+                        `
+                    },
+
+                    {
+                        title: '2-2. 구글 검색광고 — 전환 131건(+59.9%) · CAC ₩2,097(-41.8%) · 행사그룹 주도 · 실상담 전환 +262%',
+                        html: `
+                            <div class="weekly-kpi-grid">
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">비용</div><div class="weekly-kpi-value">₩274,871</div><div class="weekly-kpi-delta pos">-6.9% vs W19</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">전환수</div><div class="weekly-kpi-value">131건</div><div class="weekly-kpi-delta pos">+59.9% vs W19</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">CTR</div><div class="weekly-kpi-value">9.82%</div><div class="weekly-kpi-delta pos">벤치마크(5%) 대폭 상회</div></div>
+                                <div class="weekly-kpi-box"><div class="weekly-kpi-label">CAC</div><div class="weekly-kpi-value">₩2,097</div><div class="weekly-kpi-delta pos">-41.8% vs W19</div></div>
+                            </div>
+
+                            <h4 class="weekly-section-subtitle">W18 → W19 → W20 추이</h4>
+                            <table class="weekly-table">
+                                <thead><tr><th>지표</th><th class="num">W18</th><th class="num">W19</th><th class="num">W20</th><th class="num">W19→W20</th><th class="num">W18 대비</th></tr></thead>
+                                <tbody>
+                                    <tr><td>비용</td><td class="num">₩218,322</td><td class="num">₩287,283</td><td class="num">₩274,871</td><td class="num delta-pos">-6.9%</td><td class="num delta-neg">+25.9%</td></tr>
+                                    <tr><td>클릭</td><td class="num">209</td><td class="num">265</td><td class="num">328</td><td class="num delta-pos">+23.8%</td><td class="num delta-neg">+56.9%</td></tr>
+                                    <tr><td>노출</td><td class="num" style="color:#888">미수집</td><td class="num">2,453</td><td class="num">3,340</td><td class="num delta-pos">+36.2%</td><td class="num" style="color:#888">—</td></tr>
+                                    <tr><td>CTR</td><td class="num" style="color:#888">미수집</td><td class="num">10.80%</td><td class="num">9.82%</td><td class="num">-0.98%p</td><td class="num" style="color:#888">—</td></tr>
+                                    <tr><td>CPC</td><td class="num">₩1,045</td><td class="num">₩1,114</td><td class="num"><strong>₩838</strong></td><td class="num delta-pos">-24.8%</td><td class="num delta-pos">-19.8%</td></tr>
+                                    <tr><td>전환</td><td class="num">47</td><td class="num">82</td><td class="num"><strong>131</strong></td><td class="num delta-pos">+59.9%</td><td class="num delta-pos">+178.7%</td></tr>
+                                    <tr><td>CAC</td><td class="num">₩4,645</td><td class="num">₩3,601</td><td class="num"><strong style="color:#059669">₩2,097</strong></td><td class="num delta-pos">-41.8%</td><td class="num delta-pos">-54.8%</td></tr>
+                                </tbody>
+                            </table>
+                            <p style="font-size:12px;color:#888;margin:4px 0 16px;">※ W18 노출·CTR은 해당 기간 임프레션 데이터 미수집</p>
+
+                            <h4 class="weekly-section-subtitle">전환 액션별 분석 (W19→W20)</h4>
+                            <table class="weekly-table">
+                                <thead><tr><th>전환 액션</th><th class="num">W19</th><th class="num">W20</th><th class="num">증감</th><th>의미</th></tr></thead>
+                                <tbody>
+                                    <tr style="background:#f0fdf4"><td><strong>respace.cargo 프로젝트 문의</strong></td><td class="num">5건</td><td class="num"><strong style="color:#059669">18.1건</strong></td><td class="num delta-pos"><strong>+262%</strong></td><td><strong>실 상담 요청 — 핵심 지표</strong></td></tr>
+                                    <tr><td>상담 클릭</td><td class="num">44건</td><td class="num">63.8건</td><td class="num delta-pos">+44.9%</td><td>상담 의도 클릭</td></tr>
+                                    <tr><td>소개서 다운로드</td><td class="num">23건</td><td class="num">40.3건</td><td class="num delta-pos">+75.0%</td><td>정보 탐색</td></tr>
+                                    <tr><td>프로젝트 뷰</td><td class="num">10건</td><td class="num">9건</td><td class="num delta-neg">-10.0%</td><td>포트폴리오 탐색</td></tr>
+                                    <tr style="font-weight:bold;background:#f5f5f5"><td>합계</td><td class="num">82건</td><td class="num">131건</td><td class="num delta-pos">+59.9%</td><td></td></tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="weekly-section-subtitle">광고그룹별 전환 분석 (W19→W20)</h4>
+                            <table class="weekly-table">
+                                <thead><tr><th>광고그룹</th><th class="num">W19</th><th class="num">W20</th><th class="num">증감</th><th>주요 기여 키워드</th></tr></thead>
+                                <tbody>
+                                    <tr style="background:#f0fdf4"><td><strong>행사</strong></td><td class="num">25건</td><td class="num"><strong>55건</strong></td><td class="num delta-pos">+30건</td><td>전시부스(+7), 행사대행사(+5), 부스제작(+5) 등</td></tr>
+                                    <tr style="background:#f0fdf4"><td><strong>행사디자인</strong></td><td class="num">42건</td><td class="num"><strong>54건</strong></td><td class="num delta-pos">+12건</td><td>리스페이스컴퍼니(+8), 리 스페이스(+4) 브랜드 키워드</td></tr>
+                                    <tr><td>기타</td><td class="num">2건</td><td class="num">5건</td><td class="num delta-pos">+3건</td><td>기타 브랜드·소재 키워드</td></tr>
+                                </tbody>
+                            </table>
+
+                            <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                                <strong>W20 성과 요약 — 네이버 고비용 CPC 커버 전략 적중, 실 상담 전환 ×3.6배</strong>
+                                <ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;">
+                                    <li>네이버 CPC(₩2,429) 대비 구글 CPC(₩838)이 약 3배 저렴 → 행사/행사디자인 그룹 예산 집중 전략 유효</li>
+                                    <li>실 상담 문의(respace.cargo) <strong>18.1건(+262%)</strong> — 단순 클릭이 아닌 실질 의뢰 요청 3배 증가</li>
+                                    <li>월-화 주초 집중 패턴(5/11 31건, 5/12 32건) — 행사 관련 B2B 의사결정 주초 집중 확인</li>
+                                    <li>확장검색 5개(팝업스토어마케팅 외) W20 투입: 직접 전환 기여 0건 확인, W21 모니터링 예정</li>
+                                </ul>
+                            </div>
+                        `
+                    },
+
+                    {
+                        title: '2-3. 검색광고 총평 — 구글 행사그룹 주도 급증, 네이버 W18 회복 진행 중',
+                        html: `
+                        <h4 class="weekly-section-subtitle">매체별 효율 비교 (W18 기준선 포함)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>매체</th><th class="num">W18 전환</th><th class="num">W19 전환</th><th class="num">W20 전환</th><th class="num">W20 CAC</th><th class="num">전주 CAC</th><th class="num">W18 CAC 대비</th><th>평가</th></tr></thead>
+                            <tbody>
+                                <tr><td>네이버</td><td class="num">47건</td><td class="num" style="color:#e74c3c">27건</td><td class="num" style="color:#d97706"><strong>38건</strong></td><td class="num" style="color:#d97706">₩5,943</td><td class="num">₩8,049</td><td class="num delta-neg">+7.8% ⚠️</td><td>회복 중, 미완</td></tr>
+                                <tr style="background:#f0fdf4"><td>구글</td><td class="num">47건</td><td class="num">69건</td><td class="num" style="color:#059669"><strong>114건</strong></td><td class="num" style="color:#059669">₩2,363</td><td class="num">₩4,164</td><td class="num delta-pos">-49.1% ✓</td><td>3주 연속 개선</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>W20 검색광고 총평 — "구글 3주 연속 개선 확실, 네이버는 W18 기준 미회복"</strong><br><br>
+                            <strong>[구글]</strong> 행사그룹(+30건)과 행사디자인그룹(+12건)에서 확인 가능한 전환 급증. W18→W20 3주 연속 개선(CAC ₩4,645 → ₩2,363). 다만 신규 확장검색 5개의 직접 기여는 검색어 보고서 없이 단정 불가.<br><br>
+                            <strong>[네이버]</strong> W19(27건) 대비 W20(38건) 개선은 실제이나, W18(47건) 기준으로는 여전히 -19% 수준. 자상호명 그룹이 회복을 주도했으나 팝업스토어기획 키워드가 W20에도 0건이어서 완전 회복 미달. 롱테일 38개는 비용 소진 0 · 노출 0 확인 — 품질지수·입찰가 점검 필요.
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #6366f1;">
+                            <strong>🔍 W20 개선이 "W19 반등" vs "실질 성장" — 매체별 판단</strong><br><br>
+                            • <strong>구글</strong>: W18(47건) → W19(69건) → W20(114건) — 3주 연속 상승. W19가 비정상적으로 낮지 않았음. <strong>실질 성장으로 판단 가능</strong><br>
+                            • <strong>네이버</strong>: W18(47건) → W19(27건, -42%) → W20(38건, +41%). W19 급락 후 반등. W20가 W18을 넘지 못함. <strong>W19 기저 효과 포함 — 완전 회복 판단 보류</strong>
+                        </div>
+
+                        <h4 class="weekly-section-subtitle">매체별 즉시 실행 액션</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>매체</th><th>확인 필요 항목</th><th>담당</th><th>시점</th></tr></thead>
+                            <tbody>
+                                <tr><td>구글</td><td>검색어 보고서 — W20 신규 유입 검색어 vs 기존 검색어 비중</td><td>광고 운영</td><td>W21 초</td></tr>
+                                <tr><td>구글</td><td>확장검색 5개 키워드 개별 전환수 확인</td><td>광고 운영</td><td>W21 초</td></tr>
+                                <tr><td>네이버</td><td>"팝업스토어기획" 키워드 W19 급락 원인 (입찰가·품질지수·경쟁)</td><td>광고 운영</td><td>이번 주</td></tr>
+                                <tr><td>네이버</td><td>롱테일 38개 키워드 W21 7일 성과 — 전환 기여 키워드 선별</td><td>광고 운영</td><td>W21 말</td></tr>
+                            </tbody>
+                        </table>
+                        `
+                    },
+
+                    {
+                        title: '3. Meta 광고 — 전환 35→45건(+28.6%) · CAC ₩5,696→₩4,256(-25.3%) · 신규 캠페인(5/07) 주도',
+                        html: `
+                            <h4 class="weekly-section-subtitle">W19 vs W20 주차별 성과 비교</h4>
+                            <table class="weekly-table">
+                                <thead>
+                                    <tr>
+                                        <th>지표</th>
+                                        <th class="num" style="background:#f8f4ff;border-bottom:3px solid #8b5cf6;">W19<br><span style="font-weight:400;font-size:11px;">5/4~5/10</span></th>
+                                        <th class="num" style="background:#f0fdf4;border-bottom:3px solid #059669;">W20<br><span style="font-weight:400;font-size:11px;">5/11~5/17</span></th>
+                                        <th class="num">변화</th>
+                                        <th class="num">W18 (참고)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>노출</td>
+                                        <td class="num" style="background:#faf7ff;">17,065</td>
+                                        <td class="num" style="background:#f0fdf4;"><strong>20,954</strong></td>
+                                        <td class="num delta-pos">+22.8%</td>
+                                        <td class="num">13,324</td></tr>
+                                    <tr><td>클릭</td>
+                                        <td class="num" style="background:#faf7ff;">478</td>
+                                        <td class="num" style="background:#f0fdf4;"><strong>523</strong></td>
+                                        <td class="num delta-pos">+9.4%</td>
+                                        <td class="num">217</td></tr>
+                                    <tr><td>CTR</td>
+                                        <td class="num" style="background:#faf7ff;">2.80%</td>
+                                        <td class="num" style="background:#f0fdf4;">2.50%</td>
+                                        <td class="num delta-neg">-0.30%p</td>
+                                        <td class="num">1.63%</td></tr>
+                                    <tr><td>CPC</td>
+                                        <td class="num" style="background:#faf7ff;">₩417</td>
+                                        <td class="num" style="background:#f0fdf4;"><strong style="color:#059669;">₩366</strong></td>
+                                        <td class="num delta-pos">-12.2%</td>
+                                        <td class="num">₩753</td></tr>
+                                    <tr><td>비용</td>
+                                        <td class="num" style="background:#faf7ff;">₩199,374</td>
+                                        <td class="num" style="background:#f0fdf4;">₩191,537</td>
+                                        <td class="num delta-pos">-3.9%</td>
+                                        <td class="num">₩163,467</td></tr>
+                                    <tr><td>전환</td>
+                                        <td class="num" style="background:#faf7ff;">35건</td>
+                                        <td class="num" style="background:#f0fdf4;"><strong>45건</strong></td>
+                                        <td class="num delta-pos">+28.6%</td>
+                                        <td class="num">20건</td></tr>
+                                    <tr><td>CAC</td>
+                                        <td class="num" style="background:#faf7ff;">₩5,696</td>
+                                        <td class="num" style="background:#f0fdf4;"><strong style="color:#059669;">₩4,256</strong></td>
+                                        <td class="num delta-pos">-25.3%</td>
+                                        <td class="num">₩8,173</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="weekly-section-subtitle">캠페인별 성과 비교 (W19→W20)</h4>
+                            <table class="weekly-table">
+                                <thead>
+                                    <tr><th>캠페인</th>
+                                        <th class="num">W19 전환</th><th class="num">W19 비용</th>
+                                        <th class="num">W20 전환</th><th class="num">W20 비용</th>
+                                        <th class="num">W20 CAC</th><th>상태</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="background:#f0fdf4">
+                                        <td><strong>신규 캠페인 (5/07)</strong></td>
+                                        <td class="num">10건</td><td class="num">₩50,443</td>
+                                        <td class="num"><strong>44건</strong></td><td class="num">₩176,385</td>
+                                        <td class="num" style="color:#059669;">₩4,009</td>
+                                        <td>✅ W20 전환의 98% 주도</td></tr>
+                                    <tr>
+                                        <td>구 캠페인 (4/20)</td>
+                                        <td class="num">25건</td><td class="num">₩148,931</td>
+                                        <td class="num">1건</td><td class="num">₩15,152</td>
+                                        <td class="num" style="color:#e74c3c;">₩15,152</td>
+                                        <td>⚠️ W20 사실상 종료</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="weekly-section-subtitle">페르소나별 성과 분석 (W19→W20)</h4>
+                            <table class="weekly-table">
+                                <thead>
+                                    <tr><th>페르소나</th>
+                                        <th class="num">W19 노출</th><th class="num">W19 전환</th>
+                                        <th class="num">W20 노출</th><th class="num">W20 전환</th>
+                                        <th class="num">W20 CAC</th><th>평가</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Core A (엔터프라이즈)</td>
+                                        <td class="num">5,958</td><td class="num">7건</td>
+                                        <td class="num">8,094</td><td class="num">6건</td>
+                                        <td class="num" style="color:#e74c3c;">₩12,400</td>
+                                        <td>⚠️ 전환 소폭 감소</td></tr>
+                                    <tr style="background:#f0fdf4">
+                                        <td><strong>Core B (글로벌)</strong></td>
+                                        <td class="num">5,484</td><td class="num">12건</td>
+                                        <td class="num">5,462</td><td class="num"><strong>26건</strong></td>
+                                        <td class="num" style="color:#059669;"><strong>₩1,996</strong></td>
+                                        <td>✅ +116.7% 최우수</td></tr>
+                                    <tr><td>Core C (엔터/IP)</td>
+                                        <td class="num">5,623</td><td class="num">16건</td>
+                                        <td class="num">7,398</td><td class="num">13건</td>
+                                        <td class="num" style="color:#e74c3c;">₩5,019</td>
+                                        <td>⚠️ 노출 증가에도 전환 감소</td></tr>
+                                </tbody>
+                            </table>
+
+                            <div class="weekly-summary-card" style="border-left:4px solid #8b5cf6;">
+                                <strong>W20 성과 요약 — 신규 캠페인 전환 ×4.4배, Core B 독주</strong>
+                                <ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;">
+                                    <li>신규 캠페인(5/07) W19 10건 → W20 44건(+340%) · CAC ₩4,009 — 전체 전환의 98% 주도</li>
+                                    <li>Core B(글로벌) 26건/₩1,996 — 동일 노출 대비 전환 +116.7% · 페르소나 중 압도적 최고 효율</li>
+                                    <li>CPC ₩366 역대 최저 · 노출 +22.8% 확대에도 비용 -3.9% 절감</li>
+                                    <li>A2_01 소재 OFF 조치 이후 CPC·CAC 모두 개선 확인</li>
+                                </ul>
+                            </div>
+                        `
+                    },
+
+                    {
+                        title: '4. 광고→웹사이트→리드/딜 퍼널 분석 — 세션 +29.1% · 리드 23건(+155.6%) · 딜 12건',
+                        html: `
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>W20 3단계 퍼널 요약 — 리드 23건(+155.6%)의 실질 동력은 구글 광고(+28건)와 Direct(+8건)</strong><br>
+                            Meta는 상위 퍼널 인지도 기여에 그침. 소개서 다운로드 → 문의 전환율 0.6%로 하단 전환 구조 미완성 확인.
+                        </div>
+
+                        <h4 class="weekly-section-subtitle">① 광고 유입 단계 — 채널별 GA4 주요이벤트 기여 (W19→W20)</h4>
+                        <table class="weekly-table">
+                            <thead>
+                                <tr><th>채널</th><th class="num">W19 세션</th><th class="num">W20 세션</th><th class="num">세션 증감</th><th class="num">W19 GA4전환</th><th class="num">W20 GA4전환</th><th class="num">증분</th><th>CVR</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background:#f0fdf4">
+                                    <td><strong>Google CPC ★</strong></td>
+                                    <td class="num">283</td><td class="num"><strong>374</strong></td><td class="num delta-pos">+32.2%</td>
+                                    <td class="num">9건</td><td class="num"><strong>37건</strong></td>
+                                    <td class="num delta-pos"><strong>+28건 ✓</strong></td>
+                                    <td class="num delta-pos">3.2%→9.9%</td>
+                                </tr>
+                                <tr style="background:#fefce8">
+                                    <td><strong>Direct ★</strong></td>
+                                    <td class="num">308</td><td class="num"><strong>374</strong></td><td class="num delta-pos">+21.4%</td>
+                                    <td class="num">1건</td><td class="num"><strong>9건</strong></td>
+                                    <td class="num delta-pos"><strong>+8건 ✓</strong></td>
+                                    <td class="num delta-pos">0.3%→2.4%</td>
+                                </tr>
+                                <tr>
+                                    <td>검색 오가닉 합산</td>
+                                    <td class="num">348</td><td class="num">527</td><td class="num delta-pos">+51.4%</td>
+                                    <td class="num">5건</td><td class="num">10건</td>
+                                    <td class="num delta-pos">+5건</td>
+                                    <td class="num">1.4%→1.9%</td>
+                                </tr>
+                                <tr>
+                                    <td>Meta 유료 (instagram/da)</td>
+                                    <td class="num">559</td><td class="num">629</td><td class="num delta-pos">+12.5%</td>
+                                    <td class="num">9건</td><td class="num">10건</td>
+                                    <td class="num">+1건</td>
+                                    <td class="num">1.6%→1.6%</td>
+                                </tr>
+                                <tr>
+                                    <td>Naver SA (sa_pc + cpc)</td>
+                                    <td class="num">105</td><td class="num">155</td><td class="num delta-pos">+47.6%</td>
+                                    <td class="num">10건</td><td class="num">9건</td>
+                                    <td class="num delta-neg">-1건</td>
+                                    <td class="num delta-neg">9.5%→5.8%</td>
+                                </tr>
+                                <tr style="background:#f5f5f5;font-weight:bold">
+                                    <td>전체</td>
+                                    <td class="num">1,811</td><td class="num">2,338</td><td class="num delta-pos">+29.1%</td>
+                                    <td class="num">38건</td><td class="num">79건</td>
+                                    <td class="num delta-pos">+41건</td>
+                                    <td class="num delta-pos">2.1%→3.4%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size:12px;color:#888;margin:4px 0 12px;">※ Naver SA: GA4에서 naver/sa_pc·naver/cpc 세션은 UTM 설정으로 추적 중. 단, Naver Ads 전환 38건은 Naver 자체 스크립트 기준(마이크로 전환 복수 카운팅)으로 GA4 주요이벤트(9건)와 집계 방식이 달라 단순 비교 불가.</p>
+
+                        <h4 class="weekly-section-subtitle">② 웹사이트 내 행동 전환 단계 (GA4 이벤트)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>전환 이벤트</th><th class="num">W18</th><th class="num">W19</th><th class="num">W20</th><th class="num">W19→W20</th><th>의미</th></tr></thead>
+                            <tbody>
+                                <tr><td>상담 클릭 (click_contact)</td><td class="num">128</td><td class="num">148</td><td class="num"><strong>222</strong></td><td class="num delta-pos">+50.0%</td><td>상담 페이지 진입 의도</td></tr>
+                                <tr><td>소개서 다운로드 (전체)</td><td class="num">113</td><td class="num">98</td><td class="num"><strong>141</strong></td><td class="num delta-pos">+43.9%</td><td>도입 검토 단계 (글로벌 소개서 W20 신규 5건 포함)</td></tr>
+                                <tr style="background:#f0fdf4"><td><strong>프로젝트 문의 클릭</strong></td><td class="num">31</td><td class="num">21</td><td class="num"><strong>42</strong></td><td class="num delta-pos"><strong>+100.0% ✓</strong></td><td><strong>실 의뢰 의도 — 핵심 전환</strong></td></tr>
+                                <tr><td>프로젝트 뷰</td><td class="num">63</td><td class="num">56</td><td class="num">67</td><td class="num delta-pos">+19.6%</td><td>포트폴리오 탐색</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size:12px;color:#e97316;margin:4px 0 12px;">⚠️ 소개서 다운로드(click_download_intro) → 프로젝트 문의 클릭(click_project_inquiry) 전환율: <strong>1/160 = 0.6%</strong> — 소개서를 받아간 사람 중 실제 문의로 이어진 경우가 극히 드뭄. 다운로드 후 후속 경로(이메일 드립, CTA 강화) 없는 구조적 병목.</p>
+
+                        <h4 class="weekly-section-subtitle">③ 리드·딜 접수 단계 (리캐치 기준)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>구분</th><th class="num">W18</th><th class="num">W19</th><th class="num">W20</th><th class="num">W19→W20</th><th>주요 내용</th></tr></thead>
+                            <tbody>
+                                <tr><td>리드 접수</td><td class="num">15건</td><td class="num" style="color:#e74c3c">9건</td><td class="num" style="color:#059669"><strong>23건</strong></td><td class="num delta-pos">+155.6% ✓</td><td>Google CPC·Direct 주도 (Meta 기여 3건 확인)</td></tr>
+                                <tr><td>딜 접수</td><td class="num">13건</td><td class="num">12건</td><td class="num"><strong>12건</strong></td><td class="num">±0</td><td>KINFOLK, 현대백화점, KT, 아이더, SK엠앤서비스 등</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>✅ 리드 23건(+155.6%) — 실질 기여 채널 Google CPC(+28건 전환이벤트) · Direct(+8건)</strong><br><br>
+                            <strong>채널별 기여 분해:</strong><br>
+                            • <strong>Google CPC +28건</strong>: 전환이벤트 9→37건. 행사그룹 집중 예산 배분 + 저CPC(₩838) 효율이 GA4 전환으로 직결. W20 최대 기여 채널.<br>
+                            • <strong>Direct +8건</strong>: 전환이벤트 1→9건(+800%). 자상호명 검색 후 직접 접속 유입 패턴으로 추정 — 광고 간접 효과가 브랜드 검색/직접 접속으로 이전. CVR 0.3%→2.4% 급등이 이를 반증.<br>
+                            • <strong>Meta +1건</strong>: 전환이벤트 9→10건. GA4 기준 기여 미미. 리캐치 리드 3건은 소개서 다운로드 경로가 아닌 직접 문의 경로로 추정.<br><br>
+                            <strong>3단계 요약:</strong><br>
+                            광고 214건 → GA4 세션 2,338건(+29.1%) → GA4 전환이벤트 79건(CVR 3.4%) → 리캐치 35건(리드 23 + 딜 12)
+                        </div>
+
+                        <div class="weekly-summary-card" style="border-left:4px solid #f59e0b;">
+                            <strong>⚠️ 구조적 병목 2개 — 소개서→문의 전환 · Meta CVR 정체</strong><br><br>
+                            <strong>① 소개서 다운로드 → 문의 CVR 0.6% 병목</strong><br>
+                            소개서 다운로드(141건) 중 문의 클릭(click_project_inquiry)으로 이어진 비율이 1/160 = 0.6%로 극저조. 소개서를 받아간 후 다음 행동을 유도하는 경로(CTA, 팝업, 이메일 시퀀스)가 없는 구조적 문제. 글로벌 소개서 5건 다운로드 후 리드 제출 0건도 같은 맥락.<br><br>
+                            <strong>② Meta 유료 CVR 1.6% 정체</strong><br>
+                            세션 +12.5%(559→629)에도 불구하고 GA4 전환이벤트는 9→10건으로 거의 증가 없음. Meta 유입 후 랜딩 행동이 소개서 다운로드(인지 단계)에 머물고 문의(전환 단계)까지 이어지지 않는 패턴. EN 페이지 세션 +15% 증가는 글로벌 인지도 기여로 긍정적이나 단기 리드 전환 기대는 불가.<br><br>
+                            <strong>딜 12건 주요 기업:</strong> KINFOLK, 유씨오마케팅그룹, 현대백화점, Jiangsupengsheng, 사단법인 도구, 루트원스튜디오, 주식회사 어니스트, 뚝섬침례교회, (주)필블랭크, KT, 아이더, SK엠앤서비스
+                        </div>
+
+                        <div class="weekly-callout">
+                            <div class="weekly-callout-title">📌 W21 액션 포인트</div>
+                            ① <strong>[P0] 소개서 다운로드 후 CTA 강화</strong> — 다운로드 완료 화면에 "프로젝트 문의하기" 버튼 추가 또는 리캐치 팝업 트리거 연결<br>
+                            ② <strong>[P0] 글로벌 소개서 다운로드 5건 → 이메일 후속 시퀀스 검토</strong> — 다운로드 후 7일 이내 뉴스레터 또는 개인화 이메일 발송 구조 구축<br>
+                            ③ <strong>[P1] 딜 12건 미팅·견적 진행 현황 업데이트</strong><br>
+                            ④ <strong>[P1] 자상호명 검색 유입 고객 이전 접점 추적 장치 구축</strong> — Direct +8건 전환이벤트의 사전 매체 경로 UTM 분석
+                        </div>
+                        `
+                    },
+
+                    {
+                        title: '5. 지난주 조정 내역',
+                        html: `
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:8px;">
+                            <div class="weekly-summary-card" style="flex:1; min-width:240px; border-left:4px solid #3b82f6;">
+                                <div style="font-size:13px; font-weight:700; color:#1e40af; margin-bottom:6px;">📌 네이버</div>
+                                CPC 재정비 + 롱테일 38개 키워드 투입 (5/14)
+                            </div>
+                            <div class="weekly-summary-card" style="flex:1; min-width:240px; border-left:4px solid #16a34a;">
+                                <div style="font-size:13px; font-weight:700; color:#15803d; margin-bottom:6px;">📌 구글</div>
+                                제외 키워드 28개 설정 + 확장 검색 유형 신규 키워드 5개 투입
+                            </div>
+                            <div class="weekly-summary-card" style="flex:1; min-width:240px; border-left:4px solid #7c3aed;">
+                                <div style="font-size:13px; font-weight:700; color:#6d28d9; margin-bottom:6px;">📌 Meta</div>
+                                A2_01 소재 저효율 확인 → OFF 조치
+                            </div>
+                        </div>
+                        `
+                    },
+
+                    {
+                        title: '6. 종합 인사이트',
+                        html: `
+                        <div class="weekly-summary-card" style="border-left:4px solid #059669;">
+                            <strong>W20 핵심 요약 — 구글·Meta 신규 캠페인 전략 작동, 네이버 부분 회복</strong><br><br>
+                            총 광고비 ₩692,251(-1.7%), 총 전환 214건(+79.8%). 3매체 모두 CAC 개선. 단, 네이버는 W18 기준 미회복 지속.
+                        </div>
+                        <h4 class="weekly-section-subtitle">매체별 종합 평가</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>매체</th><th class="num">W20 전환</th><th class="num">W20 CAC</th><th class="num">W19 CAC</th><th class="num">W18 CAC</th><th>평가</th></tr></thead>
+                            <tbody>
+                                <tr style="background:#f0fdf4"><td><strong>구글</strong></td><td class="num">131건</td><td class="num" style="color:#059669">₩2,097</td><td class="num">₩3,601</td><td class="num">₩4,645</td><td>✅ 3주 연속 실질 개선</td></tr>
+                                <tr><td>네이버</td><td class="num">38건</td><td class="num" style="color:#d97706">₩5,943</td><td class="num">₩8,049</td><td class="num">₩5,512</td><td>⚠️ W19 반등, W18 미회복</td></tr>
+                                <tr style="background:#f0fdf4"><td><strong>Meta</strong></td><td class="num">45건</td><td class="num" style="color:#059669">₩4,256</td><td class="num">₩5,696</td><td class="num">₩8,173</td><td>✅ 신규 캠페인 전환 +95.7%</td></tr>
+                            </tbody>
+                        </table>
+                        <h4 class="weekly-section-subtitle">퍼널 전체 흐름 (W19 → W20)</h4>
+                        <table class="weekly-table">
+                            <thead><tr><th>단계</th><th class="num">W19</th><th class="num">W20</th><th class="num">증감</th><th>핵심 변화</th></tr></thead>
+                            <tbody>
+                                <tr><td>광고 전환 (매체 합산)</td><td class="num">119건</td><td class="num">214건</td><td class="num delta-pos">+79.8%</td><td>구글 행사그룹, Meta Core B 주도</td></tr>
+                                <tr><td>GA4 세션</td><td class="num">1,811건</td><td class="num">2,338건</td><td class="num delta-pos">+29.1%</td><td>Google CPC +31.3%, 오가닉 +45.3%</td></tr>
+                                <tr><td>GA4 주요이벤트</td><td class="num">38건</td><td class="num">79건</td><td class="num delta-pos">+107.9%</td><td>google/cpc +28건, (direct) +8건 주도</td></tr>
+                                <tr style="background:#f0fdf4"><td><strong>리캐치 리드</strong></td><td class="num">9건</td><td class="num"><strong>23건</strong></td><td class="num delta-pos"><strong>+155.6%</strong></td><td>프로젝트 문의 클릭 증가 반영</td></tr>
+                                <tr><td>리캐치 딜</td><td class="num">12건</td><td class="num">12건</td><td class="num">±0</td><td>KINFOLK, 현대백화점, KT, 아이더, SK엠앤서비스 포함</td></tr>
+                            </tbody>
+                        </table>
+                        <h4 class="weekly-section-subtitle">💡 종합 인사이트</h4>
+                        <div class="weekly-summary-card">
+                            <ul style="margin:0;padding-left:20px;line-height:1.8;">
+                                <li>구글 전환 131건은 매체 내 분수령 — 실 상담 클릭 +262% 동반 상승으로 광고 품질 개선 신호</li>
+                                <li>GA4 주요이벤트 증가(+107.9%)의 주요 드라이버는 google/cpc(+28건)와 (direct)/(none)(+8건) — 브랜드 인지 유입도 동시 증가</li>
+                                <li>소개서 다운로드 → 리드 전환율 0.6%(1/160) — 퍼널 하단 CVR 개선이 다음 우선순위</li>
+                                <li>네이버 CAC W18 대비 미회복 — 롱테일 키워드 효과 W21에서 재확인 필요</li>
+                            </ul>
+                        </div>
+                        `
+                    },
+
+                ]
+            },
+            {
                 id: '2026-W19',
                 weekLabel: 'W19 (5/4~5/10)',
                 meetingDate: '2026-05-12 (화)',
                 periodLabel: '2026-05-04 (월) ~ 2026-05-10 (일)',
                 comparePeriod: '지난 주 W18 (2026-04-27 ~ 2026-05-03)',
-                isLatest: true,
+                isLatest: false,
                 oneLineSummary: '총 광고비 ₩642,470(+0.3%) · 구글 전환 69건(+46.8%) · Meta 잠재고객 복귀 CVR 10.0% · 딜 12건 · 리드 9건 · 네이버 팝업스토어 그룹 성과 이상 확인 필요',
                 kpis: [
                     { label: '총 광고비', value: '₩642,470', delta: '+0.3% vs W18', trend: 'neg' },
