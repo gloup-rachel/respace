@@ -7,324 +7,208 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0F1117;
-  --surface: #181B24;
-  --surface2: #1E2130;
-  --border: #252838;
-  --text-primary: #EDF0FA;
-  --text-secondary: #8B8FA8;
-  --text-muted: #4E5268;
-  --deal: #FF6B6B;
-  --deal-dim: rgba(255,107,107,0.12);
-  --lead: #4ECDC4;
-  --lead-dim: rgba(78,205,196,0.12);
-  --accent: #6C8EFF;
-  --accent-dim: rgba(108,142,255,0.1);
-  --success: #52D68A;
-  --warning: #FFB347;
-  --meta-color: #0866FF;
-  --naver-color: #03C75A;
-  --google-color: #EA4335;
-  --etc-color: #8B8FA8;
+  --bg:#0F1117; --surface:#181B24; --surface2:#1E2130; --border:#252838;
+  --text-primary:#EDF0FA; --text-secondary:#8B8FA8; --text-muted:#4E5268;
+  --deal:#FF6B6B; --deal-dim:rgba(255,107,107,.12);
+  --lead:#4ECDC4; --lead-dim:rgba(78,205,196,.12);
+  --accent:#6C8EFF; --accent-dim:rgba(108,142,255,.1);
+  --success:#52D68A; --warning:#FFB347;
+  --meta:#0866FF; --naver:#03C75A; --google:#EA4335; --etc:#8B8FA8;
 }
+body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background:var(--bg); color:var(--text-primary); min-height:100vh; font-size:14px; line-height:1.5; }
 
-body {
-  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text-primary);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
-}
+/* HEADER */
+.header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo { font-size:17px; font-weight:800; letter-spacing:3px; }
+.logo em { color:var(--accent); font-style:normal; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.pill { background:var(--surface2); border:1px solid var(--border); padding:5px 12px; border-radius:20px; font-size:12px; color:var(--text-secondary); display:flex; align-items:center; gap:6px; }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--text-muted); flex-shrink:0; transition:background .3s; }
+.status-dot.live { background:var(--success); box-shadow:0 0 6px var(--success); }
+.status-dot.loading { background:var(--warning); animation:pulse 1s infinite; }
+.status-dot.error { background:var(--deal); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
 
-/* ── HEADER ── */
-.header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+.btn { padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:opacity .15s; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { opacity:.82; }
+.btn-ghost { background:var(--surface2); border:1px solid var(--border); color:var(--text-secondary); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
 
-.logo { font-size: 17px; font-weight: 800; letter-spacing: 3px; }
-.logo em { color: var(--accent); font-style: normal; }
+/* MAIN */
+.main { max-width:1440px; margin:0 auto; padding:28px 32px 60px; display:flex; flex-direction:column; gap:24px; }
+.sec-label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:14px; }
 
-.header-right { display: flex; align-items: center; gap: 10px; }
+/* ERROR BANNER */
+.error-banner { background:rgba(255,107,107,.08); border:1px solid var(--deal); border-radius:10px; padding:14px 18px; }
+.error-banner summary { cursor:pointer; font-size:13px; color:var(--deal); font-weight:600; }
+.error-banner details[open] summary { margin-bottom:10px; }
+.error-list { font-size:11px; color:var(--text-secondary); line-height:1.8; padding-left:4px; }
 
-.status-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted);
-  display: inline-block; margin-right: 6px;
-  transition: background .3s;
-}
-.status-dot.live { background: var(--success); box-shadow: 0 0 6px var(--success); }
-.status-dot.loading { background: var(--warning); animation: pulse 1s infinite; }
-.status-dot.error { background: var(--deal); }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+/* HIST */
+.hist-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.hist-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; position:relative; overflow:hidden; }
+.hist-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.hist-card.m1::before { background:linear-gradient(90deg,#6C8EFF,#4ECDC4); }
+.hist-card.m2::before { background:linear-gradient(90deg,#4ECDC4,#52D68A); }
+.hist-card.avg::before { background:linear-gradient(90deg,#FFB347,#FF6B6B); }
+.hist-month { font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.hist-kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.hist-kpi { text-align:center; background:var(--surface2); border-radius:8px; padding:10px 6px; }
+.hist-kpi-val { font-size:24px; font-weight:700; line-height:1; margin-bottom:2px; }
+.hist-kpi-val.deal { color:var(--deal); }
+.hist-kpi-val.lead { color:var(--lead); }
+.hist-kpi-lbl { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+.evt-section { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin:10px 0 6px; display:flex; align-items:center; gap:6px; }
+.ch-bars { display:flex; flex-direction:column; gap:6px; }
+.ch-bar-row { display:flex; align-items:center; gap:7px; }
+.ch-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.ch-bar-label { font-size:10px; color:var(--text-secondary); width:38px; flex-shrink:0; }
+.ch-bar-track { flex:1; background:var(--border); border-radius:3px; height:5px; overflow:hidden; }
+.ch-bar-fill { height:100%; border-radius:3px; transition:width .7s; }
+.ch-bar-val { font-size:11px; color:var(--text-primary); font-weight:600; width:24px; text-align:right; flex-shrink:0; }
+.indirect-row { display:flex; gap:7px; margin-top:10px; }
+.indirect-box { flex:1; background:var(--surface2); border-radius:7px; padding:7px 9px; text-align:center; }
+.indirect-val { font-size:17px; font-weight:700; margin-bottom:1px; }
+.indirect-lbl { font-size:8px; color:var(--text-muted); line-height:1.3; }
+.hist-spend { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.hist-spend-lbl { font-size:11px; color:var(--text-muted); }
+.hist-spend-val { font-size:13px; font-weight:600; color:var(--text-secondary); }
 
-.pill {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  padding: 5px 12px; border-radius: 20px;
-  font-size: 12px; color: var(--text-secondary);
-  display: flex; align-items: center;
-}
+/* SIM */
+.sim-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; }
+.sim-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+.sim-scenarios { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.scen-btn { padding:7px 13px; border-radius:20px; font-size:12px; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--text-secondary); transition:all .15s; }
+.scen-btn.on { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); font-weight:600; }
+.goal-inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.goal-fg label { font-size:11px; color:var(--text-secondary); font-weight:500; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+.goal-fg input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; color:var(--text-primary); font-size:18px; font-weight:700; outline:none; text-align:center; transition:border-color .15s; }
+.goal-fg input:focus { border-color:var(--accent); }
+.sim-preview { background:var(--surface2); border-radius:10px; padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.sim-prev-item { text-align:center; }
+.sim-prev-val { font-size:20px; font-weight:700; margin-bottom:2px; }
+.sim-prev-lbl { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.section-header .sec-label { margin-bottom:0; }
 
-.btn {
-  padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
-  cursor: pointer; border: none; transition: opacity .15s;
-}
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { opacity: .82; }
-.btn-ghost {
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text-secondary);
-}
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+/* KPI CARDS */
+.kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+.kcard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 16px 14px; position:relative; overflow:hidden; }
+.kcard::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; }
+.kcard.deal::after { background:var(--deal); }
+.kcard.lead::after { background:var(--lead); }
+.kcard.pace::after { background:var(--accent); }
+.kcard-lbl { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.kcard-val { font-size:28px; font-weight:700; line-height:1; margin-bottom:5px; }
+.kcard.deal .kcard-val { color:var(--deal); }
+.kcard.lead .kcard-val { color:var(--lead); }
+.kcard.pace .kcard-val { color:var(--accent); }
+.kcard-sub { font-size:11px; color:var(--text-muted); line-height:1.4; }
+.kcard-sub .hi { color:var(--text-secondary); font-weight:600; }
+.kbar { height:3px; background:var(--border); border-radius:2px; margin-top:10px; overflow:hidden; }
+.kbar-fill { height:100%; border-radius:2px; transition:width .7s cubic-bezier(.4,0,.2,1); }
+.deal .kbar-fill { background:var(--deal); }
+.lead .kbar-fill { background:var(--lead); }
+.no-goal-banner { background:var(--surface2); border:1px dashed var(--border); border-radius:10px; padding:14px 18px; text-align:center; color:var(--text-muted); font-size:13px; }
 
-/* ── MAIN ── */
-.main { max-width: 1440px; margin: 0 auto; padding: 28px 32px 60px; display: flex; flex-direction: column; gap: 24px; }
+/* PACING */
+.pacing-bar { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 22px; display:grid; grid-template-columns:1fr 1fr; gap:0; }
+.pace-item { display:flex; align-items:center; gap:12px; padding:0 8px; }
+.pace-item:first-child { padding-left:0; padding-right:22px; border-right:1px solid var(--border); }
+.pace-item:last-child { padding-left:22px; }
+.pace-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.pace-icon.deal { background:var(--deal-dim); }
+.pace-icon.lead { background:var(--lead-dim); }
+.pace-main { font-size:13px; margin-bottom:2px; }
+.pace-main strong { font-weight:700; }
+.pace-sub { font-size:11px; color:var(--text-muted); }
+.pace-sub .ok { color:var(--success); font-weight:600; }
+.pace-sub .warn { color:var(--warning); font-weight:600; }
 
-.sec-label {
-  font-size: 11px; font-weight: 700; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px;
-}
+/* CHANNEL */
+.two-col { display:grid; grid-template-columns:5fr 4fr; gap:16px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.ch-badge { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 9px; border-radius:12px; }
+.ch-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.ch-badge.meta   { background:rgba(8,102,255,.1);  color:var(--meta); }
+.ch-badge.naver  { background:rgba(3,199,90,.1);   color:var(--naver); }
+.ch-badge.google { background:rgba(234,67,53,.1);  color:var(--google); }
+.ch-badge.etc    { background:rgba(139,143,168,.1);color:var(--etc); }
+.ch-table { width:100%; border-collapse:collapse; margin-top:10px; }
+.ch-table th { font-size:9px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; padding:0 8px 8px; border-bottom:1px solid var(--border); text-align:right; }
+.ch-table th:first-child { text-align:left; }
+.ch-table td { padding:9px 8px; font-size:12px; border-bottom:1px solid var(--border); text-align:right; }
+.ch-table tr:last-child td { border-bottom:none; }
+.ch-table td:first-child { text-align:left; }
+.ch-table .total-row td { font-weight:700; border-top:1px solid #3A3D55; border-bottom:none; padding-top:10px; }
+.ch-table .etc-row td { cursor:pointer; }
+.ch-table .etc-row:hover td { background:rgba(255,255,255,.02); }
+.etc-toggle-icon { font-size:10px; color:var(--text-muted); margin-left:4px; }
+.etc-detail-row { display:none; }
+.etc-detail-row.open { display:table-row; }
+.etc-detail-row td { background:rgba(139,143,168,.04); border-bottom:1px solid var(--border); }
+.etc-detail-inner { padding:10px 12px; }
+.etc-sub-list { display:flex; flex-direction:column; gap:5px; }
+.etc-sub-item { display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:3px 6px; border-radius:5px; background:var(--surface2); }
+.etc-sub-src { color:var(--text-secondary); }
+.etc-sub-cnt { color:var(--lead); font-weight:600; font-size:12px; }
+.v-deal { color:var(--deal); font-weight:600; }
+.v-lead { color:var(--lead); font-weight:600; }
+.v-muted { color:var(--text-muted); }
+.v-accent { color:var(--accent); font-weight:500; }
+.v-warn { color:var(--warning); }
 
-/* ── HISTORICAL SECTION ── */
-.hist-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px;
-}
+/* FUNNEL */
+.funnel-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px 22px 42px; }
+.funnel-wrap { display:flex; align-items:center; margin-top:14px; }
+.funnel-step { flex:1; position:relative; }
+.funnel-block { height:74px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:filter .2s; cursor:default; }
+.funnel-block:hover { filter:brightness(1.15); }
+.funnel-num { font-size:19px; font-weight:700; color:#fff; }
+.funnel-name { font-size:10px; color:rgba(255,255,255,.7); margin-top:1px; }
+.funnel-rate { position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); font-size:10px; color:var(--text-muted); white-space:nowrap; text-align:center; }
 
-.hist-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  padding: 20px;
-  position: relative; overflow: hidden;
-}
-.hist-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-}
-.hist-card.apr::before { background: linear-gradient(90deg, #6C8EFF, #4ECDC4); }
-.hist-card.may::before { background: linear-gradient(90deg, #4ECDC4, #52D68A); }
-.hist-card.avg::before { background: linear-gradient(90deg, #FFB347, #FF6B6B); }
+/* CHART */
+.chart-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; }
+.toggle-bar { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.toggle-bar button { padding:6px 16px; background:transparent; border:none; color:var(--text-secondary); font-size:12px; cursor:pointer; transition:all .15s; }
+.toggle-bar button.on { background:var(--accent); color:#fff; font-weight:600; }
 
-.hist-month { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+/* MODAL */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); display:flex; align-items:center; justify-content:center; z-index:200; opacity:0; pointer-events:none; transition:opacity .2s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:30px; width:460px; transform:translateY(20px); transition:transform .2s; }
+.overlay.open .modal { transform:translateY(0); }
+.modal-title { font-size:18px; font-weight:700; margin-bottom:4px; }
+.modal-desc { font-size:12px; color:var(--text-muted); margin-bottom:22px; }
+.modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.mfg label { font-size:11px; color:var(--text-secondary); font-weight:500; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+.mfg input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; color:var(--text-primary); font-size:14px; outline:none; transition:border-color .15s; }
+.mfg input:focus { border-color:var(--accent); }
+.modal-btns { display:flex; gap:8px; justify-content:flex-end; margin-top:22px; }
+.btn-cancel { padding:9px 20px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text-secondary); font-size:13px; cursor:pointer; }
+.btn-save { padding:9px 22px; background:var(--accent); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
 
-.hist-kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+/* LOADING */
+.loading-overlay { position:fixed; inset:0; background:rgba(15,17,23,.9); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:300; transition:opacity .3s; }
+.loading-overlay.hidden { opacity:0; pointer-events:none; }
+.loading-spinner { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; margin-bottom:12px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loading-text { font-size:13px; color:var(--text-secondary); }
 
-.hist-kpi { text-align: center; background: var(--surface2); border-radius: 8px; padding: 12px 8px; }
-.hist-kpi-val { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
-.hist-kpi-val.deal { color: var(--deal); }
-.hist-kpi-val.lead { color: var(--lead); }
-.hist-kpi-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-.ch-bars { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
-.ch-bar-row { display: flex; align-items: center; gap: 8px; }
-.ch-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.ch-bar-label { font-size: 11px; color: var(--text-secondary); width: 44px; flex-shrink: 0; }
-.ch-bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 5px; overflow: hidden; }
-.ch-bar-fill { height: 100%; border-radius: 3px; transition: width .7s; }
-.ch-bar-val { font-size: 11px; color: var(--text-primary); font-weight: 600; width: 28px; text-align: right; flex-shrink: 0; }
-
-.hist-spend {
-  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-}
-.hist-spend-lbl { font-size: 11px; color: var(--text-muted); }
-.hist-spend-val { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-
-/* ── SIMULATION ── */
-.sim-wrap {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  padding: 24px;
-}
-
-.sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-
-.sim-scenarios { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.scen-btn {
-  padding: 7px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface2); color: var(--text-secondary);
-  transition: all .15s;
-}
-.scen-btn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-
-.goal-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.goal-fg label { font-size: 11px; color: var(--text-secondary); font-weight: 500; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
-.goal-fg input {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 14px; color: var(--text-primary); font-size: 18px; font-weight: 700;
-  outline: none; text-align: center; transition: border-color .15s;
-}
-.goal-fg input:focus { border-color: var(--accent); }
-
-.sim-preview {
-  background: var(--surface2); border-radius: 10px; padding: 16px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-}
-.sim-prev-item { text-align: center; }
-.sim-prev-val { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
-.sim-prev-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* ── KPI CARDS ── */
-.kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-
-.kcard {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  padding: 18px 18px 14px; position: relative; overflow: hidden;
-}
-.kcard::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 12px 12px 0 0;
-}
-.kcard.deal::after { background: var(--deal); }
-.kcard.lead::after { background: var(--lead); }
-.kcard.pace::after { background: var(--accent); }
-
-.kcard-lbl { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.kcard-val { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 5px; }
-.kcard.deal .kcard-val { color: var(--deal); }
-.kcard.lead .kcard-val { color: var(--lead); }
-.kcard.pace .kcard-val { color: var(--accent); }
-.kcard-sub { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-.kcard-sub .hi { color: var(--text-secondary); font-weight: 600; }
-.kbar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; }
-.kbar-fill { height: 100%; border-radius: 2px; transition: width .7s cubic-bezier(.4,0,.2,1); }
-.deal .kbar-fill { background: var(--deal); }
-.lead .kbar-fill { background: var(--lead); }
-
-/* ── CHANNEL TABLE ── */
-.two-col { display: grid; grid-template-columns: 5fr 4fr; gap: 16px; }
-
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
-
-.ch-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.ch-table th {
-  font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;
-  letter-spacing: 0.5px; padding: 0 10px 10px; border-bottom: 1px solid var(--border); text-align: right;
-}
-.ch-table th:first-child { text-align: left; }
-.ch-table td { padding: 10px; font-size: 13px; border-bottom: 1px solid var(--border); text-align: right; }
-.ch-table tr:last-child td { border-bottom: none; }
-.ch-table td:first-child { text-align: left; }
-.ch-table .total-row td { font-weight: 700; color: var(--text-primary); border-top: 1px solid #3A3D55; border-bottom: none; }
-
-.ch-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px;
-}
-.ch-badge.meta   { background: rgba(8,102,255,.12); color: var(--meta-color); }
-.ch-badge.naver  { background: rgba(3,199,90,.12);  color: var(--naver-color); }
-.ch-badge.google { background: rgba(234,67,53,.12); color: var(--google-color); }
-.ch-badge.etc    { background: rgba(139,143,168,.1);color: var(--etc-color); }
-.ch-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-.v-deal { color: var(--deal); font-weight: 600; }
-.v-lead { color: var(--lead); font-weight: 600; }
-.v-muted { color: var(--text-muted); }
-.v-accent { color: var(--accent); font-weight: 500; }
-
-/* ── PACING ── */
-.pacing-bar {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  padding: 16px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-}
-.pace-item { display: flex; align-items: center; gap: 14px; padding: 0 8px; }
-.pace-item:first-child { padding-left: 0; padding-right: 24px; border-right: 1px solid var(--border); }
-.pace-item:last-child { padding-left: 24px; }
-.pace-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-.pace-icon.deal { background: var(--deal-dim); }
-.pace-icon.lead { background: var(--lead-dim); }
-.pace-main { font-size: 13px; margin-bottom: 2px; }
-.pace-main strong { font-weight: 700; }
-.pace-sub { font-size: 11px; color: var(--text-muted); }
-.pace-sub .ok { color: var(--success); font-weight: 600; }
-.pace-sub .warn { color: var(--warning); font-weight: 600; }
-
-/* ── FUNNEL ── */
-.funnel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 22px 44px; }
-.funnel-wrap { display: flex; align-items: center; margin-top: 14px; }
-.funnel-step { flex: 1; position: relative; }
-.funnel-block {
-  height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: filter .2s; cursor: default;
-}
-.funnel-block:hover { filter: brightness(1.15); }
-.funnel-step:nth-child(1) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); }
-.funnel-step:nth-child(2) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%); }
-.funnel-step:nth-child(3) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%); }
-.funnel-step:nth-child(4) .funnel-block { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%); }
-.funnel-num { font-size: 20px; font-weight: 700; color: #fff; }
-.funnel-name { font-size: 10px; color: rgba(255,255,255,.7); margin-top: 1px; }
-.funnel-rate { position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-muted); white-space: nowrap; text-align: center; }
-
-/* ── CHART ── */
-.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
-
-/* ── MODAL ── */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .2s; }
-.overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 32px; width: 480px; transform: translateY(20px); transition: transform .2s; }
-.overlay.open .modal { transform: translateY(0); }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-.modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
-.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
-.btn-cancel { padding: 9px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; }
-.btn-save { padding: 9px 22px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
-
-/* ── SECTION HEADER ── */
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.section-header .sec-label { margin-bottom: 0; }
-
-/* ── NO GOAL BANNER ── */
-.no-goal-banner {
-  background: var(--surface2); border: 1px dashed var(--border); border-radius: 10px;
-  padding: 16px 20px; text-align: center; color: var(--text-muted); font-size: 13px;
-}
-.no-goal-banner strong { color: var(--text-secondary); }
-
-/* ── LOADING ── */
-.loading-overlay {
-  position: fixed; inset: 0; background: rgba(15,17,23,.9);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 300; transition: opacity .3s;
-}
-.loading-overlay.hidden { opacity: 0; pointer-events: none; }
-.loading-spinner {
-  width: 36px; height: 36px; border: 3px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite;
-  margin-bottom: 14px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 13px; color: var(--text-secondary); }
-
-@media (max-width: 1100px) {
-  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-  .hist-grid { grid-template-columns: 1fr 1fr; }
-  .two-col { grid-template-columns: 1fr; }
-}
-@media (max-width: 700px) {
-  .main { padding: 16px; }
-  .kpi-grid { grid-template-columns: 1fr 1fr; }
-  .hist-grid { grid-template-columns: 1fr; }
-  .sim-row { grid-template-columns: 1fr; }
-}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.hist-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:700px){.main{padding:16px}.kpi-grid{grid-template-columns:1fr 1fr}.hist-grid{grid-template-columns:1fr}.sim-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loading-text">데이터 로딩 중...</div>
 </div>
 
-<!-- HEADER -->
 <div class="header">
   <div style="display:flex;align-items:center;gap:14px">
     <div class="logo">RESPACE <em>KPI</em></div>
@@ -334,61 +218,57 @@ body {
     </div>
   </div>
   <div class="header-right">
+    <div class="pill" id="period-label">—</div>
     <div class="pill" id="last-update">업데이트: —</div>
     <button class="btn btn-ghost" onclick="loadData()">↻ 새로고침</button>
-    <button class="btn btn-primary" onclick="openGoalModal()">🎯 6월 목표 설정</button>
+    <button class="btn btn-primary" onclick="openGoalModal()">🎯 목표 설정</button>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- ① 4-5월 실적 요약 -->
+  <!-- 에러 배너 -->
+  <div id="error-banner" style="display:none"></div>
+
+  <!-- ① 과거 2개월 실적 -->
   <div>
-    <div class="sec-label">📊 4-5월 실적 요약 (목표 설정 기준)</div>
-    <div class="hist-grid" id="hist-grid">
-      <!-- 동적 렌더링 -->
-    </div>
+    <div class="sec-label" id="hist-label">📊 과거 2개월 실적 요약</div>
+    <div class="hist-grid" id="hist-grid"></div>
   </div>
 
-  <!-- ② 6월 목표 설정 시뮬레이션 -->
+  <!-- ② 목표 시뮬레이션 -->
   <div class="sim-wrap">
     <div class="section-header">
-      <div class="sec-label" style="margin-bottom:0">🔮 6월 목표 시뮬레이션</div>
-      <div style="font-size:12px;color:var(--text-muted)">4-5월 평균 기반으로 시나리오를 선택하거나 직접 입력하세요</div>
+      <div class="sec-label" style="margin-bottom:0" id="sim-label">🔮 이번달 목표 시뮬레이션</div>
+      <div style="font-size:11px;color:var(--text-muted)">과거 2개월 평균 기반 — 시나리오 선택 후 저장</div>
     </div>
     <div class="sim-row">
       <div>
         <div class="sim-scenarios" id="sim-scenarios"></div>
         <div class="goal-inputs">
-          <div class="goal-fg">
-            <label>딜 목표 (상담문의)</label>
-            <input type="number" id="goal-deal" placeholder="건" min="0">
-          </div>
-          <div class="goal-fg">
-            <label>리드 목표 (소개서)</label>
-            <input type="number" id="goal-lead" placeholder="건" min="0">
-          </div>
+          <div class="goal-fg"><label>딜 목표 (상담문의)</label><input type="number" id="goal-deal" placeholder="건" min="0"></div>
+          <div class="goal-fg"><label>리드 목표 (소개서)</label><input type="number" id="goal-lead" placeholder="건" min="0"></div>
         </div>
-        <div style="margin-top:14px;display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveGoal()">✓ 이 목표로 6월 트래킹 시작</button>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="saveGoal()">✓ 이 목표로 트래킹 시작</button>
           <button class="btn btn-ghost" onclick="resetGoal()">초기화</button>
         </div>
       </div>
       <div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">시나리오 예상 결과</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">시나리오 예상 결과</div>
         <div class="sim-preview" id="sim-preview"></div>
       </div>
     </div>
   </div>
 
-  <!-- ③ 6월 KPI 현황 -->
+  <!-- ③ 이번달 KPI -->
   <div>
     <div class="section-header">
-      <div class="sec-label">🎯 6월 KPI 트래킹 현황</div>
+      <div class="sec-label" id="kpi-label">🎯 이번달 KPI 트래킹</div>
       <div id="goal-badge" style="font-size:12px;color:var(--text-muted)"></div>
     </div>
     <div id="no-goal-msg" class="no-goal-banner" style="display:none">
-      <strong>아직 6월 목표가 설정되지 않았습니다.</strong><br>위 시뮬레이션에서 목표를 설정하면 달성률과 페이싱이 자동으로 계산됩니다.
+      목표가 아직 설정되지 않았습니다. 위 시뮬레이션에서 목표를 설정하면 달성률이 활성화됩니다.
     </div>
     <div class="kpi-grid" id="kpi-grid"></div>
   </div>
@@ -398,32 +278,34 @@ body {
 
   <!-- ⑤ 채널별 기여도 -->
   <div>
-    <div class="sec-label">📡 채널별 전환 기여도 (6월 · GA4 이벤트 기준)</div>
+    <div class="sec-label">📡 채널별 전환 기여도 (이번달 · GA4 이벤트 기준)</div>
     <div class="two-col">
+      <div class="card"><canvas id="ch-chart" height="220"></canvas></div>
       <div class="card">
-        <canvas id="ch-chart" height="220"></canvas>
-      </div>
-      <div class="card">
-        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">채널별 상세 (6월)</div>
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">채널별 상세</div>
         <table class="ch-table" id="ch-table"></table>
-        <div style="margin-top:10px;font-size:10px;color:var(--text-muted)">* 채널별 기여도는 GA4 전환이벤트 소스/매체 기준. 리드: click_project_inquiry + click_download_intro | 딜: complete_project_inquiry</div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">
+          리드↓: click_project_inquiry + click_download_intro &nbsp;|&nbsp;
+          딜✓: complete_project_inquiry &nbsp;|&nbsp;
+          etc 행 클릭 → 소스 상세 보기
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ⑥ 퍼널 -->
   <div class="funnel-card">
-    <div class="sec-label">⬇ 전환 퍼널 (6월)</div>
+    <div class="sec-label">⬇ 전환 퍼널 (이번달)</div>
     <div class="funnel-wrap" id="funnel-wrap"></div>
   </div>
 
-  <!-- ⑦ 누적 추이 차트 -->
+  <!-- ⑦ 누적 추이 -->
   <div class="chart-card">
     <div class="section-header" style="margin-bottom:16px">
-      <div class="sec-label" style="margin-bottom:0">📈 딜·리드 누적 추이 (6월)</div>
-      <div class="toggle" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <button class="toggle-btn on" onclick="switchChart('deal',this)" style="padding:6px 16px;background:var(--accent);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer">딜</button>
-        <button class="toggle-btn" onclick="switchChart('lead',this)" style="padding:6px 16px;background:transparent;border:none;color:var(--text-secondary);font-size:12px;cursor:pointer">리드</button>
+      <div class="sec-label" style="margin-bottom:0">📈 딜·리드 누적 추이 (이번달)</div>
+      <div class="toggle-bar">
+        <button class="on" onclick="switchChart('deal',this)">딜</button>
+        <button onclick="switchChart('lead',this)">리드</button>
       </div>
     </div>
     <canvas id="trend-chart" height="240"></canvas>
@@ -431,20 +313,14 @@ body {
 
 </div>
 
-<!-- 목표 설정 MODAL -->
-<div class="overlay" id="goal-modal" onclick="handleOverlayClick(event)">
+<!-- MODAL -->
+<div class="overlay" id="goal-modal" onclick="if(event.target===this)closeGoalModal()">
   <div class="modal">
-    <div class="modal-title">🎯 6월 목표 설정</div>
-    <div class="modal-desc">목표를 저장하면 KPI 트래킹과 달성률 계산이 활성화됩니다.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="goal-fg">
-        <label style="font-size:11px;color:var(--text-secondary);font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">딜 목표 (상담 문의)</label>
-        <input type="number" id="modal-deal" placeholder="예: 10" min="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text-primary);font-size:14px;outline:none">
-      </div>
-      <div class="goal-fg">
-        <label style="font-size:11px;color:var(--text-secondary);font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">리드 목표 (소개서 다운)</label>
-        <input type="number" id="modal-lead" placeholder="예: 60" min="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text-primary);font-size:14px;outline:none">
-      </div>
+    <div class="modal-title">🎯 목표 설정</div>
+    <div class="modal-desc" id="modal-desc">이번달 목표를 저장하면 KPI 트래킹이 활성화됩니다.</div>
+    <div class="modal-grid">
+      <div class="mfg"><label>딜 목표 (상담 문의)</label><input type="number" id="modal-deal" placeholder="예: 10" min="0"></div>
+      <div class="mfg"><label>리드 목표 (소개서 다운)</label><input type="number" id="modal-lead" placeholder="예: 60" min="0"></div>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeGoalModal()">취소</button>
@@ -454,9 +330,9 @@ body {
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 const SHEET_ID = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
 const SHEETS = {
   naver:   '네이버 검색광고',
@@ -468,67 +344,115 @@ const SHEETS = {
   ga4Conv: 'GA4 전환이벤트'
 };
 
-// GA4 이벤트 → KPI 매핑
 const GA4_EVENTS = {
-  // 직접 리드 전환
-  LEAD: ['click_project_inquiry', 'click_download_intro'],
-  // 직접 딜 전환
-  DEAL: ['complete_project_inquiry'],
-  // 간접 딜 기여 (문의 시도)
+  LEAD:          ['click_project_inquiry', 'click_download_intro'],
+  DEAL:          ['complete_project_inquiry'],
   INDIRECT_DEAL: ['click_contact'],
-  // 간접 리드 기여 (프로젝트 보기)
   INDIRECT_LEAD: ['click_project_view']
 };
 
-const CHANNELS = {
+const CH_CFG = {
   meta:   { label: 'Meta (인스타)',  color: '#0866FF', badgeCls: 'meta' },
   naver:  { label: '네이버',         color: '#03C75A', badgeCls: 'naver' },
   google: { label: '구글',           color: '#EA4335', badgeCls: 'google' },
-  etc:    { label: 'etc (오가닉 등)', color: '#8B8FA8', badgeCls: 'etc' }
+  etc:    { label: 'etc (기타)',      color: '#8B8FA8', badgeCls: 'etc' }
 };
 
-// GA4 소스/매체/캠페인 → 세부 채널 분류 (기존 대시보드 로직 동일)
-function classifyGA4Channel(source, medium, campaign) {
-  const s = (source   || '').toLowerCase();
-  const m = (medium   || '').toLowerCase();
-  const c = (campaign || '').toLowerCase();
-  if (s.includes('naver') && (m === 'cpc' || m === 'paidsearch')) return 'naver';
-  if (s.includes('google') && (m === 'cpc' || m === 'paidsearch')) return 'google';
-  if (s.includes('facebook') || s.includes('instagram') || s.includes('meta') ||
-      m === 'paid_social' || m === 'display') return 'meta';
-  // etc = 자연검색, 직접유입, 레퍼럴, 기타 통합
-  return 'etc';
+const MONTH_NAMES = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+// ═══════════════════════════════════════════════════════════
+// 동적 월 계산 (하드코딩 제거)
+// ═══════════════════════════════════════════════════════════
+function getMonthRange() {
+  const now = new Date();
+  function ymOf(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function offset(ym, delta) {
+    const [y, m] = ym.split('-').map(Number);
+    const d = new Date(y, m - 1 + delta, 1);
+    return ymOf(d);
+  }
+  const cur = ymOf(now);
+  return { cur, prev1: offset(cur, -1), prev2: offset(cur, -2) };
 }
 
-// 이벤트 타입 분류
-function getEventType(eventName) {
-  if (GA4_EVENTS.LEAD.includes(eventName))          return 'lead';
-  if (GA4_EVENTS.DEAL.includes(eventName))          return 'deal';
-  if (GA4_EVENTS.INDIRECT_DEAL.includes(eventName)) return 'indirectDeal';
-  if (GA4_EVENTS.INDIRECT_LEAD.includes(eventName)) return 'indirectLead';
-  return null;
+function ymLabel(ym) {
+  const [, m] = ym.split('-').map(Number);
+  return MONTH_NAMES[m - 1];
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════════
-let rawData  = {};
-let monthly  = {}; // { '2026-04': {...}, '2026-05': {...}, '2026-06': {...} }
-let goal     = { deal: 0, lead: 0 };
-let chartMode = 'deal';
-let trendChart = null, chChart = null;
+// ═══════════════════════════════════════════════════════════
+let rawData     = {};
+let monthly     = {};
+let MR          = getMonthRange();  // { cur, prev1, prev2 }
+let goal        = { deal: 0, lead: 0 };
+let chartMode   = 'deal';
+let trendChart  = null, chChart = null;
+let etcOpen     = false;
+let fetchErrors = [];
 
-// LocalStorage 목표 복원
+// localStorage: 키에 현재 월 포함 → 월 변경 시 자동으로 새 목표
+function goalKey() { return `respace_kpi_goal_${MR.cur}`; }
+
 (function restoreGoal() {
   try {
-    const s = localStorage.getItem('respace_kpi_goal_2026_06');
+    const s = localStorage.getItem(goalKey());
     if (s) { const g = JSON.parse(s); goal.deal = g.deal || 0; goal.lead = g.lead || 0; }
   } catch(e) {}
 })();
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const safeNum  = v => (isNaN(v) || v == null) ? 0 : Number(v);
+const safePct  = (a, b) => b > 0 ? Math.round((safeNum(a) / safeNum(b)) * 100) : 0;
+const safeRound= v => Math.round(safeNum(v));
+
+function moneyStr(n) {
+  n = safeNum(n);
+  if (n === 0) return '<span class="v-muted">—</span>';
+  if (n >= 10000000) return `${(n/10000000).toFixed(1)}천만`;
+  if (n >= 1000000)  return `${(n/10000).toFixed(0)}만원`;
+  if (n >= 1000)     return `${Math.round(n/1000)}천원`;
+  return `${n.toLocaleString('ko-KR')}원`;
+}
+
+function cplStr(spend, cnt) {
+  spend = safeNum(spend); cnt = safeNum(cnt);
+  if (!spend || !cnt) return '<span class="v-muted">—</span>';
+  const v = Math.round(spend / cnt);
+  return `<span class="v-accent">${v >= 10000 ? (v/10000).toFixed(1)+'만원' : v.toLocaleString('ko-KR')+'원'}</span>`;
+}
+
+function shareStr(v, tot) {
+  v = safeNum(v); tot = safeNum(tot);
+  return tot > 0 ? `${Math.round((v/tot)*100)}%` : '—';
+}
+
+function classifyGA4Ch(source, medium, campaign) {
+  const s = (source   || '').toLowerCase();
+  const m = (medium   || '').toLowerCase();
+  if (s.includes('naver') && (m === 'cpc' || m === 'paidsearch' || m.includes('cpc'))) return 'naver';
+  if (s.includes('google') && (m === 'cpc' || m === 'paidsearch' || m.includes('cpc'))) return 'google';
+  if (s.includes('facebook') || s.includes('instagram') || s.includes('meta') ||
+      m === 'paid_social' || m === 'display' || m === 'paidsocial') return 'meta';
+  return 'etc';
+}
+
+function getEventType(name) {
+  if (GA4_EVENTS.LEAD.includes(name))          return 'lead';
+  if (GA4_EVENTS.DEAL.includes(name))          return 'deal';
+  if (GA4_EVENTS.INDIRECT_DEAL.includes(name)) return 'indirectDeal';
+  if (GA4_EVENTS.INDIRECT_LEAD.includes(name)) return 'indirectLead';
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════
 // DATE HELPERS
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function parseDate(v) {
   if (!v) return null;
   const gviz = String(v).match(/Date\((\d+),(\d+),(\d+)/);
@@ -538,37 +462,25 @@ function parseDate(v) {
   const d = new Date(v); return isNaN(d.getTime()) ? null : d;
 }
 
-function getMonthKey(v) {
+function getYM(v) {
   const d = parseDate(v); if (!d) return null;
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
-function getDayOfMonth(v) {
-  const d = parseDate(v); return d ? d.getDate() : null;
-}
-
-function todayMonthKey() {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
-}
-
-function daysInMonth(ym) {
-  const [y, m] = ym.split('-').map(Number);
-  return new Date(y, m, 0).getDate();
-}
-
+function getDay(v) { const d = parseDate(v); return d ? d.getDate() : null; }
 function todayDay() { return new Date().getDate(); }
+function daysInMonth(ym) { const [y,m]=ym.split('-').map(Number); return new Date(y,m,0).getDate(); }
 
-// ═══════════════════════════════════════════════════════════════════
-// FETCH
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// FETCH — 개별 실패 허용 (Promise.allSettled)
+// ═══════════════════════════════════════════════════════════
 async function fetchSheet(name) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&tq=${encodeURIComponent('SELECT *')}`;
   const res  = await fetch(url);
   const text = await res.text();
   const m    = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
-  if (!m) throw new Error(`파싱 실패: ${name}`);
-  const tbl  = JSON.parse(m[1]).table;
+  if (!m) throw new Error(`응답 파싱 실패 (시트명 확인 필요)`);
+  const tbl = JSON.parse(m[1]).table;
   if (!tbl || !tbl.rows) return [];
   return tbl.rows.map(row => {
     const obj = {};
@@ -578,131 +490,173 @@ async function fetchSheet(name) {
 }
 
 async function loadData() {
+  fetchErrors = [];
   setStatus('loading', '데이터 로딩 중');
   document.getElementById('loading-overlay').classList.remove('hidden');
   document.getElementById('loading-text').textContent = '구글 시트에서 데이터 로딩 중...';
+  document.getElementById('error-banner').style.display = 'none';
+
+  // MR 재계산 (월이 바뀐 경우 대비)
+  MR = getMonthRange();
+
+  const sheetKeys = Object.keys(SHEETS);
+  const results = await Promise.allSettled(sheetKeys.map(k => fetchSheet(SHEETS[k])));
+
+  rawData = {};
+  results.forEach((res, i) => {
+    const key = sheetKeys[i];
+    if (res.status === 'fulfilled') {
+      rawData[key] = res.value;
+    } else {
+      rawData[key] = [];
+      fetchErrors.push({ sheet: SHEETS[key], key, error: res.reason?.message || '알 수 없는 오류' });
+      console.warn(`[KPI] 시트 로드 실패: ${SHEETS[key]}`, res.reason);
+    }
+  });
+
+  if (fetchErrors.length > 0) {
+    showErrorBanner(fetchErrors);
+    // 부분 성공 시에도 렌더링 시도
+    if (fetchErrors.length < sheetKeys.length) {
+      setStatus('loading', `일부 로드 (${sheetKeys.length - fetchErrors.length}/${sheetKeys.length})`);
+    } else {
+      setStatus('error', '전체 로드 실패 — 시트 접근 권한 확인');
+      document.getElementById('loading-overlay').classList.add('hidden');
+      return;
+    }
+  }
 
   try {
-    const [naverRows, googleRows, metaRows, leadsRows, dealsRows, ga4Rows, ga4ConvRows] = await Promise.all([
-      fetchSheet(SHEETS.naver),
-      fetchSheet(SHEETS.google),
-      fetchSheet(SHEETS.meta),
-      fetchSheet(SHEETS.leads),
-      fetchSheet(SHEETS.deals),
-      fetchSheet(SHEETS.ga4),
-      fetchSheet(SHEETS.ga4Conv)
-    ]);
-    rawData = { naver: naverRows, google: googleRows, meta: metaRows, leads: leadsRows, deals: dealsRows, ga4: ga4Rows, ga4Conv: ga4ConvRows };
     aggregateMonthly();
     render();
-    setStatus('live', '실시간 데이터');
-    document.getElementById('last-update').textContent = `업데이트: ${new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'})}`;
+    if (fetchErrors.length === 0) {
+      setStatus('live', '실시간 데이터');
+    }
+    document.getElementById('last-update').textContent = `업데이트: ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`;
   } catch(err) {
-    console.error(err);
-    setStatus('error', '로드 실패 — 재시도 필요');
-  } finally {
-    document.getElementById('loading-overlay').classList.add('hidden');
+    console.error('[KPI] 렌더링 오류:', err);
+    setStatus('error', `렌더링 오류: ${err.message}`);
+  }
+
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+function showErrorBanner(errors) {
+  const b = document.getElementById('error-banner');
+  b.style.display = 'block';
+  b.innerHTML = `
+    <details class="error-banner">
+      <summary>⚠️ ${errors.length}개 시트 로드 실패 — 클릭하여 상세 확인</summary>
+      <div class="error-list">
+        ${errors.map(e => `• <strong>${e.sheet}</strong>: ${e.error}`).join('<br>')}
+        <br><br>
+        <span style="color:var(--text-muted)">
+          가능한 원인: ① 시트명 불일치 ② 스프레드시트 공개 설정 미적용 ③ 네트워크 오류<br>
+          해결: 스프레드시트 → 공유 → "링크 있는 모든 사용자" 뷰어 권한 확인
+        </span>
+      </div>
+    </details>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// AGGREGATION
+// ═══════════════════════════════════════════════════════════
+function makeCh() {
+  return { total:0, meta:0, naver:0, google:0, etc:0,
+           etcSources:{} }; // etc 상세: { "organic/organic":5, ... }
+}
+
+function addToCh(chObj, ch, cnt, srcKey) {
+  chObj.total += cnt;
+  chObj[ch]   += cnt;
+  if (ch === 'etc' && srcKey) {
+    chObj.etcSources[srcKey] = (chObj.etcSources[srcKey] || 0) + cnt;
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// AGGREGATION
-// ═══════════════════════════════════════════════════════════════════
-function makeCh() { return { total: 0, meta: 0, naver: 0, google: 0, etc: 0 }; }
+function avgCh(a, b) {
+  const mergeEtc = {};
+  const allKeys = new Set([...Object.keys(a.etcSources||{}), ...Object.keys(b.etcSources||{})]);
+  allKeys.forEach(k => { mergeEtc[k] = Math.round(((a.etcSources[k]||0) + (b.etcSources[k]||0)) / 2); });
+  return {
+    total:      safeRound((safeNum(a.total)  + safeNum(b.total))  / 2),
+    meta:       safeRound((safeNum(a.meta)   + safeNum(b.meta))   / 2),
+    naver:      safeRound((safeNum(a.naver)  + safeNum(b.naver))  / 2),
+    google:     safeRound((safeNum(a.google) + safeNum(b.google)) / 2),
+    etc:        safeRound((safeNum(a.etc)    + safeNum(b.etc))    / 2),
+    etcSources: mergeEtc
+  };
+}
 
 function aggregateMonthly() {
-  const months = ['2026-04', '2026-05', '2026-06'];
+  const months = [MR.prev2, MR.prev1, MR.cur];
   monthly = {};
 
   months.forEach(ym => {
     monthly[ym] = {
-      // ── 리캐치 기준 총량 (primary KPI)
-      leads: 0,          // 리캐치_리드 총계
-      deals: 0,          // 리캐치_딜 총계
-
-      // ── GA4 이벤트 기준 채널별 기여도
-      ga4Lead:         makeCh(), // click_project_inquiry + click_download_intro (직접 리드)
-      ga4Deal:         makeCh(), // complete_project_inquiry (직접 딜)
-      ga4IndirectDeal: makeCh(), // click_contact (간접 딜 기여)
-      ga4IndirectLead: makeCh(), // click_project_view (간접 리드 기여)
-
-      // ── 광고비 / 세션
-      spend:    { meta: 0, naver: 0, google: 0 },
-      sessions: 0,
-
-      // ── 6월 일별 누적 (트렌드 차트용)
-      dealsByDay: {},
-      leadsByDay: {}
+      leads:0, deals:0,
+      ga4Lead:         makeCh(),
+      ga4Deal:         makeCh(),
+      ga4IndirectDeal: makeCh(),
+      ga4IndirectLead: makeCh(),
+      spend: { meta:0, naver:0, google:0 },
+      sessions:0,
+      dealsByDay:{}, leadsByDay:{}
     };
   });
 
-  // ① 리캐치_리드 (총량만 집계 — 채널은 GA4로 대체)
-  rawData.leads.forEach(row => {
-    const ym = getMonthKey(row['생성일']);
-    if (!monthly[ym]) return;
+  // 리캐치_리드
+  (rawData.leads||[]).forEach(row => {
+    const ym = getYM(row['생성일']); if (!monthly[ym]) return;
     monthly[ym].leads++;
-    if (ym === '2026-06') {
-      const d = getDayOfMonth(row['생성일']);
-      if (d) monthly[ym].leadsByDay[d] = (monthly[ym].leadsByDay[d] || 0) + 1;
+    if (ym === MR.cur) {
+      const d = getDay(row['생성일']);
+      if (d) monthly[ym].leadsByDay[d] = (monthly[ym].leadsByDay[d]||0)+1;
     }
   });
 
-  // ② 리캐치_딜 (총량만 집계 — 채널은 GA4로 대체)
-  rawData.deals.forEach(row => {
-    const ym = getMonthKey(row['폼 제출 일자']);
-    if (!monthly[ym]) return;
+  // 리캐치_딜
+  (rawData.deals||[]).forEach(row => {
+    const ym = getYM(row['폼 제출 일자']); if (!monthly[ym]) return;
     monthly[ym].deals++;
-    if (ym === '2026-06') {
-      const d = getDayOfMonth(row['폼 제출 일자']);
-      if (d) monthly[ym].dealsByDay[d] = (monthly[ym].dealsByDay[d] || 0) + 1;
+    if (ym === MR.cur) {
+      const d = getDay(row['폼 제출 일자']);
+      if (d) monthly[ym].dealsByDay[d] = (monthly[ym].dealsByDay[d]||0)+1;
     }
   });
 
-  // ③ GA4 전환이벤트 — 채널별 기여도 집계
-  (rawData.ga4Conv || []).forEach(row => {
-    const ym = getMonthKey(row['날짜']);
-    if (!monthly[ym]) return;
-    const ch   = classifyGA4Channel(row['소스'], row['매체'], row['캠페인']);
-    const etype = getEventType(row['이벤트명']);
-    if (!etype) return;
-    const cnt = Number(row['이벤트 횟수']) || 0;
-
-    const key = {
-      lead:         'ga4Lead',
-      deal:         'ga4Deal',
-      indirectDeal: 'ga4IndirectDeal',
-      indirectLead: 'ga4IndirectLead'
-    }[etype];
-
-    monthly[ym][key].total += cnt;
-    monthly[ym][key][ch]   += cnt;
+  // GA4 전환이벤트
+  (rawData.ga4Conv||[]).forEach(row => {
+    const ym = getYM(row['날짜']); if (!monthly[ym]) return;
+    const ch   = classifyGA4Ch(row['소스'], row['매체'], row['캠페인']);
+    const type = getEventType(String(row['이벤트명']||''));
+    if (!type) return;
+    const cnt  = safeNum(row['이벤트 횟수']);
+    const key  = { lead:'ga4Lead', deal:'ga4Deal', indirectDeal:'ga4IndirectDeal', indirectLead:'ga4IndirectLead' }[type];
+    // etc 소스 키 = "소스/매체"
+    const srcKey = ch === 'etc'
+      ? `${(row['소스']||'(none)')}/${(row['매체']||'(none)')}`
+      : null;
+    addToCh(monthly[ym][key], ch, cnt, srcKey);
   });
 
-  // ④ 광고비 집계
-  rawData.naver.forEach(row => {
-    const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.naver += (Number(row['비용']) || 0);
-  });
-  rawData.google.forEach(row => {
-    const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.google += (Number(row['비용']) || 0);
-  });
-  rawData.meta.forEach(row => {
-    const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.meta += (Number(row['비용']) || 0);
-  });
+  // 광고비
+  (rawData.naver ||[]).forEach(row => { const ym=getYM(row['날짜']); if(monthly[ym]) monthly[ym].spend.naver +=safeNum(row['비용']); });
+  (rawData.google||[]).forEach(row => { const ym=getYM(row['날짜']); if(monthly[ym]) monthly[ym].spend.google+=safeNum(row['비용']); });
+  (rawData.meta  ||[]).forEach(row => { const ym=getYM(row['날짜']); if(monthly[ym]) monthly[ym].spend.meta  +=safeNum(row['비용']); });
 
-  // ⑤ GA4 세션
-  (rawData.ga4 || []).forEach(row => {
-    const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].sessions += (Number(row['세션수'] || row['세션'] || row['sessions']) || 0);
+  // GA4 세션
+  (rawData.ga4||[]).forEach(row => {
+    const ym=getYM(row['날짜']); if(!monthly[ym]) return;
+    monthly[ym].sessions += safeNum(row['세션수']||row['세션']||row['sessions']);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER MASTER
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
 function render() {
+  updatePeriodLabels();
   renderHistorical();
   renderSimulation();
   renderKPI();
@@ -713,424 +667,347 @@ function render() {
   updateGoalBadge();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 1. HISTORICAL (4-5월)
-// ═══════════════════════════════════════════════════════════════════
-function renderHistorical() {
-  const apr = monthly['2026-04'];
-  const may = monthly['2026-05'];
+function updatePeriodLabels() {
+  document.getElementById('period-label').textContent = `${ymLabel(MR.cur)} KPI`;
+  document.getElementById('kpi-label').textContent    = `🎯 ${ymLabel(MR.cur)} KPI 트래킹`;
+  document.getElementById('sim-label').textContent    = `🔮 ${ymLabel(MR.cur)} 목표 시뮬레이션`;
+  document.getElementById('hist-label').textContent   = `📊 ${ymLabel(MR.prev2)} · ${ymLabel(MR.prev1)} 실적 요약`;
+  document.getElementById('modal-desc').textContent   = `${ymLabel(MR.cur)} 목표를 저장하면 KPI 트래킹이 활성화됩니다.`;
+}
 
-  // 월 평균 계산 (GA4 기반 채널 포함)
-  function avgCh(aprC, mayC) {
-    return {
-      total:  Math.round((aprC.total  + mayC.total)  / 2),
-      meta:   Math.round((aprC.meta   + mayC.meta)   / 2),
-      naver:  Math.round((aprC.naver  + mayC.naver)  / 2),
-      google: Math.round((aprC.google + mayC.google) / 2),
-      etc:    Math.round((aprC.etc    + mayC.etc)    / 2),
-    };
+// ── 히스토리컬 카드
+function renderHistorical() {
+  const m1 = monthly[MR.prev2] || {};
+  const m2 = monthly[MR.prev1] || {};
+
+  function safeAvgCh(a, b) {
+    return avgCh(a || makeCh(), b || makeCh());
   }
 
   const avg = {
-    leads:          Math.round((apr.leads + may.leads) / 2),
-    deals:          Math.round((apr.deals + may.deals) / 2),
-    ga4Lead:         avgCh(apr.ga4Lead,         may.ga4Lead),
-    ga4Deal:         avgCh(apr.ga4Deal,         may.ga4Deal),
-    ga4IndirectDeal: avgCh(apr.ga4IndirectDeal, may.ga4IndirectDeal),
-    ga4IndirectLead: avgCh(apr.ga4IndirectLead, may.ga4IndirectLead),
+    leads:          safeRound((safeNum(m1.leads) + safeNum(m2.leads)) / 2),
+    deals:          safeRound((safeNum(m1.deals) + safeNum(m2.deals)) / 2),
+    ga4Lead:         safeAvgCh(m1.ga4Lead,         m2.ga4Lead),
+    ga4Deal:         safeAvgCh(m1.ga4Deal,         m2.ga4Deal),
+    ga4IndirectDeal: safeAvgCh(m1.ga4IndirectDeal, m2.ga4IndirectDeal),
+    ga4IndirectLead: safeAvgCh(m1.ga4IndirectLead, m2.ga4IndirectLead),
     spend: {
-      meta:   Math.round((apr.spend.meta   + may.spend.meta)   / 2),
-      naver:  Math.round((apr.spend.naver  + may.spend.naver)  / 2),
-      google: Math.round((apr.spend.google + may.spend.google) / 2),
+      meta:   safeRound((safeNum(m1.spend?.meta)   + safeNum(m2.spend?.meta))   / 2),
+      naver:  safeRound((safeNum(m1.spend?.naver)  + safeNum(m2.spend?.naver))  / 2),
+      google: safeRound((safeNum(m1.spend?.google) + safeNum(m2.spend?.google)) / 2),
     }
   };
   window._histAvg = avg;
 
-  const months = [
-    { label: '4월 실적', cls: 'apr', data: apr },
-    { label: '5월 실적', cls: 'may', data: may },
-    { label: '월 평균',  cls: 'avg', data: avg }
+  const cards = [
+    { label: ymLabel(MR.prev2)+' 실적', cls:'m1', data:m1 },
+    { label: ymLabel(MR.prev1)+' 실적', cls:'m2', data:m2 },
+    { label: '2개월 평균',              cls:'avg', data:avg }
   ];
 
-  // GA4 채널바 헬퍼
-  function chBars(metricObj, colorAlpha) {
-    const max = Math.max(metricObj.meta, metricObj.naver, metricObj.google, metricObj.etc, 1);
+  function chBars(chObj) {
+    chObj = chObj || makeCh();
+    const max = Math.max(safeNum(chObj.meta), safeNum(chObj.naver), safeNum(chObj.google), safeNum(chObj.etc), 1);
     return ['meta','naver','google','etc'].map(ch => {
-      const val = metricObj[ch] || 0;
-      const pct = Math.round((val / max) * 100);
-      return `
-        <div class="ch-bar-row">
-          <span class="ch-dot" style="background:${CHANNELS[ch].color}"></span>
-          <span class="ch-bar-label" style="font-size:10px;width:36px">${CHANNELS[ch].label.split('(')[0].trim().split(' ')[0]}</span>
-          <div class="ch-bar-track"><div class="ch-bar-fill" style="width:${pct}%;background:${CHANNELS[ch].color + (colorAlpha||'CC')}"></div></div>
-          <span class="ch-bar-val">${val}</span>
-        </div>`;
+      const val = safeNum(chObj[ch]);
+      const pct = Math.round((val/max)*100);
+      return `<div class="ch-bar-row">
+        <span class="ch-dot" style="background:${CH_CFG[ch].color}"></span>
+        <span class="ch-bar-label">${CH_CFG[ch].label.split(' ')[0].split('(')[0].trim()}</span>
+        <div class="ch-bar-track"><div class="ch-bar-fill" style="width:${pct}%;background:${CH_CFG[ch].color}"></div></div>
+        <span class="ch-bar-val">${val}</span>
+      </div>`;
     }).join('');
   }
 
-  document.getElementById('hist-grid').innerHTML = months.map(m => {
-    const d = m.data;
-    const totalSpend = (d.spend.meta || 0) + (d.spend.naver || 0) + (d.spend.google || 0);
-    const spendStr = totalSpend > 0 ? `₩${Math.round(totalSpend/10000).toLocaleString('ko-KR')}만` : '—';
-
-    // 리캐치 기준 총량 vs GA4 이벤트 기준 차이 노트
-    const leadTotal  = d.leads ?? 0;
-    const dealTotal  = d.deals ?? 0;
-    const ga4LeadTot = d.ga4Lead?.total  ?? 0;
-    const ga4DealTot = d.ga4Deal?.total  ?? 0;
-    const indDeal    = d.ga4IndirectDeal?.total ?? 0;
-    const indLead    = d.ga4IndirectLead?.total ?? 0;
-
+  document.getElementById('hist-grid').innerHTML = cards.map(c => {
+    const d = c.data || {};
+    const sp = d.spend || {meta:0,naver:0,google:0};
+    const totalSpend = safeNum(sp.meta) + safeNum(sp.naver) + safeNum(sp.google);
     return `
-      <div class="hist-card ${m.cls}">
-        <div class="hist-month">${m.label}</div>
-
-        <!-- Primary KPI (리캐치 기준) -->
-        <div class="hist-kpi-row">
-          <div class="hist-kpi">
-            <div class="hist-kpi-val deal">${dealTotal}</div>
-            <div class="hist-kpi-lbl">딜 (리캐치)</div>
-          </div>
-          <div class="hist-kpi">
-            <div class="hist-kpi-val lead">${leadTotal}</div>
-            <div class="hist-kpi-lbl">리드 (리캐치)</div>
-          </div>
+    <div class="hist-card ${c.cls}">
+      <div class="hist-month">${c.label}</div>
+      <div class="hist-kpi-row">
+        <div class="hist-kpi">
+          <div class="hist-kpi-val deal">${safeNum(d.deals)}</div>
+          <div class="hist-kpi-lbl">딜 (리캐치)</div>
         </div>
-
-        <!-- GA4 직접 리드 채널별 -->
-        <div style="font-size:10px;font-weight:700;color:var(--lead);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;display:flex;align-items:center;gap:6px">
-          <span>▶ 리드 채널별</span>
-          <span style="color:var(--text-muted);font-weight:400">(GA4 · ${ga4LeadTot}건)</span>
-        </div>
-        <div class="ch-bars">${chBars(d.ga4Lead ?? makeCh())}</div>
-
-        <!-- GA4 직접 딜 채널별 -->
-        <div style="font-size:10px;font-weight:700;color:var(--deal);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;display:flex;align-items:center;gap:6px">
-          <span>▶ 딜 채널별</span>
-          <span style="color:var(--text-muted);font-weight:400">(GA4 · ${ga4DealTot}건)</span>
-        </div>
-        <div class="ch-bars">${chBars(d.ga4Deal ?? makeCh(), 'AA')}</div>
-
-        <!-- 간접 전환 기여 -->
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">간접 전환 기여</div>
-          <div style="display:flex;gap:8px">
-            <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:var(--warning)">${indDeal}</div>
-              <div style="font-size:9px;color:var(--text-muted);margin-top:2px">문의 시도<br>(click_contact)</div>
-            </div>
-            <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:var(--accent)">${indLead}</div>
-              <div style="font-size:9px;color:var(--text-muted);margin-top:2px">프로젝트 보기<br>(click_project_view)</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hist-spend">
-          <span class="hist-spend-lbl">총 광고비</span>
-          <span class="hist-spend-val">${spendStr}</span>
+        <div class="hist-kpi">
+          <div class="hist-kpi-val lead">${safeNum(d.leads)}</div>
+          <div class="hist-kpi-lbl">리드 (리캐치)</div>
         </div>
       </div>
-    `;
+      <div class="evt-section" style="color:var(--lead)">▶ 리드 채널별 <span style="color:var(--text-muted);font-weight:400">(GA4 ${safeNum(d.ga4Lead?.total)}건)</span></div>
+      <div class="ch-bars">${chBars(d.ga4Lead)}</div>
+      <div class="evt-section" style="color:var(--deal);margin-top:9px">▶ 딜 채널별 <span style="color:var(--text-muted);font-weight:400">(GA4 ${safeNum(d.ga4Deal?.total)}건)</span></div>
+      <div class="ch-bars">${chBars(d.ga4Deal)}</div>
+      <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
+        <div style="font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">간접 전환 기여</div>
+        <div class="indirect-row">
+          <div class="indirect-box">
+            <div class="indirect-val" style="color:var(--warning)">${safeNum(d.ga4IndirectDeal?.total)}</div>
+            <div class="indirect-lbl">문의 시도<br>click_contact</div>
+          </div>
+          <div class="indirect-box">
+            <div class="indirect-val" style="color:var(--accent)">${safeNum(d.ga4IndirectLead?.total)}</div>
+            <div class="indirect-lbl">프로젝트 보기<br>click_project_view</div>
+          </div>
+        </div>
+      </div>
+      <div class="hist-spend">
+        <span class="hist-spend-lbl">총 광고비</span>
+        <span class="hist-spend-val">${totalSpend > 0 ? '₩'+Math.round(totalSpend/10000).toLocaleString('ko-KR')+'만' : '—'}</span>
+      </div>
+    </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 2. SIMULATION
-// ═══════════════════════════════════════════════════════════════════
-const SIM_SCENARIOS = [
-  { id: 'maintain', label: '현 페이스 유지',   dealMult: 1.0, leadMult: 1.0 },
-  { id: 'grow10',   label: '+10% 성장',        dealMult: 1.1, leadMult: 1.1 },
-  { id: 'grow20',   label: '+20% 성장',        dealMult: 1.2, leadMult: 1.2 },
-  { id: 'grow30',   label: '+30% 성장 (도전)', dealMult: 1.3, leadMult: 1.3 },
+// ── 시뮬레이션
+const SCENARIOS = [
+  { id:'keep',  label:'현 페이스 유지', dm:1.0, lm:1.0 },
+  { id:'g10',   label:'+10% 성장',     dm:1.1, lm:1.1 },
+  { id:'g20',   label:'+20% 성장',     dm:1.2, lm:1.2 },
+  { id:'g30',   label:'+30% (도전)',   dm:1.3, lm:1.3 },
 ];
-
-let activeScenario = 'maintain';
+let activeScenario = 'keep';
 
 function renderSimulation() {
-  const avg = window._histAvg;
-  if (!avg) return;
-
-  document.getElementById('sim-scenarios').innerHTML = SIM_SCENARIOS.map(s => `
-    <button class="scen-btn ${s.id === activeScenario ? 'on' : ''}"
-            onclick="selectScenario('${s.id}')">${s.label}</button>
-  `).join('');
-
+  document.getElementById('sim-scenarios').innerHTML = SCENARIOS.map(s =>
+    `<button class="scen-btn ${s.id===activeScenario?'on':''}" onclick="selectScenario('${s.id}')">${s.label}</button>`
+  ).join('');
   applyScenario(activeScenario);
 }
 
 function selectScenario(id) {
   activeScenario = id;
-  document.querySelectorAll('.scen-btn').forEach(b => {
-    b.classList.toggle('on', b.textContent.trim() === SIM_SCENARIOS.find(s => s.id === id)?.label);
-  });
+  document.querySelectorAll('.scen-btn').forEach(b =>
+    b.classList.toggle('on', b.textContent === SCENARIOS.find(s=>s.id===id)?.label)
+  );
   applyScenario(id);
 }
 
 function applyScenario(id) {
   const avg = window._histAvg; if (!avg) return;
-  const s = SIM_SCENARIOS.find(x => x.id === id) || SIM_SCENARIOS[0];
-  const tDeal = Math.ceil(avg.deals * s.dealMult);
-  const tLead = Math.ceil(avg.leads * s.leadMult);
+  const s = SCENARIOS.find(x => x.id === id) || SCENARIOS[0];
+  const tDeal = Math.ceil(safeNum(avg.deals) * s.dm);
+  const tLead = Math.ceil(safeNum(avg.leads) * s.lm);
 
   document.getElementById('goal-deal').value = tDeal;
   document.getElementById('goal-lead').value = tLead;
 
-  const jun = monthly['2026-06'];
-  const elapsed = todayDay();
-  const total   = daysInMonth('2026-06');
+  const cur = monthly[MR.cur] || {};
+  const elapsed = todayDay(), total = daysInMonth(MR.cur);
+  const dealRate = elapsed > 0 ? safeNum(cur.deals) / elapsed : 0;
+  const leadRate = elapsed > 0 ? safeNum(cur.leads) / elapsed : 0;
+  const dealProj = safeRound(dealRate * total);
+  const leadProj = safeRound(leadRate * total);
+  const dg = dealProj - tDeal, lg = leadProj - tLead;
 
-  const dealRate = elapsed > 0 ? jun.deals / elapsed : 0;
-  const leadRate = elapsed > 0 ? jun.leads.total / elapsed : 0;
-  const dealProj = Math.round(dealRate * total);
-  const leadProj = Math.round(leadRate * total);
-
-  const dealGap = dealProj - tDeal;
-  const leadGap = leadProj - tLead;
-
-  function gapCls(gap) { return gap >= 0 ? '#52D68A' : '#FF6B6B'; }
-  function gapStr(gap) { return gap >= 0 ? `+${gap}건 초과달성 예상` : `${gap}건 부족 예상`; }
+  function gapHtml(gap) {
+    const c = gap >= 0 ? 'var(--success)' : 'var(--deal)';
+    const t = gap >= 0 ? `+${gap}건 초과달성 예상` : `${gap}건 부족 예상`;
+    return `<span style="color:${c};font-size:12px">${t}</span>`;
+  }
 
   document.getElementById('sim-preview').innerHTML = `
     <div class="sim-prev-item">
-      <div class="sim-prev-val" style="color:var(--deal)">${tDeal}건</div>
+      <div class="sim-prev-val" style="color:var(--deal)">${tDeal}</div>
       <div class="sim-prev-lbl">딜 목표</div>
     </div>
     <div class="sim-prev-item">
-      <div class="sim-prev-val" style="color:var(--lead)">${tLead}건</div>
+      <div class="sim-prev-val" style="color:var(--lead)">${tLead}</div>
       <div class="sim-prev-lbl">리드 목표</div>
     </div>
-    <div class="sim-prev-item" style="grid-column:1/-1">
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">현재 6월 페이스 기준</div>
-      <div style="display:flex;gap:24px;justify-content:center">
-        <span style="font-size:13px;color:${gapCls(dealGap)}">딜: ${gapStr(dealGap)}</span>
-        <span style="font-size:13px;color:${gapCls(leadGap)}">리드: ${gapStr(leadGap)}</span>
-      </div>
-    </div>
-  `;
+    <div style="grid-column:1/-1;text-align:center;padding-top:4px">
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">이번달 현재 페이스 기준</div>
+      <div style="display:flex;gap:20px;justify-content:center">${gapHtml(dg)} ${gapHtml(lg)}</div>
+    </div>`;
 }
 
 function saveGoal() {
-  const d = parseInt(document.getElementById('goal-deal').value) || 0;
-  const l = parseInt(document.getElementById('goal-lead').value) || 0;
-  goal.deal = d; goal.lead = l;
-  try { localStorage.setItem('respace_kpi_goal_2026_06', JSON.stringify({ deal: d, lead: l })); } catch(e) {}
+  goal.deal = safeNum(parseInt(document.getElementById('goal-deal').value));
+  goal.lead = safeNum(parseInt(document.getElementById('goal-lead').value));
+  try { localStorage.setItem(goalKey(), JSON.stringify({deal:goal.deal,lead:goal.lead})); } catch(e){}
   render();
-  showToast('6월 목표 저장 완료! 🎯');
+  showToast(`${ymLabel(MR.cur)} 목표 저장 완료! 🎯`);
 }
-
 function resetGoal() {
   goal.deal = 0; goal.lead = 0;
-  try { localStorage.removeItem('respace_kpi_goal_2026_06'); } catch(e) {}
+  try { localStorage.removeItem(goalKey()); } catch(e){}
   render();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 3. KPI CARDS
-// ═══════════════════════════════════════════════════════════════════
+// ── KPI 카드
 function renderKPI() {
-  const jun = monthly['2026-06'];
-  if (!jun) return;
+  const cur = monthly[MR.cur]; if (!cur) return;
+  const hasGoal = goal.deal > 0 || goal.lead > 0;
+  document.getElementById('no-goal-msg').style.display = hasGoal ? 'none' : 'block';
 
-  const goalSet = g => g > 0;
-  const pct     = (a, b) => b > 0 ? Math.round((a / b) * 100) : 0;
-  const elapsed = todayDay();
-  const total   = daysInMonth('2026-06');
-  const remaining = total - elapsed;
+  const elapsed = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const dealAct = safeNum(cur.deals), leadAct = safeNum(cur.leads);
 
-  function calcPace(actual, g) {
-    const rate = elapsed > 0 ? actual / elapsed : 0;
-    const proj = Math.round(rate * total);
-    const needed = g > 0 && g > actual && remaining > 0 ? Math.ceil((g - actual) / remaining) : 0;
-    return { proj, needed, rate };
+  function pace(actual, g) {
+    const rate = elapsed > 0 ? actual/elapsed : 0;
+    const proj = safeRound(rate * total);
+    const need = g>0 && g>actual && rem>0 ? Math.ceil((g-actual)/rem) : 0;
+    return { proj, need, rate };
   }
 
-  const dealAct = jun.deals;
-  const leadAct = jun.leads.total;
-  const dp = calcPace(dealAct, goal.deal);
-  const lp = calcPace(leadAct, goal.lead);
+  const dp = pace(dealAct, goal.deal), lp = pace(leadAct, goal.lead);
 
   const cards = [
-    {
-      cls: 'deal', label: '딜 달성 (상담문의)', val: dealAct, unit: '건',
-      sub: goalSet(goal.deal) ? `목표 <span class="hi">${goal.deal}건</span>` : '목표 미설정',
-      prog: goalSet(goal.deal) ? Math.min(100, pct(dealAct, goal.deal)) : null
-    },
-    {
-      cls: 'deal', label: '딜 달성률', val: goalSet(goal.deal) ? pct(dealAct, goal.deal)+'%' : '—', unit: '',
-      sub: goalSet(goal.deal) ? `${dealAct}건 / ${goal.deal}건 목표` : '목표 설정 후 활성화'
-    },
-    {
-      cls: 'pace', label: '딜 페이스 예측', val: dp.proj, unit: '건',
-      sub: dp.needed > 0 ? `잔여 ${remaining}일 · 일 <span class="hi">${dp.needed}건</span> 필요` :
-           goalSet(goal.deal) ? '목표 달성 페이스 ✓' : `현재 일평균 ${dp.rate.toFixed(1)}건`
-    },
-    {
-      cls: 'lead', label: '리드 달성 (소개서)', val: leadAct, unit: '건',
-      sub: goalSet(goal.lead) ? `목표 <span class="hi">${goal.lead}건</span>` : '목표 미설정',
-      prog: goalSet(goal.lead) ? Math.min(100, pct(leadAct, goal.lead)) : null
-    },
-    {
-      cls: 'lead', label: '리드 달성률', val: goalSet(goal.lead) ? pct(leadAct, goal.lead)+'%' : '—', unit: '',
-      sub: goalSet(goal.lead) ? `${leadAct}건 / ${goal.lead}건 목표` : '목표 설정 후 활성화'
-    },
-    {
-      cls: 'pace', label: '리드 페이스 예측', val: lp.proj, unit: '건',
-      sub: lp.needed > 0 ? `잔여 ${remaining}일 · 일 <span class="hi">${lp.needed}건</span> 필요` :
-           goalSet(goal.lead) ? '목표 달성 페이스 ✓' : `현재 일평균 ${lp.rate.toFixed(1)}건`
-    },
+    { cls:'deal', label:'딜 달성 (상담문의)', val:dealAct, unit:'건',
+      sub: goal.deal>0 ? `목표 <span class="hi">${goal.deal}건</span>` : '목표 미설정',
+      prog: goal.deal>0 ? Math.min(100, safePct(dealAct, goal.deal)) : null },
+    { cls:'deal', label:'딜 달성률',
+      val: goal.deal>0 ? safePct(dealAct,goal.deal)+'%' : '—', unit:'',
+      sub: goal.deal>0 ? `${dealAct}건 / ${goal.deal}건` : '목표 설정 후 활성화' },
+    { cls:'pace', label:'딜 페이스 예측', val:dp.proj, unit:'건',
+      sub: dp.need>0 ? `잔여 ${rem}일 · 일 <span class="hi">${dp.need}건</span> 필요` :
+           goal.deal>0 ? '목표 달성 페이스 ✓' : `일평균 ${dp.rate.toFixed(1)}건` },
+    { cls:'lead', label:'리드 달성 (소개서)', val:leadAct, unit:'건',
+      sub: goal.lead>0 ? `목표 <span class="hi">${goal.lead}건</span>` : '목표 미설정',
+      prog: goal.lead>0 ? Math.min(100, safePct(leadAct, goal.lead)) : null },
+    { cls:'lead', label:'리드 달성률',
+      val: goal.lead>0 ? safePct(leadAct,goal.lead)+'%' : '—', unit:'',
+      sub: goal.lead>0 ? `${leadAct}건 / ${goal.lead}건` : '목표 설정 후 활성화' },
+    { cls:'pace', label:'리드 페이스 예측', val:lp.proj, unit:'건',
+      sub: lp.need>0 ? `잔여 ${rem}일 · 일 <span class="hi">${lp.need}건</span> 필요` :
+           goal.lead>0 ? '목표 달성 페이스 ✓' : `일평균 ${lp.rate.toFixed(1)}건` },
   ];
-
-  const hasGoal = goalSet(goal.deal) || goalSet(goal.lead);
-  document.getElementById('no-goal-msg').style.display = hasGoal ? 'none' : 'block';
 
   document.getElementById('kpi-grid').innerHTML = cards.map(c => `
     <div class="kcard ${c.cls}">
       <div class="kcard-lbl">${c.label}</div>
-      <div class="kcard-val">${c.val}<span style="font-size:14px;font-weight:400;color:var(--text-secondary)"> ${c.unit}</span></div>
+      <div class="kcard-val">${c.val}<span style="font-size:13px;font-weight:400;color:var(--text-secondary)"> ${c.unit}</span></div>
       <div class="kcard-sub">${c.sub}</div>
-      ${c.prog != null ? `<div class="kbar"><div class="kbar-fill" style="width:${c.prog}%"></div></div>` : ''}
-    </div>
-  `).join('');
+      ${c.prog!=null ? `<div class="kbar"><div class="kbar-fill" style="width:${c.prog}%"></div></div>` : ''}
+    </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 4. PACING BAR
-// ═══════════════════════════════════════════════════════════════════
+// ── 페이싱
 function renderPacing() {
-  const jun = monthly['2026-06']; if (!jun) return;
-  const elapsed = todayDay(), total = daysInMonth('2026-06'), remaining = total - elapsed;
+  const cur = monthly[MR.cur]; if (!cur) return;
+  const elapsed = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const dealAct = safeNum(cur.deals), leadAct = safeNum(cur.leads);
 
-  function pace(actual, g) {
-    const rate = elapsed > 0 ? actual / elapsed : 0;
-    const proj = Math.round(rate * total);
-    const needed = g > 0 && g > actual && remaining > 0 ? Math.ceil((g - actual) / remaining) : 0;
-    return { proj, needed, rate };
+  function sub(actual, g) {
+    const rate = elapsed>0 ? actual/elapsed : 0;
+    const proj = safeRound(rate*total);
+    if (!g) return `일평균 ${rate.toFixed(2)}건 · 잔여 ${rem}일`;
+    const need = g>actual && rem>0 ? Math.ceil((g-actual)/rem) : 0;
+    return need>0
+      ? `잔여 ${rem}일 · 일평균 ${rate.toFixed(2)}건 · <span class="warn">일 ${need}건 추가 필요</span>`
+      : `잔여 ${rem}일 · 일평균 ${rate.toFixed(2)}건 · <span class="ok">달성 페이스 ✓</span>`;
   }
 
-  const dp = pace(jun.deals, goal.deal);
-  const lp = pace(jun.leads.total, goal.lead);
-
-  function subHtml(p, g) {
-    if (!g) return `현재 일평균 ${p.rate.toFixed(2)}건 · 잔여 ${remaining}일`;
-    if (p.needed > 0) return `잔여 ${remaining}일 · 일평균 ${p.rate.toFixed(2)}건 · <span class="warn">일 ${p.needed}건 추가 필요</span>`;
-    return `잔여 ${remaining}일 · 일평균 ${p.rate.toFixed(2)}건 · <span class="ok">목표 달성 페이스 ✓</span>`;
-  }
+  const dr = elapsed>0 ? safeRound(dealAct/elapsed*total) : 0;
+  const lr = elapsed>0 ? safeRound(leadAct/elapsed*total) : 0;
 
   document.getElementById('pacing-bar').innerHTML = `
     <div class="pace-item">
       <div class="pace-icon deal">📋</div>
       <div>
-        <div class="pace-main">딜: 현재 페이스 → 월말 <strong>${dp.proj}건</strong> 예상${goal.deal ? ` / 목표 ${goal.deal}건` : ''}</div>
-        <div class="pace-sub">${subHtml(dp, goal.deal)}</div>
+        <div class="pace-main">딜: 현재 페이스 → 월말 <strong>${dr}건</strong> 예상${goal.deal?` / 목표 ${goal.deal}건`:''}</div>
+        <div class="pace-sub">${sub(dealAct, goal.deal)}</div>
       </div>
     </div>
     <div class="pace-item">
       <div class="pace-icon lead">📄</div>
       <div>
-        <div class="pace-main">리드: 현재 페이스 → 월말 <strong>${lp.proj}건</strong> 예상${goal.lead ? ` / 목표 ${goal.lead}건` : ''}</div>
-        <div class="pace-sub">${subHtml(lp, goal.lead)}</div>
+        <div class="pace-main">리드: 현재 페이스 → 월말 <strong>${lr}건</strong> 예상${goal.lead?` / 목표 ${goal.lead}건`:''}</div>
+        <div class="pace-sub">${sub(leadAct, goal.lead)}</div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 5. CHANNEL TABLE + CHART
-// ═══════════════════════════════════════════════════════════════════
+// ── 채널 섹션 (etc 토글 포함)
 function renderChannelSection() {
-  const jun = monthly['2026-06']; if (!jun) return;
-  const keys = ['meta', 'naver', 'google', 'etc'];
+  const cur = monthly[MR.cur]; if (!cur) return;
+  const gl  = cur.ga4Lead         || makeCh();
+  const gd  = cur.ga4Deal         || makeCh();
+  const gid = cur.ga4IndirectDeal || makeCh();
+  const gir = cur.ga4IndirectLead || makeCh();
+  const sp  = cur.spend           || {meta:0,naver:0,google:0};
+  const keys = ['meta','naver','google','etc'];
 
-  const ga4Lead         = jun.ga4Lead         ?? makeCh();
-  const ga4Deal         = jun.ga4Deal         ?? makeCh();
-  const ga4IndirectDeal = jun.ga4IndirectDeal ?? makeCh();
-  const ga4IndirectLead = jun.ga4IndirectLead ?? makeCh();
-
-  const chSpend = { meta: jun.spend.meta, naver: jun.spend.naver, google: jun.spend.google, etc: 0 };
-
-  // ── 차트: 직접 리드 + 직접 딜 + 간접 기여 스택
+  // 차트
   if (chChart) chChart.destroy();
   const ctx = document.getElementById('ch-chart').getContext('2d');
   chChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: keys.map(k => CHANNELS[k].label),
-      datasets: [
-        {
-          label: '직접 리드 (소개서)',
-          data: keys.map(k => ga4Lead[k] || 0),
-          backgroundColor: keys.map(k => CHANNELS[k].color + 'CC'),
-          borderRadius: 4, borderSkipped: false,
-        },
-        {
-          label: '직접 딜 (문의 완료)',
-          data: keys.map(k => ga4Deal[k] || 0),
-          backgroundColor: '#FF6B6B88',
-          borderRadius: 4, borderSkipped: false,
-        },
-        {
-          label: '간접 딜 기여 (문의 시도)',
-          data: keys.map(k => ga4IndirectDeal[k] || 0),
-          backgroundColor: '#FFB34750',
-          borderRadius: 4, borderSkipped: false,
-        },
+    type:'bar',
+    data:{
+      labels: keys.map(k => CH_CFG[k].label),
+      datasets:[
+        { label:'직접 리드 (소개서)',   data:keys.map(k=>gl[k]||0),  backgroundColor:keys.map(k=>CH_CFG[k].color+'CC'), borderRadius:4, borderSkipped:false },
+        { label:'직접 딜 (문의 완료)',  data:keys.map(k=>gd[k]||0),  backgroundColor:'#FF6B6B80', borderRadius:4, borderSkipped:false },
+        { label:'간접 딜 기여',        data:keys.map(k=>gid[k]||0), backgroundColor:'#FFB34750', borderRadius:4, borderSkipped:false },
       ]
     },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom', align: 'start',
-          labels: { color: '#8B8FA8', font: { size: 10 }, boxWidth: 12, boxHeight: 12, padding: 12 }
-        },
-        tooltip: {
-          backgroundColor: '#1E2130', borderColor: '#252838', borderWidth: 1,
-          titleColor: '#EDF0FA', bodyColor: '#8B8FA8', padding: 10,
-          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}건` }
-        }
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ position:'bottom', align:'start', labels:{ color:'#8B8FA8', font:{size:10}, boxWidth:10, boxHeight:10, padding:10 } },
+        tooltip:{ backgroundColor:'#1E2130', borderColor:'#252838', borderWidth:1, titleColor:'#EDF0FA', bodyColor:'#8B8FA8', padding:9 }
       },
-      scales: {
-        x: { ticks: { color: '#8B8FA8', font: { size: 10 } }, grid: { color: '#252838' } },
-        y: { ticks: { color: '#8B8FA8', font: { size: 11 }, stepSize: 1 }, grid: { color: '#252838' }, beginAtZero: true }
+      scales:{
+        x:{ ticks:{color:'#8B8FA8',font:{size:10}}, grid:{color:'#252838'} },
+        y:{ ticks:{color:'#8B8FA8',font:{size:11},stepSize:1}, grid:{color:'#252838'}, beginAtZero:true }
       }
     }
   });
 
-  // ── 테이블
-  const totalLeads     = ga4Lead.total;
-  const totalDeals     = ga4Deal.total;
-  const totalIndDeal   = ga4IndirectDeal.total;
-  const totalIndLead   = ga4IndirectLead.total;
-  const totalSpend     = jun.spend.meta + jun.spend.naver + jun.spend.google;
+  // 테이블
+  const totLead = gl.total, totDeal = gd.total, totInd = gid.total, totIL = gir.total;
+  const totSpend = safeNum(sp.meta) + safeNum(sp.naver) + safeNum(sp.google);
+  const chSpend  = { meta:sp.meta, naver:sp.naver, google:sp.google, etc:0 };
 
-  function moneyStr(n) {
-    if (!n || n === 0) return '<span class="v-muted">—</span>';
-    return n >= 1000000 ? `${(n/10000).toFixed(0)}만원` : `${Math.round(n/1000)}천원`;
-  }
-  function cplStr(spend, cnt) {
-    if (!spend || !cnt) return '<span class="v-muted">—</span>';
-    const v = Math.round(spend / cnt);
-    return `<span class="v-accent">${v >= 10000 ? (v/10000).toFixed(1)+'만' : v.toLocaleString('ko-KR')}원</span>`;
-  }
-  function share(v, tot) { return tot > 0 ? `${Math.round((v/tot)*100)}%` : '—'; }
+  // etc 상세 소스 목록 (리드 기준, 상위 10개)
+  const etcSources = Object.entries(gl.etcSources || {})
+    .sort((a,b) => b[1]-a[1]).slice(0, 15);
 
   const rows = keys.map(k => {
-    const lead    = ga4Lead[k]         || 0;
-    const deal    = ga4Deal[k]         || 0;
-    const iDeal   = ga4IndirectDeal[k] || 0;
-    const iLead   = ga4IndirectLead[k] || 0;
-    const spend   = chSpend[k]         || 0;
+    const lead = safeNum(gl[k]), deal = safeNum(gd[k]);
+    const iDeal = safeNum(gid[k]), iLead = safeNum(gir[k]);
+    const spend = safeNum(chSpend[k]);
+    const isEtc = k === 'etc';
+
+    const detailRow = isEtc ? `
+      <tr class="etc-detail-row" id="etc-detail">
+        <td colspan="7">
+          <div class="etc-detail-inner">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;font-weight:600">
+              etc 소스 상세 (리드 기준 · GA4 소스/매체)
+              ${etcSources.length===0 ? '<span style="color:var(--text-muted)"> — 데이터 없음</span>' : ''}
+            </div>
+            <div class="etc-sub-list">
+              ${etcSources.length > 0
+                ? etcSources.map(([src, cnt]) =>
+                    `<div class="etc-sub-item">
+                      <span class="etc-sub-src">${src}</span>
+                      <span class="etc-sub-cnt">${cnt}건</span>
+                    </div>`).join('')
+                : '<div style="font-size:11px;color:var(--text-muted)">GA4 전환이벤트 시트에서 etc 채널 데이터를 가져오지 못했습니다.</div>'
+              }
+            </div>
+          </div>
+        </td>
+      </tr>` : '';
+
     return `
-      <tr>
-        <td><span class="ch-badge ${CHANNELS[k].badgeCls}">${CHANNELS[k].label}</span></td>
-        <td class="v-lead">${lead}<span class="v-muted" style="font-size:10px"> (${share(lead, totalLeads)})</span></td>
+      <tr class="${isEtc?'etc-row':''}" ${isEtc?'onclick="toggleEtc()"':''} title="${isEtc?'클릭하여 소스 상세 보기':''}">
+        <td>
+          <span class="ch-badge ${CH_CFG[k].badgeCls}">${CH_CFG[k].label}</span>
+          ${isEtc ? `<span class="etc-toggle-icon" id="etc-icon">▼</span>` : ''}
+        </td>
+        <td class="v-lead">${lead}<span class="v-muted" style="font-size:9px"> ${shareStr(lead,totLead)}</span></td>
         <td class="v-deal">${deal}</td>
-        <td style="color:var(--warning)">${iDeal}</td>
+        <td class="v-warn">${iDeal}</td>
         <td style="color:var(--accent)">${iLead}</td>
         <td>${moneyStr(spend)}</td>
         <td>${cplStr(spend, lead)}</td>
-      </tr>`;
+      </tr>
+      ${detailRow}`;
   }).join('');
 
   document.getElementById('ch-table').innerHTML = `
@@ -1139,8 +1016,8 @@ function renderChannelSection() {
         <th style="text-align:left">채널</th>
         <th title="click_project_inquiry + click_download_intro">리드↓</th>
         <th title="complete_project_inquiry">딜✓</th>
-        <th title="click_contact">간접딜</th>
-        <th title="click_project_view">간접리드</th>
+        <th title="click_contact" style="color:var(--warning)">간접딜</th>
+        <th title="click_project_view" style="color:var(--accent)">간접리드</th>
         <th>광고비</th>
         <th>CPL</th>
       </tr>
@@ -1149,138 +1026,95 @@ function renderChannelSection() {
       ${rows}
       <tr class="total-row">
         <td>합계</td>
-        <td class="v-lead">${totalLeads}</td>
-        <td class="v-deal">${totalDeals}</td>
-        <td style="color:var(--warning)">${totalIndDeal}</td>
-        <td style="color:var(--accent)">${totalIndLead}</td>
-        <td style="color:var(--text-secondary)">${moneyStr(totalSpend)}</td>
-        <td>${cplStr(totalSpend, totalLeads)}</td>
+        <td class="v-lead">${totLead}</td>
+        <td class="v-deal">${totDeal}</td>
+        <td class="v-warn">${totInd}</td>
+        <td style="color:var(--accent)">${totIL}</td>
+        <td style="color:var(--text-secondary)">${moneyStr(totSpend)}</td>
+        <td>${cplStr(totSpend, totLead)}</td>
       </tr>
-    </tbody>
-  `;
-
-  // 하단 안내 텍스트 업데이트
-  const note = document.querySelector('#ch-table + div');
-  if (note) note.textContent = '* 채널별 기여도는 GA4 전환이벤트 소스/매체 기준. 리드: click_project_inquiry + click_download_intro | 딜: complete_project_inquiry';
+    </tbody>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 6. FUNNEL
-// ═══════════════════════════════════════════════════════════════════
+function toggleEtc() {
+  etcOpen = !etcOpen;
+  const row  = document.getElementById('etc-detail');
+  const icon = document.getElementById('etc-icon');
+  if (row)  row.classList.toggle('open', etcOpen);
+  if (icon) icon.textContent = etcOpen ? '▲' : '▼';
+}
+
+// ── 퍼널
 function renderFunnel() {
-  const jun = monthly['2026-06']; if (!jun) return;
+  const cur = monthly[MR.cur]; if (!cur) return;
   const steps = [
-    { name: '세션',    value: jun.sessions,      color: '#6C8EFF' },
-    { name: '리드',    value: jun.leads.total,   color: '#4ECDC4' },
-    { name: '딜',      value: jun.deals,          color: '#FF6B6B' },
+    { name:'세션',  val:safeNum(cur.sessions), color:'#6C8EFF' },
+    { name:'리드',  val:safeNum(cur.leads),    color:'#4ECDC4' },
+    { name:'딜',    val:safeNum(cur.deals),    color:'#FF6B6B' },
+  ].filter((s,i) => i===0 ? s.val>0 : true);
+
+  const clips = [
+    'polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%)',
+    'polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%)',
+    'polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%)',
   ];
 
-  // 세션이 0이면 퍼널 축소
-  const funnelSteps = jun.sessions > 0 ? steps : steps.slice(1);
-
-  document.getElementById('funnel-wrap').innerHTML = funnelSteps.map((s, i) => {
-    const fromPrev = i === 0 ? null : funnelSteps[i-1].value > 0 ? ((s.value / funnelSteps[i-1].value) * 100).toFixed(1) : '0.0';
-    const rateLabel = i === 0 ? '기준' : `▼ ${fromPrev}%`;
-    const n = funnelSteps.length;
-    let clipPath;
-    if (n === 3) {
-      if (i === 0) clipPath = 'polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%)';
-      else if (i === 1) clipPath = 'polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%)';
-      else clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%)';
-    } else {
-      clipPath = i === 0
-        ? 'polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%)'
-        : 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%)';
-    }
+  document.getElementById('funnel-wrap').innerHTML = steps.map((s, i) => {
+    const fromPrev = i===0 ? null : steps[i-1].val>0
+      ? ((s.val/steps[i-1].val)*100).toFixed(1)+'%' : '0%';
     return `
       <div class="funnel-step">
-        <div class="funnel-block" style="background:${s.color};clip-path:${clipPath}">
-          <div class="funnel-num">${s.value.toLocaleString('ko-KR')}</div>
+        <div class="funnel-block" style="background:${s.color};clip-path:${clips[Math.min(i,2)]}">
+          <div class="funnel-num">${s.val.toLocaleString('ko-KR')}</div>
           <div class="funnel-name">${s.name}</div>
         </div>
-        <div class="funnel-rate">${rateLabel}</div>
-      </div>
-    `;
+        <div class="funnel-rate">${fromPrev ? '▼ '+fromPrev : '기준'}</div>
+      </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 7. TREND CHART
-// ═══════════════════════════════════════════════════════════════════
+// ── 추이 차트
 function renderTrendChart(mode) {
-  const jun = monthly['2026-06']; if (!jun) return;
-  const totalDays = daysInMonth('2026-06');
-  const today = todayDay();
-  const labels = Array.from({ length: totalDays }, (_, i) => `${i+1}일`);
+  const cur = monthly[MR.cur]; if (!cur) return;
+  const total   = daysInMonth(MR.cur), today = todayDay();
+  const labels  = Array.from({length:total}, (_,i) => `${i+1}일`);
+  const byDay   = mode==='deal' ? cur.dealsByDay : cur.leadsByDay;
+  const g       = mode==='deal' ? goal.deal : goal.lead;
+  const color   = mode==='deal' ? '#FF6B6B' : '#4ECDC4';
 
-  const byDay = mode === 'deal' ? jun.dealsByDay : jun.leadsByDay;
-  const g = mode === 'deal' ? goal.deal : goal.lead;
-  const color = mode === 'deal' ? '#FF6B6B' : '#4ECDC4';
-
-  // 실적: 누적
   let cum = 0;
-  const actualLine = labels.map((_, i) => {
-    const day = i + 1;
-    if (day > today) return null;
-    cum += (byDay[day] || 0);
+  const actualLine = labels.map((_,i) => {
+    if (i+1 > today) return null;
+    cum += safeNum(byDay[i+1]);
     return cum;
   });
-  const actualVal = cum;
-
-  // 페이스 예측 (마지막 실적점부터 월말까지)
-  const rate = today > 0 ? actualVal / today : 0;
-  const paceLine = labels.map((_, i) => {
-    const day = i + 1;
-    if (day < today) return null;
-    return +(actualVal + rate * (day - today)).toFixed(1);
+  const rate = today > 0 ? cum/today : 0;
+  const paceLine = labels.map((_,i) => {
+    if (i+1 < today) return null;
+    return +((cum + rate*(i+1-today)).toFixed(1));
   });
-
-  // 목표선
-  const goalLine = g > 0 ? labels.map((_, i) => +((g / totalDays) * (i+1)).toFixed(1)) : null;
+  const goalLine = g>0 ? labels.map((_,i) => +((g/total*(i+1)).toFixed(1))) : null;
 
   const datasets = [
-    {
-      label: '실적', data: actualLine,
-      borderColor: color, backgroundColor: color + '22',
-      borderWidth: 2.5, pointRadius: 2.5, pointBackgroundColor: color,
-      fill: false, tension: 0.15, spanGaps: false
-    },
-    {
-      label: '현재 페이스 예측', data: paceLine,
-      borderColor: color, borderWidth: 1.5, borderDash: [5, 4],
-      pointRadius: 0, fill: false, tension: 0
-    }
+    { label:'실적', data:actualLine, borderColor:color, backgroundColor:color+'22', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:color, fill:false, tension:0.15, spanGaps:false },
+    { label:'현재 페이스 예측', data:paceLine, borderColor:color, borderWidth:1.5, borderDash:[5,4], pointRadius:0, fill:false, tension:0 }
   ];
-  if (goalLine) {
-    datasets.unshift({
-      label: '목표선', data: goalLine,
-      borderColor: '#6C8EFF', borderWidth: 2, borderDash: [7, 3],
-      pointRadius: 0, fill: false, tension: 0
-    });
-  }
+  if (goalLine) datasets.unshift({ label:'목표선', data:goalLine, borderColor:'#6C8EFF', borderWidth:2, borderDash:[7,3], pointRadius:0, fill:false, tension:0 });
 
   if (trendChart) trendChart.destroy();
   const ctx = document.getElementById('trend-chart').getContext('2d');
   trendChart = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          position: 'top', align: 'end',
-          labels: { color: '#8B8FA8', font: { size: 11 }, boxWidth: 20, boxHeight: 2, usePointStyle: true, pointStyle: 'line', padding: 16 }
-        },
-        tooltip: {
-          backgroundColor: '#1E2130', borderColor: '#252838', borderWidth: 1,
-          titleColor: '#EDF0FA', bodyColor: '#8B8FA8', padding: 10,
-          callbacks: { label: ctx => ctx.raw != null ? `${ctx.dataset.label}: ${ctx.raw}건` : null }
-        }
+    type:'line', data:{ labels, datasets },
+    options:{
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{ position:'top', align:'end', labels:{ color:'#8B8FA8', font:{size:11}, boxWidth:20, boxHeight:2, usePointStyle:true, pointStyle:'line', padding:14 } },
+        tooltip:{ backgroundColor:'#1E2130', borderColor:'#252838', borderWidth:1, titleColor:'#EDF0FA', bodyColor:'#8B8FA8', padding:9,
+          callbacks:{ label: ctx => ctx.raw!=null ? `${ctx.dataset.label}: ${ctx.raw}건` : null } }
       },
-      scales: {
-        x: { ticks: { color: '#4E5268', font: { size: 10 }, maxTicksLimit: 16 }, grid: { color: '#1E2130' } },
-        y: { ticks: { color: '#8B8FA8', font: { size: 11 } }, grid: { color: '#252838' }, beginAtZero: true }
+      scales:{
+        x:{ ticks:{color:'#4E5268',font:{size:10},maxTicksLimit:16}, grid:{color:'#1E2130'} },
+        y:{ ticks:{color:'#8B8FA8',font:{size:11}}, grid:{color:'#252838'}, beginAtZero:true }
       }
     }
   });
@@ -1288,32 +1122,26 @@ function renderTrendChart(mode) {
 
 function switchChart(mode, btn) {
   chartMode = mode;
-  document.querySelectorAll('.toggle-btn').forEach(b => {
-    b.style.background = 'transparent'; b.style.color = 'var(--text-secondary)'; b.style.fontWeight = '400';
-  });
-  btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.fontWeight = '600';
+  document.querySelectorAll('.toggle-bar button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
   renderTrendChart(mode);
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// GOAL MODAL
-// ═══════════════════════════════════════════════════════════════════
+// ── 목표 모달
 function openGoalModal() {
   document.getElementById('modal-deal').value = goal.deal || '';
   document.getElementById('modal-lead').value = goal.lead || '';
   document.getElementById('goal-modal').classList.add('open');
 }
 function closeGoalModal() { document.getElementById('goal-modal').classList.remove('open'); }
-function handleOverlayClick(e) { if (e.target === document.getElementById('goal-modal')) closeGoalModal(); }
 function saveGoalFromModal() {
-  goal.deal = parseInt(document.getElementById('modal-deal').value) || 0;
-  goal.lead = parseInt(document.getElementById('modal-lead').value) || 0;
-  try { localStorage.setItem('respace_kpi_goal_2026_06', JSON.stringify({ deal: goal.deal, lead: goal.lead })); } catch(e) {}
+  goal.deal = safeNum(parseInt(document.getElementById('modal-deal').value));
+  goal.lead = safeNum(parseInt(document.getElementById('modal-lead').value));
+  try { localStorage.setItem(goalKey(), JSON.stringify({deal:goal.deal,lead:goal.lead})); } catch(e){}
   closeGoalModal();
   render();
-  showToast('6월 목표 저장 완료! 🎯');
+  showToast(`${ymLabel(MR.cur)} 목표 저장 완료! 🎯`);
 }
-
 function updateGoalBadge() {
   const el = document.getElementById('goal-badge');
   if (goal.deal || goal.lead) {
@@ -1325,27 +1153,20 @@ function updateGoalBadge() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════════════════
+// ── UTILS
 function setStatus(state, text) {
-  const dot = document.getElementById('status-dot');
-  const txt = document.getElementById('status-text');
-  dot.className = `status-dot ${state}`;
-  txt.textContent = text;
+  document.getElementById('status-dot').className = `status-dot ${state}`;
+  document.getElementById('status-text').textContent = text;
 }
-
 function showToast(msg) {
   const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#252838;border:1px solid var(--border);padding:12px 22px;border-radius:10px;font-size:13px;color:var(--text-primary);z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#252838;border:1px solid var(--border);padding:11px 20px;border-radius:10px;font-size:13px;color:var(--text-primary);z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.4)';
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2800);
+  setTimeout(() => t.remove(), 2600);
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
+// ═══ INIT ═══
 loadData();
 </script>
 </body>
