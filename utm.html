@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UTM 생성기 — RESPACE AI 시스템</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #f5f5f3;
+      color: #111;
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #0a0a0a; color: #fff;
+      padding: 1.4rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 1.2rem; }
+    .logo {
+      font-weight: 800; font-size: 0.92rem; letter-spacing: 0.18em;
+      border: 1.5px solid #fff; padding: 0.28rem 0.65rem;
+      text-decoration: none; color: #fff;
+    }
+    .header-title { font-size: 0.9rem; color: rgba(255,255,255,.55); }
+    .header-badge { font-size: 0.72rem; color: rgba(255,255,255,.35); letter-spacing: 0.08em; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a0a0f 0%, #0a0a0a 60%);
+      color: #fff; padding: 3rem 2.5rem 2.5rem;
+      display: flex; align-items: center; gap: 1.5rem;
+      border-bottom: 3px solid #e84393;
+    }
+    .hero-icon { font-size: 2.8rem; }
+    .hero-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; color: #e84393; margin-bottom: .4rem; }
+    .hero h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: .5rem; }
+    .hero p { font-size: 0.88rem; color: rgba(255,255,255,.5); max-width: 500px; }
+
+    /* ── Main ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+      color: #999; text-transform: uppercase; margin-bottom: 1rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 14px;
+      padding: 2rem; margin-bottom: 1.25rem;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 1.25rem; }
+
+    /* ── 사용 설명서 ── */
+    .guide-details {
+      background: #fff; border: 1.5px solid #e84393;
+      border-radius: 14px; margin-bottom: 2rem; overflow: hidden;
+    }
+    .guide-summary {
+      list-style: none; display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.75rem; cursor: pointer;
+      font-size: 0.95rem; font-weight: 800;
+      user-select: none;
+      background: #fff;
+    }
+    .guide-summary::-webkit-details-marker { display: none; }
+    .guide-summary:hover { background: #fff8fb; }
+    .guide-summary-left { display: flex; align-items: center; gap: .6rem; }
+    .guide-summary-left .pink { color: #e84393; }
+    .guide-toggle {
+      font-size: 0.73rem; font-weight: 600; color: #e84393;
+      background: #fff0f7; padding: .22rem .65rem; border-radius: 20px;
+    }
+    .guide-details[open] .guide-toggle-closed { display: none; }
+    .guide-details:not([open]) .guide-toggle-open { display: none; }
+
+    .guide-body { padding: 1.5rem 1.75rem 1.75rem; border-top: 1px solid #f5e0ec; }
+
+    /* 3-step */
+    .guide-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .guide-step {
+      background: #fafafa; border: 1px solid #f0f0f0;
+      border-radius: 10px; padding: 1rem 1.1rem;
+    }
+    .guide-step-num {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em;
+      color: #e84393; text-transform: uppercase; margin-bottom: .35rem;
+    }
+    .guide-step-icon { font-size: 1.6rem; margin-bottom: .4rem; }
+    .guide-step h4 { font-size: 0.88rem; font-weight: 800; margin-bottom: .3rem; }
+    .guide-step p { font-size: 0.78rem; color: #666; line-height: 1.6; }
+
+    /* channel ref */
+    .guide-channels { margin-bottom: 1.5rem; }
+    .guide-channels h4 {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+      color: #999; text-transform: uppercase; margin-bottom: .7rem;
+    }
+    .ch-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ch-table th {
+      background: #f7f7f7; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.06em; color: #888; text-transform: uppercase;
+      padding: .5rem .8rem; text-align: left; border-bottom: 2px solid #eee;
+    }
+    .ch-table td { padding: .55rem .8rem; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+    .ch-table tr:last-child td { border-bottom: none; }
+    .ch-table code {
+      font-family: 'SF Mono','Consolas','Monaco',monospace;
+      font-size: 0.76rem; background: #f5f5f5;
+      padding: .1rem .35rem; border-radius: 4px; color: #333;
+    }
+
+    /* example */
+    .guide-example { background: #fff8fb; border: 1px solid #f5d0e5; border-radius: 10px; padding: 1rem 1.2rem; }
+    .guide-example h4 {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+      color: #e84393; text-transform: uppercase; margin-bottom: .6rem;
+    }
+    .guide-example-row { display: flex; gap: .5rem; align-items: flex-start; margin-bottom: .4rem; font-size: 0.8rem; }
+    .guide-example-row:last-child { margin-bottom: 0; }
+    .guide-example-label { font-weight: 700; color: #777; min-width: 70px; }
+    .guide-example-val { font-family: 'SF Mono','Consolas',monospace; font-size: 0.75rem; color: #333; word-break: break-all; }
+
+    /* ── Form elements ── */
+    label {
+      display: block; font-size: 0.78rem; font-weight: 700;
+      color: #444; margin-bottom: .35rem; letter-spacing: 0.04em;
+    }
+    input[type="text"], input[type="url"], select, textarea {
+      width: 100%; padding: .62rem .85rem;
+      border: 1.5px solid #e0e0e0; border-radius: 8px;
+      font-size: 0.88rem; font-family: inherit;
+      background: #fafafa; color: #111;
+      transition: border-color .15s, background .15s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #e84393; background: #fff;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .form-group { margin-bottom: 1rem; }
+
+    /* ── Inferred badge ── */
+    .inferred-badge {
+      display: inline-block; font-size: 0.7rem; padding: .2rem .55rem;
+      background: #fff0f7; color: #e84393; border-radius: 20px;
+      font-weight: 700; margin-top: .35rem; letter-spacing: 0.04em;
+    }
+
+    /* ── Campaign hint ── */
+    .campaign-hint {
+      font-size: 0.72rem; color: #aaa; margin-top: .3rem;
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .campaign-hint code {
+      font-family: 'SF Mono','Consolas',monospace;
+      background: #f5f5f5; padding: .1rem .3rem; border-radius: 3px;
+      font-size: 0.71rem; color: #555;
+    }
+
+    /* ── Media radio ── */
+    .media-section-label {
+      font-size: 0.72rem; font-weight: 700; color: #bbb;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin: .75rem 0 .4rem; padding-bottom: .3rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .media-section-label:first-child { margin-top: 0; }
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: .6rem; margin-bottom: .35rem;
+    }
+    .media-option { display: none; }
+    .media-label {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .6rem .9rem; border: 1.5px solid #e0e0e0;
+      border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all .15s; user-select: none;
+      background: #fafafa;
+    }
+    .media-option:checked + .media-label {
+      border-color: #e84393; background: #fff0f7; color: #e84393;
+    }
+    .media-label:hover { border-color: #ccc; background: #f5f5f5; }
+
+    /* ── Batch rows ── */
+    .batch-header {
+      display: grid;
+      grid-template-columns: 2fr 1.3fr 1fr 1fr 1fr 80px 40px;
+      gap: .5rem;
+      font-size: 0.72rem; font-weight: 700; color: #999;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0 .25rem .5rem; border-bottom: 1px solid #eee; margin-bottom: .5rem;
+    }
+    .batch-row {
+      display: grid;
+      grid-template-columns: 2fr 1.3fr 1fr 1fr 1fr 80px 40px;
+      gap: .5rem; align-items: center; margin-bottom: .5rem;
+    }
+    .batch-row input, .batch-row select { margin-bottom: 0; }
+    .btn-remove {
+      background: none; border: 1.5px solid #f0d0d0; border-radius: 6px;
+      color: #e57373; font-size: 1.1rem; cursor: pointer; padding: .4rem .55rem;
+      line-height: 1; transition: background .12s;
+    }
+    .btn-remove:hover { background: #fff5f5; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .65rem 1.4rem; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; border: none; transition: all .15s;
+    }
+    .btn-primary { background: #e84393; color: #fff; }
+    .btn-primary:hover { background: #d0307e; }
+    .btn-secondary { background: #f0f0f0; color: #444; }
+    .btn-secondary:hover { background: #e5e5e5; }
+    .btn-outline { background: #fff; color: #e84393; border: 1.5px solid #e84393; }
+    .btn-outline:hover { background: #fff0f7; }
+    .btn-sm { padding: .45rem .9rem; font-size: 0.78rem; }
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+    /* ── Results ── */
+    .result-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .result-table th {
+      background: #f7f7f7; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.06em; color: #888; text-transform: uppercase;
+      padding: .6rem .85rem; text-align: left; border-bottom: 2px solid #eee;
+    }
+    .result-table td { padding: .75rem .85rem; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    .result-table tr:last-child td { border-bottom: none; }
+    .url-cell {
+      font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+      font-size: 0.74rem; color: #333; word-break: break-all;
+    }
+    .url-cell a { color: #e84393; text-decoration: none; }
+    .url-cell a:hover { text-decoration: underline; }
+    .tag {
+      display: inline-block; font-size: 0.68rem; padding: .18rem .5rem;
+      border-radius: 4px; font-weight: 700;
+    }
+    .tag-source { background: #e8f4fd; color: #1976d2; }
+    .tag-medium { background: #f3e5f5; color: #7b1fa2; }
+    .tag-campaign { background: #e8f5e9; color: #2e7d32; }
+    .tag-warn { background: #fff8e1; color: #f57f17; }
+    .tag-dup { background: #fce4ec; color: #c62828; }
+
+    .copy-btn {
+      font-size: 0.72rem; padding: .22rem .55rem; border-radius: 5px;
+      background: #f5f5f5; border: 1px solid #e0e0e0;
+      cursor: pointer; font-family: inherit; font-weight: 600; color: #555;
+      transition: background .1s;
+    }
+    .copy-btn:hover { background: #e8f5e9; color: #2e7d32; }
+    .copy-btn.copied { background: #e8f5e9; color: #2e7d32; }
+
+    /* ── Warn / info ── */
+    .alert {
+      padding: .75rem 1rem; border-radius: 8px;
+      font-size: 0.83rem; margin-bottom: 1rem;
+      display: flex; align-items: flex-start; gap: .6rem;
+    }
+    .alert-warn { background: #fff8e1; color: #7d5600; border: 1px solid #ffe082; }
+    .alert-info { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+    .alert-success { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid #eee; margin: 1.5rem 0; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; padding: 2rem;
+      font-size: .76rem; color: #ccc;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    @media (max-width: 700px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-row.three { grid-template-columns: 1fr 1fr; }
+      .batch-header, .batch-row { grid-template-columns: 1fr; }
+      .batch-header { display: none; }
+      .hero { flex-direction: column; gap: .75rem; padding: 2rem 1.25rem; }
+      .guide-steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <a href="/" class="logo">RESPACE</a>
+    <div class="header-title">UTM 생성기</div>
+  </div>
+  <div class="header-badge">System 06</div>
+</header>
+
+<div class="hero">
+  <div class="hero-icon">🔗</div>
+  <div>
+    <div class="hero-label">System 06</div>
+    <h1>UTM 생성기</h1>
+    <p>URL 입력 → 캠페인 자동 추론 → 매체 선택 → UTM URL 즉시 생성.<br>
+      뉴스레터·블로그·카드뉴스·광고 채널 전부 지원.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════════
+       사용 설명서 토글
+  ══════════════════════════════════════════════ -->
+  <details class="guide-details" id="guideSection">
+    <summary class="guide-summary">
+      <div class="guide-summary-left">
+        <span>📖</span>
+        <span>처음 쓰시나요? <span class="pink">3단계 사용 설명서</span></span>
+      </div>
+      <span class="guide-toggle guide-toggle-closed">펼쳐보기 ▾</span>
+      <span class="guide-toggle guide-toggle-open">접기 ▴</span>
+    </summary>
+
+    <div class="guide-body">
+
+      <!-- 3-step -->
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-step-num">Step 01</div>
+          <div class="guide-step-icon">🔗</div>
+          <h4>URL 붙여넣기</h4>
+          <p>링크 걸 페이지 주소를 입력하면, 캠페인이 <strong>자동으로 감지</strong>됩니다.<br>
+            예: 팝업 페이지 → <code style="font-size:.72rem;background:#f0f0f0;padding:.1rem .3rem;border-radius:3px;">05_popup</code> 자동 추론</p>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">Step 02</div>
+          <div class="guide-step-icon">📣</div>
+          <h4>채널 선택</h4>
+          <p>콘텐츠를 올리는 곳을 클릭하세요.<br>
+            뉴스레터 · 블로그 · 카드뉴스(인스타) · 카카오 · 네이버 광고 등 source/medium이 <strong>자동으로 채워집니다.</strong></p>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">Step 03</div>
+          <div class="guide-step-icon">✅</div>
+          <h4>생성 & 복사</h4>
+          <p><strong>UTM 생성</strong> 버튼을 누르면 완성된 URL이 바로 나옵니다.<br>
+            복사 버튼으로 바로 쓰거나, CSV로 내려받으세요.</p>
+        </div>
+      </div>
+
+      <!-- 채널별 빠른 참고 -->
+      <div class="guide-channels">
+        <h4>콘텐츠 팀 자주 쓰는 채널 — 이렇게 채우면 됩니다</h4>
+        <table class="ch-table">
+          <thead>
+            <tr><th>채널</th><th>매체 선택</th><th>캠페인 코드 예시</th><th>utm_term (식별자)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>📧 뉴스레터</td>
+              <td><strong>뉴스레터</strong></td>
+              <td><code>newsletter_202605_01</code> <span style="color:#aaa;font-size:.72rem;">(연월_호수)</span></td>
+              <td><code>01</code>, <code>02</code> (호수)</td>
+            </tr>
+            <tr>
+              <td>📝 블로그</td>
+              <td><strong>블로그</strong></td>
+              <td><code>blog_202605_popup-trend</code> <span style="color:#aaa;font-size:.72rem;">(연월_슬러그)</span></td>
+              <td>글 슬러그 (예: <code>popup-trend-2026</code>)</td>
+            </tr>
+            <tr>
+              <td>📸 카드뉴스 (인스타)</td>
+              <td><strong>인스타 오가닉</strong></td>
+              <td><code>instagram_202605_01</code> <span style="color:#aaa;font-size:.72rem;">(연월_번호)</span></td>
+              <td>게시물 번호 또는 슬러그</td>
+            </tr>
+            <tr>
+              <td>💬 카카오 채널</td>
+              <td><strong>카카오</strong></td>
+              <td><code>kakao_20260526</code> <span style="color:#aaa;font-size:.72rem;">(발송일)</span></td>
+              <td>발송일 <code>YYYYMMDD</code></td>
+            </tr>
+            <tr>
+              <td>🔗 링크드인</td>
+              <td><strong>링크드인</strong></td>
+              <td><code>linkedin_202605_01</code></td>
+              <td>게시물 번호</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 예시 출력 -->
+      <div class="guide-example">
+        <h4>예시 — 뉴스레터 5월 1호 UTM</h4>
+        <div class="guide-example-row">
+          <span class="guide-example-label">입력 URL</span>
+          <span class="guide-example-val">https://respace.co.kr/INTRO-WORKS</span>
+        </div>
+        <div class="guide-example-row">
+          <span class="guide-example-label">매체 선택</span>
+          <span class="guide-example-val">뉴스레터</span>
+        </div>
+        <div class="guide-example-row">
+          <span class="guide-example-label">캠페인</span>
+          <span class="guide-example-val">newsletter_202605_01</span>
+        </div>
+        <div class="guide-example-row">
+          <span class="guide-example-label">결과 URL</span>
+          <span class="guide-example-val" style="color:#e84393;">https://respace.co.kr/INTRO-WORKS?utm_source=newsletter&utm_medium=email&utm_campaign=newsletter_202605_01&utm_content=cta_button</span>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════════════════════════════════════════
+       단건 / 풀세트 생성
+  ══════════════════════════════════════════════ -->
+  <div class="section-title">단건 / 풀세트 생성</div>
+  <div class="card">
+    <div class="card-title">URL 입력</div>
+
+    <!-- URL -->
+    <div class="form-group">
+      <label for="inputUrl">원본 URL *</label>
+      <input type="url" id="inputUrl" placeholder="https://respace.co.kr/project?service=popup"
+             oninput="onUrlInput()" />
+      <div id="inferredBadge" style="min-height:1.5rem;"></div>
+    </div>
+
+    <!-- 매체 선택 -->
+    <div class="form-group">
+      <label>채널 / 매체 선택 *</label>
+
+      <div class="media-section-label">📣 광고 채널</div>
+      <div class="media-grid" id="mediaGridAd"></div>
+
+      <div class="media-section-label">✍️ 콘텐츠 / 온드 채널</div>
+      <div class="media-grid" id="mediaGridOwned"></div>
+
+      <div class="media-section-label">⚙️ 기타</div>
+      <div class="media-grid" id="mediaGridCustom"></div>
+    </div>
+
+    <!-- 직접 입력 필드 (custom만) -->
+    <div id="customFields" style="display:none;">
+      <div class="form-row">
+        <div>
+          <label for="customSource">utm_source</label>
+          <select id="customSource"><option value="">선택</option></select>
+        </div>
+        <div>
+          <label for="customMedium">utm_medium</label>
+          <select id="customMedium"><option value="">선택</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 캠페인 + content -->
+    <div class="form-row">
+      <!-- 광고/기본 캠페인 선택 (SA/DA) -->
+      <div id="campaignSelGroup">
+        <label for="campaignSel">utm_campaign</label>
+        <select id="campaignSel"><option value="">자동 추론</option></select>
+      </div>
+      <!-- 온드 캠페인 자유입력 -->
+      <div id="ownedCampaignGroup" style="display:none;">
+        <label for="ownedCampaignInput">utm_campaign <span style="font-weight:400;color:#aaa;">(컨벤션: 채널_연월_번호)</span></label>
+        <input type="text" id="ownedCampaignInput" placeholder="newsletter_202605_01" />
+        <div class="campaign-hint" id="campaignHint"></div>
+      </div>
+      <div>
+        <label for="contentSel">utm_content</label>
+        <select id="contentSel"><option value="">선택 (선택사항)</option></select>
+      </div>
+    </div>
+
+    <!-- utm_term -->
+    <div class="form-group">
+      <label for="utmTerm" id="utmTermLabel">utm_term</label>
+      <input type="text" id="utmTerm" placeholder="{keyword}" />
+    </div>
+
+    <!-- 라벨 -->
+    <div class="form-group">
+      <label for="labelInput">라벨 <span style="font-weight:400;color:#aaa;">(메모용, 선택사항)</span></label>
+      <input type="text" id="labelInput" placeholder="예: 뉴스레터 5월 1호 CTA" />
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateSingle()">🔗 UTM 생성</button>
+      <button class="btn btn-secondary" onclick="generateFullset()">📦 광고 풀세트 (4매체)</button>
+      <button class="btn btn-outline btn-sm" onclick="clearSingle()">초기화</button>
+    </div>
+  </div>
+
+  <!-- ── 단건 결과 ── -->
+  <div id="resultSection" style="display:none;">
+    <div class="section-title">생성 결과</div>
+    <div class="card" style="padding: 1.5rem;">
+      <div id="resultAlert" style="margin-bottom:.5rem;"></div>
+      <div style="overflow-x:auto;">
+        <table class="result-table">
+          <thead>
+            <tr><th>#</th><th>라벨</th><th>매체</th><th>캠페인</th><th>최종 URL</th><th>경고</th></tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" onclick="downloadCSV()">⬇ CSV 다운로드</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyAllUrls()">📋 URL 전체 복사</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════
+       배치 생성
+  ══════════════════════════════════════════════ -->
+  <div class="section-title">배치 생성</div>
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <div class="card-title" style="margin:0;">여러 URL × 여러 채널 일괄 생성</div>
+      <button class="btn btn-secondary btn-sm" onclick="addBatchRow()">+ 행 추가</button>
+    </div>
+    <div class="batch-header">
+      <div>원본 URL</div><div>채널</div><div>캠페인</div>
+      <div>content</div><div>term</div><div>라벨</div><div></div>
+    </div>
+    <div id="batchRows"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateBatch()">🔗 배치 UTM 생성</button>
+      <button class="btn btn-outline btn-sm" onclick="clearBatch()">초기화</button>
+    </div>
+  </div>
+
+  <!-- ── 배치 결과 ── -->
+  <div id="batchResultSection" style="display:none;">
+    <div class="section-title">배치 결과</div>
+    <div class="card" style="padding: 1.5rem;">
+      <div id="batchResultAlert" style="margin-bottom:.5rem;"></div>
+      <div style="overflow-x:auto;">
+        <table class="result-table">
+          <thead>
+            <tr><th>#</th><th>라벨</th><th>매체</th><th>캠페인</th><th>최종 URL</th><th>경고</th></tr>
+          </thead>
+          <tbody id="batchResultBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" onclick="downloadBatchCSV()">⬇ CSV 다운로드</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyBatchUrls()">📋 URL 전체 복사</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UTM 사전 참고 ── -->
+  <hr class="divider">
+  <details style="cursor:pointer;">
+    <summary class="section-title" style="cursor:pointer; list-style:none; display:flex; align-items:center; gap:.5rem;">
+      <span>▶</span>&nbsp;UTM 파라미터 사전 참고
+    </summary>
+    <div class="card" style="margin-top:.75rem;">
+      <div id="dictReference"></div>
+    </div>
+  </details>
+
+</div>
+
+<footer>
+  RESPACE AI 시스템 &nbsp;|&nbsp; System 06 — UTM 생성기 &nbsp;|&nbsp; Built by 글로업(GLOUP)
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 데이터 — campaign_mapping.json + utm_dictionary 임베드
+// ══════════════════════════════════════════════════════════════
+const DOMAIN_WHITELIST = ['respace.co.kr', 'www.respace.co.kr'];
+
+const PATH_RULES = [
+  { match_type:'query_param', param:'service', value:'popup',  default_campaign:'05_popup',  note:'팝업스토어 랜딩' },
+  { match_type:'query_param', param:'service', value:'event',  default_campaign:'01_general', note:'행사 일반' },
+  { match_type:'query_param', param:'service', value:'design', default_campaign:'04_design',  note:'디자인/굿즈/전시' },
+  { match_type:'path', value:'/INTRO-WORKS', default_campaign:'01_general', note:'기업 소개 + 포트폴리오' },
+  { match_type:'path', value:'/', default_campaign:'01_general', note:'메인 페이지' },
+];
+
+const CATEGORY_OVERRIDES = [
+  { service:'popup', category:'entertainment', campaign:'05_popup' },
+  { service:'popup', category:'global-brand',  campaign:'05_popup' },
+  { service:'popup', category:'etc',           campaign:'05_popup' },
+  { service:'event', category:'forum',         campaign:'01_general' },
+  { service:'event', category:'networking',    campaign:'01_general' },
+];
+
+const SEASON_RULES = [
+  { months:[3,4,5],   campaign:'00_spring' },
+  { months:[6,7,8],   campaign:'00_summer' },
+  { months:[9,10,11], campaign:'00_autumn' },
+  { months:[12,1,2],  campaign:'00_winter' },
+];
+
+const CAMPAIGN_CATALOG_SA = [
+  {v:'01_general',    label:'01_general — 행사 일반'},
+  {v:'02_booth',      label:'02_booth — 박람회/부스'},
+  {v:'03_B2G',        label:'03_B2G — 기업/관공서'},
+  {v:'04_design',     label:'04_design — 디자인/굿즈/전시'},
+  {v:'05_popup',      label:'05_popup — 팝업스토어'},
+  {v:'06_fleamarket', label:'06_fleamarket — 플리마켓/바자회'},
+  {v:'07_festival',   label:'07_festival — 축제/페스티벌'},
+  {v:'08_lowcpc',     label:'08_lowcpc — 저비용 키워드'},
+  {v:'09_ref',        label:'09_ref — 레퍼런스 키워드'},
+  {v:'00_spring',     label:'00_spring — 시즌(봄)'},
+  {v:'00_summer',     label:'00_summer — 시즌(여름)'},
+  {v:'00_autumn',     label:'00_autumn — 시즌(가을)'},
+  {v:'00_winter',     label:'00_winter — 시즌(겨울)'},
+];
+const CAMPAIGN_CATALOG_DA = [
+  {v:'core_a', label:'core_a — 이벤트 코어'},
+  {v:'core_b', label:'core_b — 글로벌 브랜드 팝업'},
+  {v:'core_c', label:'core_c — 엔터테인먼트 팝업'},
+  {v:'s_b',    label:'s_b — 기타(etc) 팝업'},
+];
+
+// 매체 프리셋 — [QA Fix 1] 인스타 오가닉(카드뉴스) 추가
+const MEDIA_PRESETS = [
+  // 광고
+  { id:'naver_sa',      label:'네이버 SA',           source:'naver',            medium:'sa_pc',    content:'text',       term:'{keyword}', type:'sa',    group:'ad' },
+  { id:'google_sa',     label:'구글 SA',             source:'google',           medium:'sa_pc',    content:'text',       term:'{keyword}', type:'sa',    group:'ad' },
+  { id:'meta_image',    label:'메타 이미지',          source:'instagram',        medium:'da',       content:'image',      term:'',          type:'da',    group:'ad' },
+  { id:'meta_video',    label:'메타 영상',            source:'instagram',        medium:'da',       content:'video',      term:'',          type:'da',    group:'ad' },
+  // 온드 (콘텐츠)
+  { id:'newsletter',    label:'뉴스레터',             source:'newsletter',       medium:'email',    content:'cta_button', term:'',          type:'owned', group:'owned',
+    campaignPrefix:'newsletter', termPlaceholder:'호수 (예: 01, 02)', termLabel:'utm_term — 호수' },
+  { id:'blog',          label:'블로그',               source:'blog',             medium:'referral', content:'body',       term:'',          type:'owned', group:'owned',
+    campaignPrefix:'blog', termPlaceholder:'슬러그 (예: popup-trend-2026)', termLabel:'utm_term — 글 슬러그' },
+  { id:'insta_organic', label:'인스타 오가닉 (카드뉴스)', source:'instagram_organic', medium:'social', content:'image',  term:'',          type:'owned', group:'owned',
+    campaignPrefix:'instagram', termPlaceholder:'게시물 번호 또는 슬러그', termLabel:'utm_term — 게시물 식별자' },
+  { id:'kakao',         label:'카카오',               source:'kakao_channel',    medium:'messenger',content:'',           term:'',          type:'owned', group:'owned',
+    campaignPrefix:'kakao', termPlaceholder:'발송일 (예: 20260526)', termLabel:'utm_term — 발송일' },
+  { id:'linkedin',      label:'링크드인',             source:'linkedin_organic', medium:'social',   content:'',           term:'',          type:'owned', group:'owned',
+    campaignPrefix:'linkedin', termPlaceholder:'게시물 번호', termLabel:'utm_term — 게시물 번호' },
+  // 기타
+  { id:'custom',        label:'직접 입력',            source:'',                 medium:'',         content:'',           term:'',          type:'custom',group:'custom' },
+];
+
+const VALID_SOURCES  = ['naver','google','instagram','facebook','kakao','newsletter','blog','instagram_organic','linkedin_organic','kakao_channel','email','qr_offline'];
+const VALID_MEDIUMS  = ['sa_pc','sa_mo','da','cpv','email','social','messenger','referral','offline'];
+const VALID_CONTENTS = ['text','image','video','carousel','hero','body','footer','cta_button','signature'];
+
+// ══════════════════════════════════════════════════════════════
+// Core 로직
+// ══════════════════════════════════════════════════════════════
+function parseUrlParts(urlStr) {
+  try { return { ok: true, url: new URL(urlStr.trim()) }; }
+  catch(e) { return { ok: false }; }
+}
+
+function inferDefaults(urlStr) {
+  const r = parseUrlParts(urlStr);
+  if (!r.ok) return { domain_ok: false, campaign: '01_general', note: 'URL 파싱 실패' };
+  const u = r.url;
+  const params = Object.fromEntries(u.searchParams.entries());
+  const out = { domain_ok: DOMAIN_WHITELIST.includes(u.hostname.toLowerCase()), campaign: null, service: params.service||null, category: params.category||null, note: null };
+
+  for (const ov of CATEGORY_OVERRIDES) {
+    if (ov.service === out.service && ov.category === out.category) { out.campaign = ov.campaign; return out; }
+  }
+  for (const rule of PATH_RULES) {
+    if (rule.match_type === 'query_param' && params[rule.param] === rule.value) { out.campaign = rule.default_campaign; out.note = rule.note; return out; }
+  }
+  for (const rule of PATH_RULES) {
+    if (rule.match_type === 'path' && u.pathname.replace(/\/+$/,'') === rule.value.replace(/\/+$/,'')) { out.campaign = rule.default_campaign; out.note = rule.note; return out; }
+  }
+  out.campaign = '01_general'; out.note = '매핑 룰 미적용 → 기본값';
+  return out;
+}
+
+function buildUtmUrl(spec) {
+  const warnings = [];
+  const { url, utm_source, utm_medium, utm_campaign, utm_content, utm_term } = spec;
+  if (!url) return { error: 'URL은 필수입니다.' };
+  if (!utm_source) return { error: 'utm_source는 필수입니다.' };
+  if (!utm_medium) return { error: 'utm_medium은 필수입니다.' };
+  if (!utm_campaign) return { error: 'utm_campaign은 필수입니다.' };
+
+  const inferred = inferDefaults(url);
+  if (!inferred.domain_ok) warnings.push('도메인이 리스페이스 화이트리스트 외부입니다.');
+  if (!VALID_SOURCES.includes(utm_source))  warnings.push(`utm_source='${utm_source}'는 사전에 없음`);
+  if (!VALID_MEDIUMS.includes(utm_medium))  warnings.push(`utm_medium='${utm_medium}'는 사전에 없음`);
+  if (utm_content && !VALID_CONTENTS.includes(utm_content)) warnings.push(`utm_content='${utm_content}'는 사전에 없음`);
+  if (!/^[A-Za-z0-9_\-]+$/.test(utm_campaign)) return { error: `utm_campaign='${utm_campaign}'에 허용 안 되는 문자가 있습니다. (영문/숫자/_/- 만 허용)` };
+
+  const r = parseUrlParts(url);
+  if (!r.ok) return { error: 'URL 파싱 실패' };
+  const u = r.url;
+
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => u.searchParams.delete(k));
+  u.searchParams.set('utm_source', utm_source);
+  u.searchParams.set('utm_medium', utm_medium);
+  u.searchParams.set('utm_campaign', utm_campaign);
+  if (utm_content) u.searchParams.set('utm_content', utm_content);
+  if (utm_term)    u.searchParams.set('utm_term', utm_term);
+
+  const final_url = u.toString().replace(encodeURIComponent('{keyword}'), '{keyword}');
+  return { final_url, warnings, inferred };
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI 초기화
+// ══════════════════════════════════════════════════════════════
+let lastResults = [], lastBatchResults = [];
+
+function init() {
+  renderMediaGrids();
+  renderCampaignSelect('campaignSel', [...CAMPAIGN_CATALOG_SA, ...CAMPAIGN_CATALOG_DA], true);
+  renderContentSelect('contentSel');
+  renderCustomSourceSelect();
+  renderCustomMediumSelect();
+  addBatchRow(); addBatchRow();
+  renderDictReference();
+}
+
+function mediaEmoji(id) {
+  const map = { naver_sa:'🔍', google_sa:'🌐', meta_image:'📸', meta_video:'🎬',
+                newsletter:'📧', blog:'📝', insta_organic:'📸', kakao:'💬', linkedin:'🔗', custom:'✏️' };
+  return map[id] || '🔗';
+}
+
+function renderMediaGrids() {
+  const groups = { ad:'mediaGridAd', owned:'mediaGridOwned', custom:'mediaGridCustom' };
+  for (const [grp, elId] of Object.entries(groups)) {
+    const el = document.getElementById(elId);
+    el.innerHTML = MEDIA_PRESETS.filter(m => m.group === grp).map(m => `
+      <div>
+        <input type="radio" name="media" id="media_${m.id}" value="${m.id}" class="media-option" onchange="onMediaChange('${m.id}')">
+        <label for="media_${m.id}" class="media-label">
+          <span>${mediaEmoji(m.id)}</span> ${m.label}
+        </label>
+      </div>
+    `).join('');
+  }
+}
+
+function renderCampaignSelect(selId, catalog, includeEmpty) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = (includeEmpty ? '<option value="">자동 추론</option>' : '') +
+    catalog.map(c => `<option value="${c.v}">${c.label}</option>`).join('');
+}
+
+function renderContentSelect(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const all = [
+    {v:'', label:'선택 (선택사항)'},
+    {v:'text',       label:'text — 텍스트 광고 (SA)'},
+    {v:'image',      label:'image — 이미지 소재 (DA/오가닉)'},
+    {v:'video',      label:'video — 영상 소재 (DA)'},
+    {v:'carousel',   label:'carousel — 캐러셀 (DA)'},
+    {v:'hero',       label:'hero — 메인 비주얼 (온드)'},
+    {v:'body',       label:'body — 본문 CTA (온드)'},
+    {v:'footer',     label:'footer — 하단 CTA (온드)'},
+    {v:'cta_button', label:'cta_button — 인라인 버튼 (온드)'},
+    {v:'signature',  label:'signature — 서명/푸터 (온드)'},
+  ];
+  sel.innerHTML = all.map(c => `<option value="${c.v}">${c.label}</option>`).join('');
+}
+
+function renderCustomSourceSelect() {
+  const sel = document.getElementById('customSource');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">선택</option>' + VALID_SOURCES.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+function renderCustomMediumSelect() {
+  const sel = document.getElementById('customMedium');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">선택</option>' + VALID_MEDIUMS.map(m => `<option value="${m}">${m}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// URL 자동 추론
+// ══════════════════════════════════════════════════════════════
+let inferTimer = null;
+function onUrlInput() {
+  clearTimeout(inferTimer);
+  inferTimer = setTimeout(() => {
+    const url = document.getElementById('inputUrl').value.trim();
+    const badge = document.getElementById('inferredBadge');
+    if (!url) { badge.innerHTML = ''; return; }
+    const inf = inferDefaults(url);
+    if (!inf.domain_ok) {
+      badge.innerHTML = `<span class="inferred-badge" style="background:#fff0f0;color:#c62828;">⚠ 도메인 화이트리스트 외부</span>`;
+    } else {
+      badge.innerHTML = `<span class="inferred-badge">✦ 캠페인 자동 추론: ${inf.campaign}${inf.note ? ' — ' + inf.note : ''}</span>`;
+    }
+    // SA/DA 캠페인 select 기본값
+    const sel = document.getElementById('campaignSel');
+    if (sel && inf.campaign) {
+      const opt = [...sel.options].find(o => o.value === inf.campaign);
+      if (opt) sel.value = inf.campaign;
+    }
+  }, 300);
+}
+
+// ══════════════════════════════════════════════════════════════
+// 매체 선택 → 자동 채움
+// [QA Fix 2] owned 채널 선택 시 텍스트 입력으로 전환
+// [QA Fix 3] utm_term placeholder 채널별 힌트
+// ══════════════════════════════════════════════════════════════
+function onMediaChange(mediaId) {
+  const preset = MEDIA_PRESETS.find(m => m.id === mediaId);
+  if (!preset) return;
+
+  const customFields       = document.getElementById('customFields');
+  const campaignSelGroup   = document.getElementById('campaignSelGroup');
+  const ownedCampaignGroup = document.getElementById('ownedCampaignGroup');
+  const campaignHint       = document.getElementById('campaignHint');
+  const ownedInput         = document.getElementById('ownedCampaignInput');
+  const termInput          = document.getElementById('utmTerm');
+  const termLabel          = document.getElementById('utmTermLabel');
+  const contentSel         = document.getElementById('contentSel');
+
+  // 기본값 리셋
+  customFields.style.display       = 'none';
+  campaignSelGroup.style.display   = 'block';
+  ownedCampaignGroup.style.display = 'none';
+  termInput.readOnly               = false;
+
+  if (mediaId === 'custom') {
+    customFields.style.display = 'block';
+    termLabel.textContent = 'utm_term';
+    termInput.placeholder = '소재코드 또는 키워드';
+    renderCampaignSelect('campaignSel', [...CAMPAIGN_CATALOG_SA, ...CAMPAIGN_CATALOG_DA], true);
+    return;
+  }
+
+  // content 자동 채움
+  if (preset.content) contentSel.value = preset.content;
+
+  if (preset.type === 'sa') {
+    renderCampaignSelect('campaignSel', CAMPAIGN_CATALOG_SA, true);
+    // URL 추론값 반영
+    const url = document.getElementById('inputUrl').value.trim();
+    if (url) {
+      const inf = inferDefaults(url);
+      const opt = [...document.getElementById('campaignSel').options].find(o => o.value === inf.campaign);
+      if (opt) document.getElementById('campaignSel').value = inf.campaign;
+    }
+    termInput.value = '{keyword}';
+    termInput.readOnly = true;
+    termLabel.innerHTML = 'utm_term <span style="font-weight:400;color:#aaa;">(SA 자동: {keyword})</span>';
+
+  } else if (preset.type === 'da') {
+    renderCampaignSelect('campaignSel', CAMPAIGN_CATALOG_DA, true);
+    termInput.value = '';
+    termInput.readOnly = false;
+    termLabel.innerHTML = 'utm_term <span style="font-weight:400;color:#aaa;">(소재코드 직접 입력 — 예: im_a_01_new)</span>';
+    termInput.placeholder = '소재코드 (예: im_a_01_new)';
+
+  } else if (preset.type === 'owned') {
+    // [QA Fix 2] 온드 → 텍스트 입력으로 전환 + 컨벤션 힌트
+    campaignSelGroup.style.display   = 'none';
+    ownedCampaignGroup.style.display = 'block';
+
+    const now = new Date();
+    const ym = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
+    const hint = `${preset.campaignPrefix}_${ym}_01`;
+    ownedInput.placeholder = hint;
+
+    campaignHint.innerHTML = `💡 권장 컨벤션: <code>${preset.campaignPrefix}_연월_번호</code>&nbsp; 예) <code>${hint}</code>`;
+
+    // [QA Fix 3] term placeholder 채널별 힌트
+    termLabel.innerHTML = `utm_term <span style="font-weight:400;color:#aaa;">${preset.termLabel ? '— ' + preset.termLabel.replace('utm_term — ','') : '(선택사항)'}</span>`;
+    termInput.placeholder = preset.termPlaceholder || '';
+    termInput.value = '';
+    termInput.readOnly = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// 단건 생성
+// ══════════════════════════════════════════════════════════════
+function getSelectedMedia() {
+  const checked = document.querySelector('input[name="media"]:checked');
+  return checked ? MEDIA_PRESETS.find(m => m.id === checked.value) : null;
+}
+
+function buildSpecFromForm() {
+  const url    = document.getElementById('inputUrl').value.trim();
+  const media  = getSelectedMedia();
+  const termInput  = document.getElementById('utmTerm').value.trim();
+  const contentVal = document.getElementById('contentSel').value;
+  const labelVal   = document.getElementById('labelInput').value.trim();
+
+  let source, medium, campaign;
+
+  if (!media || media.id === 'custom') {
+    source = document.getElementById('customSource').value;
+    medium = document.getElementById('customMedium').value;
+    campaign = document.getElementById('campaignSel').value || (url ? inferDefaults(url).campaign : '01_general');
+  } else if (media.type === 'owned') {
+    source = media.source;
+    medium = media.medium;
+    // [QA Fix 2] owned → 텍스트 입력값 사용, 비어있으면 placeholder 제안값
+    const ownedInput = document.getElementById('ownedCampaignInput');
+    campaign = ownedInput.value.trim() || ownedInput.placeholder || media.campaignPrefix;
+  } else {
+    source = media.source;
+    medium = media.medium;
+    campaign = document.getElementById('campaignSel').value || (url ? inferDefaults(url).campaign : '01_general');
+  }
+
+  const content = contentVal || (media ? media.content : '');
+  const term    = termInput;
+
+  return { url, utm_source: source, utm_medium: medium, utm_campaign: campaign,
+           utm_content: content, utm_term: term, label: labelVal };
+}
+
+function generateSingle() {
+  const spec = buildSpecFromForm();
+  if (!spec.url) { showAlert('resultAlert', 'warn', '원본 URL을 입력해주세요.'); document.getElementById('resultSection').style.display='block'; return; }
+  if (!spec.utm_source) { showAlert('resultAlert', 'warn', '채널/매체를 선택해주세요.'); document.getElementById('resultSection').style.display='block'; return; }
+  const result = buildUtmUrl(spec);
+  if (result.error) { showAlert('resultAlert', 'warn', result.error); document.getElementById('resultSection').style.display='block'; return; }
+  const row = { row:1, label: spec.label || (getSelectedMedia()?.label || '단건'), spec, ...result };
+  lastResults = [row];
+  renderResults('resultBody', 'resultAlert', [row]);
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function generateFullset() {
+  const url = document.getElementById('inputUrl').value.trim();
+  if (!url) { alert('URL을 입력해주세요.'); return; }
+  const inf = inferDefaults(url);
+  const label = document.getElementById('labelInput').value.trim();
+
+  const specs = [
+    { url, utm_source:'naver',     utm_medium:'sa_pc', utm_campaign: inf.campaign, utm_content:'text',  utm_term:'{keyword}', label:(label?label+' ':'')+'네이버 SA' },
+    { url, utm_source:'google',    utm_medium:'sa_pc', utm_campaign: inf.campaign, utm_content:'text',  utm_term:'{keyword}', label:(label?label+' ':'')+'구글 SA' },
+    { url, utm_source:'instagram', utm_medium:'da',    utm_campaign: 'core_a',     utm_content:'image', utm_term:'',          label:(label?label+' ':'')+'메타 이미지' },
+    { url, utm_source:'instagram', utm_medium:'da',    utm_campaign: 'core_a',     utm_content:'video', utm_term:'',          label:(label?label+' ':'')+'메타 영상' },
+  ];
+
+  const rows = specs.map((spec, i) => ({ row:i+1, label:spec.label, spec, ...buildUtmUrl(spec) }));
+  lastResults = rows;
+  renderResults('resultBody', 'resultAlert', rows);
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 배치 생성
+// ══════════════════════════════════════════════════════════════
+let batchRowCount = 0;
+
+function addBatchRow() {
+  batchRowCount++;
+  const id = batchRowCount;
+  const allMedia = MEDIA_PRESETS.filter(m => m.id !== 'custom');
+  const div = document.createElement('div');
+  div.className = 'batch-row'; div.id = `brow_${id}`;
+  div.innerHTML = `
+    <input type="url" placeholder="https://respace.co.kr/..." id="burl_${id}" oninput="onBatchUrlInput(${id})" />
+    <select id="bmedia_${id}" onchange="onBatchMediaChange(${id})">
+      <option value="">채널 선택</option>
+      <optgroup label="광고">${allMedia.filter(m=>m.group==='ad').map(m=>`<option value="${m.id}">${m.label}</option>`).join('')}</optgroup>
+      <optgroup label="콘텐츠/온드">${allMedia.filter(m=>m.group==='owned').map(m=>`<option value="${m.id}">${m.label}</option>`).join('')}</optgroup>
+    </select>
+    <input type="text" placeholder="캠페인 코드" id="bcampaign_${id}" />
+    <select id="bcontent_${id}">
+      <option value="">-</option>
+      ${VALID_CONTENTS.map(c=>`<option value="${c}">${c}</option>`).join('')}
+    </select>
+    <input type="text" placeholder="term / 소재코드" id="bterm_${id}" />
+    <input type="text" placeholder="라벨" id="blabel_${id}" />
+    <button class="btn-remove" onclick="removeBatchRow(${id})" title="삭제">✕</button>
+  `;
+  document.getElementById('batchRows').appendChild(div);
+}
+
+function removeBatchRow(id) {
+  const el = document.getElementById(`brow_${id}`); if (el) el.remove();
+}
+
+function onBatchUrlInput(id) {
+  clearTimeout(inferTimer);
+  inferTimer = setTimeout(() => {
+    const url = document.getElementById(`burl_${id}`)?.value.trim();
+    if (!url) return;
+    const inf = inferDefaults(url);
+    const campEl = document.getElementById(`bcampaign_${id}`);
+    const mediaId = document.getElementById(`bmedia_${id}`)?.value;
+    const preset = MEDIA_PRESETS.find(m => m.id === mediaId);
+    // SA/DA → 추론값 채움. owned → 건드리지 않음
+    if (!preset || preset.type !== 'owned') {
+      if (campEl && !campEl.value) campEl.value = inf.campaign;
+    }
+  }, 300);
+}
+
+function onBatchMediaChange(id) {
+  const mediaId = document.getElementById(`bmedia_${id}`)?.value;
+  if (!mediaId) return;
+  const preset = MEDIA_PRESETS.find(m => m.id === mediaId);
+  if (!preset) return;
+  const termEl    = document.getElementById(`bterm_${id}`);
+  const contentSel = document.getElementById(`bcontent_${id}`);
+  const campEl    = document.getElementById(`bcampaign_${id}`);
+
+  if (preset.content && contentSel) contentSel.value = preset.content;
+
+  if (preset.type === 'sa') {
+    if (termEl) { termEl.value = '{keyword}'; termEl.readOnly = true; termEl.placeholder = '{keyword}'; }
+    const url = document.getElementById(`burl_${id}`)?.value.trim();
+    if (url && campEl) campEl.value = inferDefaults(url).campaign;
+  } else if (preset.type === 'owned') {
+    if (termEl) { termEl.readOnly = false; termEl.placeholder = preset.termPlaceholder || '식별자'; }
+    if (campEl) {
+      const now = new Date();
+      const ym = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
+      campEl.placeholder = `${preset.campaignPrefix}_${ym}_01`;
+      campEl.value = '';
+    }
+  } else {
+    if (termEl) { termEl.readOnly = false; termEl.placeholder = '소재코드'; }
+  }
+}
+
+function generateBatch() {
+  const rows = document.querySelectorAll('#batchRows .batch-row');
+  if (!rows.length) { alert('배치 행이 없습니다.'); return; }
+
+  const seenUrls = new Set();
+  const results = [];
+  let rowNum = 0;
+
+  rows.forEach(row => {
+    const id = row.id.replace('brow_','');
+    const url = document.getElementById(`burl_${id}`)?.value.trim();
+    if (!url) return;
+
+    const mediaId  = document.getElementById(`bmedia_${id}`)?.value;
+    const preset   = MEDIA_PRESETS.find(m => m.id === mediaId);
+    const inf      = inferDefaults(url);
+    const campVal  = document.getElementById(`bcampaign_${id}`)?.value.trim() ||
+                     (preset?.type === 'owned' ? (document.getElementById(`bcampaign_${id}`)?.placeholder || preset.campaignPrefix) : inf.campaign);
+    const contVal  = document.getElementById(`bcontent_${id}`)?.value || (preset?.content || '');
+    const termVal  = document.getElementById(`bterm_${id}`)?.value.trim() || (preset?.type === 'sa' ? '{keyword}' : '');
+    const labelVal = document.getElementById(`blabel_${id}`)?.value.trim() || preset?.label || '';
+
+    const spec = { url, utm_source: preset?.source||'', utm_medium: preset?.medium||'',
+                   utm_campaign: campVal, utm_content: contVal, utm_term: termVal, label: labelVal };
+    rowNum++;
+    const result = buildUtmUrl(spec);
+    const isDup  = result.final_url && seenUrls.has(result.final_url);
+    if (result.final_url) seenUrls.add(result.final_url);
+    results.push({ row: rowNum, label: labelVal, spec, ...result, is_duplicate: isDup });
+  });
+
+  if (!results.length) { alert('유효한 URL이 없습니다.'); return; }
+  lastBatchResults = results;
+  renderResults('batchResultBody', 'batchResultAlert', results);
+  document.getElementById('batchResultSection').style.display = 'block';
+  document.getElementById('batchResultSection').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function clearBatch() {
+  document.getElementById('batchRows').innerHTML = '';
+  batchRowCount = 0;
+  document.getElementById('batchResultSection').style.display = 'none';
+  addBatchRow(); addBatchRow();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 결과 렌더링
+// ══════════════════════════════════════════════════════════════
+function renderResults(tbodyId, alertId, rows) {
+  const tbody     = document.getElementById(tbodyId);
+  const errCount  = rows.filter(r => r.error).length;
+  const warnCount = rows.filter(r => !r.error && r.warnings?.length).length;
+  const dupCount  = rows.filter(r => r.is_duplicate).length;
+
+  let alertHtml = '';
+  if (errCount) alertHtml = `<div class="alert alert-warn">⚠ ${errCount}건 오류 발생. 해당 행을 확인해주세요.</div>`;
+  else alertHtml = `<div class="alert alert-success">✓ ${rows.length}건 UTM 생성 완료${dupCount ? ` (중복 ${dupCount}건)` : ''}${warnCount ? ` / 경고 ${warnCount}건` : ''}</div>`;
+  document.getElementById(alertId).innerHTML = alertHtml;
+
+  tbody.innerHTML = rows.map(r => {
+    const s = r.spec || {};
+    const finalUrl = r.error
+      ? `<span style="color:#e57373;">${escHtml(r.error)}</span>`
+      : `<a href="${escHtml(r.final_url)}" target="_blank">${escHtml(r.final_url)}</a>
+         <button class="copy-btn" onclick="copyUrl(this,'${escHtml(r.final_url).replace(/'/g,"\\'")}')">복사</button>`;
+    const warns = [];
+    if (r.is_duplicate) warns.push('<span class="tag tag-dup">중복</span>');
+    if (r.warnings?.length) r.warnings.forEach(w => warns.push(`<span class="tag tag-warn">${escHtml(w)}</span>`));
+    return `<tr>
+      <td>${r.row}</td>
+      <td>${escHtml(r.label||'')}</td>
+      <td><span class="tag tag-source">${escHtml(s.utm_source||'-')}</span> <span class="tag tag-medium">${escHtml(s.utm_medium||'-')}</span></td>
+      <td><span class="tag tag-campaign">${escHtml(s.utm_campaign||'-')}</span></td>
+      <td class="url-cell">${finalUrl}</td>
+      <td>${warns.join(' ')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showAlert(elId, type, msg) {
+  const cls = { warn:'alert-warn', info:'alert-info', success:'alert-success' }[type] || 'alert-info';
+  document.getElementById(elId).innerHTML = `<div class="alert ${cls}">${escHtml(msg)}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// CSV 다운로드
+// ══════════════════════════════════════════════════════════════
+function toCSV(rows) {
+  const headers = ['row','label','input_url','final_url','utm_source','utm_medium','utm_campaign','utm_content','utm_term','is_duplicate','warnings','created_at'];
+  const now = new Date().toISOString().replace('T',' ').substring(0,19);
+  const lines = [headers.join(',')];
+  rows.forEach(r => {
+    const s = r.spec||{};
+    lines.push([r.row, csvCell(r.label), csvCell(s.url), csvCell(r.final_url||''),
+      csvCell(s.utm_source), csvCell(s.utm_medium), csvCell(s.utm_campaign),
+      csvCell(s.utm_content), csvCell(s.utm_term),
+      r.is_duplicate?'Y':'', csvCell((r.warnings||[]).join(' | ')), now].join(','));
+  });
+  return '﻿' + lines.join('\r\n');
+}
+function csvCell(v) {
+  if (v==null) return '';
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function fmtDate() { return new Date().toISOString().substring(0,10).replace(/-/g,''); }
+
+function downloadCSV() {
+  if (!lastResults.length) return;
+  const blob = new Blob([toCSV(lastResults)], {type:'text/csv;charset=utf-8;'});
+  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:`respace_utm_${fmtDate()}.csv`});
+  a.click();
+}
+function downloadBatchCSV() {
+  if (!lastBatchResults.length) return;
+  const blob = new Blob([toCSV(lastBatchResults)], {type:'text/csv;charset=utf-8;'});
+  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:`respace_utm_batch_${fmtDate()}.csv`});
+  a.click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 복사
+// ══════════════════════════════════════════════════════════════
+function copyUrl(btn, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '✓ 복사됨'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+function copyAllUrls() {
+  const urls = lastResults.filter(r=>r.final_url).map(r=>r.final_url).join('\n');
+  if (!urls) return;
+  navigator.clipboard.writeText(urls).then(() => alert(`${lastResults.filter(r=>r.final_url).length}개 URL 복사 완료!`));
+}
+function copyBatchUrls() {
+  const urls = lastBatchResults.filter(r=>r.final_url).map(r=>r.final_url).join('\n');
+  if (!urls) return;
+  navigator.clipboard.writeText(urls).then(() => alert(`${lastBatchResults.filter(r=>r.final_url).length}개 URL 복사 완료!`));
+}
+
+// ══════════════════════════════════════════════════════════════
+// 초기화
+// ══════════════════════════════════════════════════════════════
+function clearSingle() {
+  document.getElementById('inputUrl').value = '';
+  document.getElementById('inferredBadge').innerHTML = '';
+  document.querySelectorAll('input[name="media"]').forEach(r => r.checked = false);
+  document.getElementById('customFields').style.display = 'none';
+  document.getElementById('campaignSelGroup').style.display = 'block';
+  document.getElementById('ownedCampaignGroup').style.display = 'none';
+  document.getElementById('ownedCampaignInput').value = '';
+  document.getElementById('utmTerm').value = '';
+  document.getElementById('utmTerm').readOnly = false;
+  document.getElementById('utmTerm').placeholder = '{keyword}';
+  document.getElementById('utmTermLabel').innerHTML = 'utm_term';
+  document.getElementById('labelInput').value = '';
+  document.getElementById('resultSection').style.display = 'none';
+  renderCampaignSelect('campaignSel', [...CAMPAIGN_CATALOG_SA, ...CAMPAIGN_CATALOG_DA], true);
+}
+
+// ══════════════════════════════════════════════════════════════
+// 사전 참고
+// ══════════════════════════════════════════════════════════════
+function renderDictReference() {
+  document.getElementById('dictReference').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;">
+      <div>
+        <div class="section-title" style="margin-bottom:.6rem;">utm_source</div>
+        ${VALID_SOURCES.map(s=>`<div style="font-size:.8rem;padding:.25rem 0;border-bottom:1px solid #f5f5f5;"><code style="font-family:monospace;font-size:.76rem;">${s}</code></div>`).join('')}
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:.6rem;">utm_medium</div>
+        ${VALID_MEDIUMS.map(m=>`<div style="font-size:.8rem;padding:.25rem 0;border-bottom:1px solid #f5f5f5;"><code style="font-family:monospace;font-size:.76rem;">${m}</code></div>`).join('')}
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:.6rem;">utm_content</div>
+        ${VALID_CONTENTS.map(c=>`<div style="font-size:.8rem;padding:.25rem 0;border-bottom:1px solid #f5f5f5;"><code style="font-family:monospace;font-size:.76rem;">${c}</code></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
