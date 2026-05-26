@@ -15,7 +15,6 @@
       font-size: 14px;
     }
 
-    /* ── Header ── */
     header {
       background: #0a0a0a;
       color: #fff;
@@ -33,9 +32,8 @@
     .header-sub { font-size: .83rem; color: rgba(255,255,255,.55); }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
     .live-badge { font-size: .72rem; font-weight: 700; color: #00b894; background: rgba(0,184,148,.15); padding: .28rem .75rem; border-radius: 20px; }
-    .version-badge { font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.4); }
+    .version-badge { font-size: .72rem; font-weight: 700; color: #fff; background: linear-gradient(90deg,#1a1a2e,#3d6be8); padding: .25rem .7rem; border-radius: 4px; letter-spacing: .04em; }
 
-    /* ── INPUT PHASE ── */
     .layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
     .section-label { font-size: .7rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #aaa; margin-bottom: .75rem; }
     .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.75rem; margin-bottom: 1.25rem; }
@@ -54,6 +52,19 @@
     .field textarea { min-height: 68px; resize: vertical; }
     .form-divider { border: none; border-top: 1px solid #f0f0f0; margin: 1.25rem 0; }
 
+    .principle-note {
+      background: #f8f9fc;
+      border-left: 3px solid #3d6be8;
+      padding: .7rem .95rem;
+      border-radius: 0 8px 8px 0;
+      font-size: .77rem;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .principle-note strong { color: #1a1a2e; }
+    .principle-note .steps-hint { display: block; margin-top: .35rem; color: #3d6be8; font-weight: 600; }
+
     .fetch-btn {
       display: inline-flex; align-items: center; gap: .5rem;
       padding: .65rem 1.25rem; background: #f5f5f3; border: 1.5px solid #ddd;
@@ -67,9 +78,13 @@
     .data-preview.show { display: block; }
     .data-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
     .data-chip { background: #f8f8f6; border: 1px solid #e5e5e5; border-radius: 8px; padding: .85rem 1rem; }
+    .data-chip.primary { background: linear-gradient(135deg, #1a1a2e 0%, #3d6be8 100%); border: none; color: #fff; }
     .data-chip-label { font-size: .7rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
+    .data-chip.primary .data-chip-label { color: rgba(255,255,255,.7); }
     .data-chip-value { font-size: .92rem; font-weight: 800; color: #1a1a2e; }
+    .data-chip.primary .data-chip-value { color: #fff; }
     .data-chip-sub { font-size: .73rem; color: #888; margin-top: .2rem; }
+    .data-chip.primary .data-chip-sub { color: rgba(255,255,255,.6); }
 
     .generate-btn {
       display: block; width: 100%; padding: 1rem;
@@ -87,14 +102,12 @@
     @keyframes prog { 0%{width:0%} 60%{width:80%} 100%{width:90%} }
     .progress-msg { font-size: .79rem; color: #888; text-align: center; }
 
-    .error-box { display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: .9rem 1.1rem; color: #dc2626; font-size: .83rem; line-height: 1.65; margin: .75rem 0; }
+    .error-box { display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: .9rem 1.1rem; color: #dc2626; font-size: .83rem; line-height: 1.65; margin: .75rem 0; white-space: pre-line; }
     .error-box.show { display: block; }
 
-    /* ── FEEDBACK PHASE — 좌우 분할 ── */
     #feedback-phase { display: none; }
     #feedback-phase.show { display: flex; gap: 0; height: calc(100vh - 56px); overflow: hidden; }
 
-    /* 왼쪽: 인사이트 패널 */
     .insight-panel {
       width: 58%;
       border-right: 1px solid #e5e5e5;
@@ -115,12 +128,7 @@
     .panel-title { font-size: .88rem; font-weight: 800; color: #111; flex: 1; }
     .panel-sub { font-size: .75rem; color: #999; }
 
-    /* 버전 탭 */
-    .version-tabs {
-      display: flex;
-      gap: .35rem;
-      align-items: center;
-    }
+    .version-tabs { display: flex; gap: .35rem; align-items: center; }
     .ver-tab {
       font-size: .7rem; font-weight: 700;
       padding: .2rem .55rem; border-radius: 6px;
@@ -130,25 +138,84 @@
     }
     .ver-tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
 
-    .insight-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.25rem 1.5rem 3rem;
-    }
+    .insight-scroll { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem 3rem; }
 
-    /* KPI strip (피드백 뷰) */
-    .kpi-strip {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: 1rem;
+    /* 단계 진행도 인디케이터 */
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      padding: .7rem 1rem;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: .73rem;
+      font-weight: 700;
     }
+    .step-progress-item { display: flex; align-items: center; gap: .35rem; color: #aaa; }
+    .step-progress-item.done { color: #00b894; }
+    .step-progress-item.active { color: #3d6be8; }
+    .step-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #e5e5e5;
+      transition: all .2s;
+    }
+    .step-progress-item.done .step-dot { background: #00b894; }
+    .step-progress-item.active .step-dot { background: #3d6be8; box-shadow: 0 0 0 3px rgba(61,107,232,.2); }
+    .step-arrow { color: #ccc; font-size: .68rem; }
+
+    /* 다음 단계 진행 버튼 */
+    .next-step-zone {
+      background: #fff;
+      border: 1.5px dashed #3d6be8;
+      border-radius: 8px;
+      padding: .9rem 1.1rem;
+      margin: 1rem 0;
+    }
+    .next-step-zone.skip { border-color: #94a3b8; }
+    .next-step-zone-msg { font-size: .79rem; color: #555; margin-bottom: .55rem; line-height: 1.7; }
+    .next-step-zone-msg strong { color: #1a1a2e; }
+    .next-step-btn {
+      display: block; width: 100%; padding: .75rem;
+      background: #3d6be8; color: #fff; font-size: .87rem;
+      font-weight: 800; font-family: inherit;
+      border: none; border-radius: 6px;
+      cursor: pointer; transition: opacity .15s;
+      letter-spacing: .02em;
+    }
+    .next-step-btn:hover { opacity: .88; }
+    .next-step-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .next-step-btn.skip { background: #94a3b8; }
+    .retry-btn {
+      display: inline-block; padding: .35rem .8rem;
+      background: #fff; color: #dc2626;
+      border: 1.5px solid #fecaca; border-radius: 6px;
+      font-size: .75rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; margin-left: .5rem;
+    }
+    .retry-btn:hover { background: #fef2f2; }
+
+    /* KPI Strip */
+    .kpi-strip {
+      display: grid; grid-template-columns: 1.4fr repeat(5, 1fr);
+      gap: .5rem; margin-bottom: 1rem;
+    }
+    @media (max-width: 760px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+
     .kpi-chip { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: .75rem; text-align: center; }
-    .kpi-label { font-size: .65rem; color: #aaa; font-weight: 600; margin-bottom: .2rem; }
-    .kpi-value { font-size: .88rem; font-weight: 800; color: #1a1a2e; }
-    .kpi-delta { font-size: .68rem; margin-top: .15rem; }
+    .kpi-chip.primary { background: linear-gradient(135deg,#1a1a2e 0%, #3d6be8 100%); border: none; }
+    .kpi-label { font-size: .65rem; color: #aaa; font-weight: 700; margin-bottom: .2rem; letter-spacing: .04em; text-transform: uppercase; }
+    .kpi-chip.primary .kpi-label { color: rgba(255,255,255,.7); }
+    .kpi-value { font-size: .9rem; font-weight: 800; color: #1a1a2e; }
+    .kpi-chip.primary .kpi-value { color: #fff; font-size: 1rem; }
+    .kpi-delta { font-size: .68rem; margin-top: .15rem; font-weight: 700; }
     .kpi-delta.pos { color: #00b894; }
     .kpi-delta.neg { color: #e74c3c; }
     .kpi-delta.neutral { color: #aaa; }
+    .kpi-chip.primary .kpi-delta { color: rgba(255,255,255,.85); }
 
-    /* 섹션 카드 (피드백 뷰) */
+    /* 섹션 카드 */
     .step-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: .75rem; overflow: hidden; }
     .step-card-header { display: flex; align-items: center; gap: .65rem; padding: .75rem 1rem; background: #fafaf8; border-bottom: 1px solid #f0f0f0; cursor: pointer; user-select: none; }
     .step-num-tag { font-size: .65rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: #1a1a2e; padding: .15rem .48rem; border-radius: 4px; }
@@ -158,25 +225,50 @@
     .step-content { padding: 1rem 1.1rem; font-size: .82rem; line-height: 1.8; color: #333; }
     .step-card.collapsed .step-content { display: none; }
 
-    /* weekly report 콘텐츠 스타일 */
+    /* 섹션 내부 콘텐츠 (LLM 출력 스타일) */
     .step-content .weekly-summary-card { background: #f8f9fc; border-left: 3px solid #1a1a2e; padding: .75rem .9rem; border-radius: 0 8px 8px 0; margin-bottom: .85rem; font-size: .83rem; line-height: 1.75; }
     .step-content .weekly-table { width: 100%; border-collapse: collapse; margin: .65rem 0; font-size: .8rem; }
     .step-content .weekly-table th { background: #f3f3f1; padding: .4rem .65rem; text-align: left; font-weight: 700; font-size: .73rem; color: #666; border-bottom: 1px solid #e5e5e5; }
     .step-content .weekly-table td { padding: .4rem .65rem; border-bottom: 1px solid #f5f5f5; }
     .step-content .weekly-table tr:last-child td { border-bottom: none; }
     .step-content .weekly-table .num { text-align: right; }
-    /* Reason / Solution 구조 스타일 */
-    .step-content p.reason { margin: .15rem 0 .1rem 1rem; font-size: .81rem; color: #555; line-height: 1.7; }
-    .step-content p.reason strong { color: #1a6fbf; }
-    .step-content p.solution { margin: .1rem 0 .55rem 1rem; font-size: .81rem; color: #555; line-height: 1.7; }
-    .step-content p.solution strong { color: #00864e; }
+
+    .step-content .channel-card { border: 1px solid #e5e5e5; border-radius: 8px; padding: .75rem 1rem; margin-bottom: .5rem; background: #fff; }
+    .step-content .channel-card.normal { border-left: 3px solid #00b894; }
+    .step-content .channel-card.anomaly { border-left: 3px solid #e74c3c; background: #fff7f5; }
+    .step-content .channel-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+    .step-content .channel-name { font-weight: 800; font-size: .85rem; color: #1a1a2e; }
+    .step-content .anomaly-badge { font-size: .68rem; font-weight: 800; color: #fff; background: #e74c3c; padding: .15rem .5rem; border-radius: 4px; letter-spacing: .04em; }
+    .step-content .channel-cpl { font-size: .82rem; margin-bottom: .2rem; }
+    .step-content .channel-cpl strong { color: #1a1a2e; }
+    .step-content .channel-note { font-size: .77rem; color: #666; margin-top: .15rem; }
+
+    .step-content .insight-block { background: #fafaf8; border-radius: 8px; padding: .75rem .95rem; margin-bottom: .65rem; border: 1px solid #ebebe8; }
+    .step-content .insight-block p.fact { font-size: .82rem; margin-bottom: .35rem; color: #1a1a2e; }
+    .step-content .insight-block p.cause { font-size: .78rem; margin: .15rem 0 .2rem; color: #444; font-weight: 700; }
+    .step-content .insight-block ul.cause-list { padding-left: 1.1rem; margin: .25rem 0 .45rem; }
+    .step-content .insight-block ul.cause-list li { font-size: .79rem; margin-bottom: .25rem; line-height: 1.65; }
+    .step-content .insight-block .cause-tag { display: inline-block; font-size: .67rem; font-weight: 800; padding: .08rem .42rem; border-radius: 3px; margin-right: .25rem; letter-spacing: .03em; }
+    .step-content .insight-block .cause-tag.confirmed { background: #e0f2fe; color: #0369a1; }
+    .step-content .insight-block .cause-tag.estimated { background: #fef3c7; color: #92400e; }
+    .step-content .insight-block p.action { font-size: .79rem; color: #166534; margin-top: .25rem; }
+
+    .step-content .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; margin-top: .35rem; }
+    @media (max-width: 700px) { .step-content .action-grid { grid-template-columns: 1fr; } }
+    .step-content .action-box { border-radius: 8px; padding: .75rem .9rem; border: 1px solid #e5e5e5; background: #fff; }
+    .step-content .action-box.immediate { border-left: 3px solid #e74c3c; background: #fef7f5; }
+    .step-content .action-box.verify { border-left: 3px solid #f59e0b; background: #fffbeb; }
+    .step-content .action-box.longterm { border-left: 3px solid #3d6be8; background: #f5f7ff; }
+    .step-content .action-head { font-size: .76rem; font-weight: 800; margin-bottom: .35rem; color: #1a1a2e; }
+    .step-content .action-box ul { padding-left: 1.1rem; margin: .2rem 0; }
+    .step-content .action-box li { font-size: .78rem; margin-bottom: .2rem; line-height: 1.6; }
+
     .step-content .delta-pos { color: #00b894; font-weight: 700; }
     .step-content .delta-neg { color: #e74c3c; font-weight: 700; }
     .step-content p { margin-bottom: .45rem; }
     .step-content ul, .step-content ol { padding-left: 1.1rem; margin: .4rem 0; }
     .step-content li { margin-bottom: .25rem; }
 
-    /* 오른쪽: 피드백 패널 */
     .feedback-panel {
       width: 42%;
       background: #fff;
@@ -194,14 +286,10 @@
       resize: vertical; transition: border-color .15s; line-height: 1.65;
     }
     .feedback-textarea:focus { outline: none; border-color: #1a1a2e; }
-    .feedback-textarea:disabled { background: #fafaf8; color: #aaa; }
+    .feedback-textarea:disabled { background: #fafaf8; color: #aaa; cursor: not-allowed; }
+    .feedback-disabled-note { font-size: .73rem; color: #aaa; margin-top: .3rem; font-style: italic; }
 
-    .feedback-hints {
-      margin-top: .6rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: .35rem;
-    }
+    .feedback-hints { margin-top: .6rem; display: flex; flex-wrap: wrap; gap: .35rem; }
     .hint-chip {
       font-size: .71rem; font-weight: 600; color: #555;
       background: #f3f3f1; border: 1px solid #e5e5e5;
@@ -210,6 +298,7 @@
       border-style: none;
     }
     .hint-chip:hover { background: #e8e8e4; }
+    .hint-chip:disabled { opacity: .4; cursor: not-allowed; }
 
     .refine-btn {
       display: block; width: 100%; padding: .85rem;
@@ -221,25 +310,13 @@
     .refine-btn:hover { opacity: .85; }
     .refine-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* 수정 이력 */
     .history-section { margin-top: 1.5rem; }
     .history-title { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #aaa; margin-bottom: .6rem; }
-    .history-item {
-      background: #f8f8f6; border: 1px solid #ebebeb;
-      border-radius: 8px; padding: .75rem 1rem;
-      margin-bottom: .5rem; font-size: .79rem;
-      line-height: 1.6;
-    }
+    .history-item { background: #f8f8f6; border: 1px solid #ebebeb; border-radius: 8px; padding: .75rem 1rem; margin-bottom: .5rem; font-size: .79rem; line-height: 1.6; }
     .history-ver { font-size: .68rem; font-weight: 800; color: #fff; background: #1a1a2e; padding: .1rem .4rem; border-radius: 4px; margin-right: .4rem; }
     .history-fb { color: #555; margin-top: .3rem; }
 
-    /* 대시보드 반영 버튼 영역 */
-    .panel-footer {
-      border-top: 1px solid #e5e5e5;
-      padding: 1rem 1.5rem;
-      background: #fff;
-      flex-shrink: 0;
-    }
+    .panel-footer { border-top: 1px solid #e5e5e5; padding: 1rem 1.5rem; background: #fff; flex-shrink: 0; }
     .dashboard-btn {
       display: block; width: 100%; padding: .85rem;
       background: #00b894; color: #fff; font-size: .88rem; font-weight: 800;
@@ -249,11 +326,7 @@
     .dashboard-btn:hover { opacity: .87; }
     .dashboard-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    .deploy-status {
-      display: none; margin-top: .65rem;
-      font-size: .78rem; line-height: 1.6;
-      padding: .65rem .85rem; border-radius: 6px;
-    }
+    .deploy-status { display: none; margin-top: .65rem; font-size: .78rem; line-height: 1.6; padding: .65rem .85rem; border-radius: 6px; white-space: pre-line; }
     .deploy-status.show { display: block; }
     .deploy-status.ok { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
     .deploy-status.fail { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
@@ -266,7 +339,6 @@
     }
     .restart-btn:hover { border-color: #bbb; }
 
-    /* 반응형 */
     @media (max-width: 900px) {
       #feedback-phase.show { flex-direction: column; }
       .insight-panel, .feedback-panel { width: 100%; border-right: none; }
@@ -275,7 +347,7 @@
     @media (max-width: 600px) {
       .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
       .data-preview-grid { grid-template-columns: 1fr 1fr; }
-      .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+      .step-progress { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -287,7 +359,7 @@
   <div class="header-sub">주간 인사이트 생성기</div>
   <div class="header-right">
     <span class="live-badge">● Live</span>
-    <span class="version-badge">System 05 v2</span>
+    <span class="version-badge">System 06 · 데이터 분석 원칙 v1</span>
   </div>
 </header>
 
@@ -300,50 +372,64 @@
     <div class="section-label">STEP 1 — 기본 정보 입력</div>
     <div class="card">
 
+      <div class="principle-note">
+        <strong>데이터 분석 원칙 v1</strong><br />
+        PRIMARY KPI = <strong>CPL</strong> (Cost Per Lead) · 펀넬 분해(LEVEL 0→6) · 인사이트 = [팩트]→[원인 확인됨/추정]→[액션 즉시/검증후/중장기]
+        <span class="steps-hint">⚙️ 인사이트 생성은 <strong>3단계 분할 호출</strong>로 진행 — 응답 안정성 ↑ · 부분 재시도 가능</span>
+      </div>
+
       <div class="card-title"><span class="step-badge">A</span> 주차 정보</div>
       <div class="form-grid-3">
-        <div class="field"><label>주차 번호</label><input type="text" id="weekNum" placeholder="예: W19" /></div>
+        <div class="field"><label>주차 번호</label><input type="text" id="weekNum" placeholder="예: W22" /></div>
         <div class="field"><label>시작일</label><input type="date" id="startDate" /></div>
         <div class="field"><label>종료일</label><input type="date" id="endDate" /></div>
       </div>
       <div class="form-grid-2">
         <div class="field"><label>미팅 날짜</label><input type="date" id="meetingDate" /></div>
-        <div class="field"><label>비교 주차 (전주)</label><input type="text" id="compareWeek" placeholder="예: W18 (4/27~5/3)" /></div>
+        <div class="field"><label>비교 주차 (전주)</label><input type="text" id="compareWeek" placeholder="예: W21 (5/18~5/24)" /></div>
       </div>
 
       <hr class="form-divider" />
 
       <div class="card-title"><span class="step-badge">F</span> 이번 주 조정/변경 사항</div>
-      <div class="field"><label>네이버</label><textarea id="adj_naver" placeholder="없으면 빈칸"></textarea></div>
+      <div class="field"><label>네이버</label><textarea id="adj_naver" placeholder="키워드 조정, 입찰가 변경 등. 없으면 빈칸"></textarea></div>
       <div class="field"><label>구글</label><textarea id="adj_google" placeholder="없으면 빈칸"></textarea></div>
-      <div class="field"><label>Meta</label><textarea id="adj_meta" placeholder="없으면 빈칸"></textarea></div>
+      <div class="field"><label>Meta</label><textarea id="adj_meta" placeholder="소재 교체, 타겟 변경 등. 없으면 빈칸"></textarea></div>
 
       <hr class="form-divider" />
 
-      <div class="card-title"><span class="step-badge">G</span> 특이사항 / 이슈</div>
-      <div class="field"><textarea id="issues" rows="3" placeholder="스크립트 오류, 트래킹 문제, 외부 변수 등"></textarea></div>
+      <div class="card-title"><span class="step-badge">G</span> 특이사항 / 이슈 (LEVEL 6 단서)</div>
+      <div class="field"><textarea id="issues" rows="3" placeholder="스크립트 오류, 트래킹 문제, 랜딩 변경, 시즌 이슈, 외부 변수 등"></textarea></div>
 
       <div class="card-title" style="margin-top:1rem"><span class="step-badge">H</span> 다음 주 논의 안건</div>
-      <div class="field"><textarea id="nextAgenda" rows="2" placeholder="다음 미팅 안건"></textarea></div>
+      <div class="field"><textarea id="nextAgenda" rows="2" placeholder="다음 미팅에서 논의할 안건"></textarea></div>
 
       <hr class="form-divider" />
 
       <div class="card-title"><span class="step-badge">B · C · D · E</span> 광고 데이터 자동 수집</div>
-      <p style="font-size:.82rem;color:#888;margin-bottom:1rem">주차 날짜 입력 후 버튼을 누르면 대시보드와 동일한 소스(Google Sheets)에서 자동으로 데이터를 가져옵니다.</p>
+      <p style="font-size:.82rem;color:#888;margin-bottom:1rem">주차 날짜 입력 후 버튼을 누르면 대시보드와 동일한 소스(Google Sheets)에서 자동으로 데이터를 가져옵니다. CPL은 수집 직후 클라이언트에서 사전 계산하여 LLM에 전달합니다.</p>
 
       <button class="fetch-btn" id="fetchBtn" onclick="fetchData()">
         <span id="fetchIcon">📡</span><span id="fetchLabel">데이터 수집 시작</span>
       </button>
 
       <div class="data-preview" id="dataPreview">
-        <div style="font-size:.75rem;font-weight:700;color:#aaa;margin:.85rem 0 .5rem;text-transform:uppercase;letter-spacing:.08em">수집 결과</div>
+        <div style="font-size:.75rem;font-weight:700;color:#aaa;margin:.85rem 0 .5rem;text-transform:uppercase;letter-spacing:.08em">수집 결과 · CPL 사전 계산</div>
         <div class="data-preview-grid" id="dataChips"></div>
+        <div id="anomalyNotice" style="display:none;margin-top:.85rem;padding:.7rem .95rem;border-radius:8px;background:#fef7f5;border-left:3px solid #e74c3c;font-size:.78rem;color:#7c2d12;line-height:1.7"></div>
       </div>
 
       <div class="error-box" id="fetchError"></div>
 
-      <button class="generate-btn" id="generateBtn" onclick="generateInsight()" disabled
-        title="먼저 위의 '데이터 수집 시작' 버튼을 눌러 데이터를 수집해 주세요.">✨ 인사이트 생성하기</button>
+      <label style="display:flex;align-items:center;gap:.45rem;margin-top:1rem;padding:.6rem .85rem;background:#f8f9fc;border-radius:6px;font-size:.78rem;color:#555;cursor:pointer;border:1px solid #e5e8f0">
+        <input type="checkbox" id="autoDeployToggle" style="margin:0;cursor:pointer" />
+        <span><strong style="color:#1a1a2e">STEP 3 완료 직후 자동으로 대시보드에 반영</strong> — 피드백 단계를 거치지 않고 바로 GitHub 배포</span>
+      </label>
+
+      <button class="generate-btn" id="generateBtn" onclick="runStep1()" disabled
+        title="먼저 위의 '데이터 수집 시작' 버튼을 눌러 데이터를 수집해 주세요.">
+        ✨ 인사이트 분석 시작 (STEP 1 / 3)
+      </button>
 
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-track"><div class="progress-fill"></div></div>
@@ -356,11 +442,10 @@
 </div>
 
 <!-- ════════════════════════════════════════════
-     FEEDBACK PHASE — 좌우 분할
+     FEEDBACK PHASE
 ════════════════════════════════════════════ -->
 <div id="feedback-phase">
 
-  <!-- ── 왼쪽: 인사이트 패널 ── -->
   <div class="insight-panel">
     <div class="panel-header">
       <div>
@@ -370,26 +455,54 @@
       <div class="version-tabs" id="versionTabs"></div>
     </div>
     <div class="insight-scroll" id="insightScroll">
+      <!-- 단계 진행도 -->
+      <div class="step-progress" id="stepProgress">
+        <div class="step-progress-item" id="sp1">
+          <span class="step-dot"></span><span>STEP 1 · 전체+매체</span>
+        </div>
+        <span class="step-arrow">▶</span>
+        <div class="step-progress-item" id="sp2">
+          <span class="step-dot"></span><span>STEP 2 · 딥다이브</span>
+        </div>
+        <span class="step-arrow">▶</span>
+        <div class="step-progress-item" id="sp3">
+          <span class="step-dot"></span><span>STEP 3 · 액션·체크</span>
+        </div>
+      </div>
+
       <div class="kpi-strip" id="kpiStrip"></div>
       <div id="sectionsContainer"></div>
+
+      <!-- 다음 단계 진행 영역 -->
+      <div id="nextStepZone"></div>
+
+      <!-- 진행 중 표시 -->
+      <div class="progress-wrap" id="stepProgressWrap">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="progress-msg" id="stepProgressMsg">단계 분석 중...</div>
+      </div>
+
+      <div class="error-box" id="stepError"></div>
     </div>
   </div>
 
-  <!-- ── 오른쪽: 피드백 패널 ── -->
   <div class="feedback-panel">
     <div class="feedback-scroll">
 
       <div class="feedback-label">피드백 입력</div>
-      <textarea class="feedback-textarea" id="feedbackInput"
-        placeholder="수정이 필요한 부분을 자유롭게 입력해 주세요.&#10;예) 네이버 섹션에서 CAC 해석이 부족합니다. Meta 총평을 더 구체적으로 작성해 주세요."></textarea>
+      <textarea class="feedback-textarea" id="feedbackInput" disabled
+        placeholder="STEP 3까지 완료된 후 피드백을 입력할 수 있습니다."></textarea>
+      <div class="feedback-disabled-note" id="feedbackDisabledNote">STEP 3 완료 후 활성화됩니다.</div>
 
       <div class="feedback-hints">
-        <button class="hint-chip" onclick="addHint('네이버 CAC 해석 보강 필요')">네이버 CAC 해석 보강</button>
-        <button class="hint-chip" onclick="addHint('Meta 섹션 더 구체적으로')">Meta 구체화</button>
-        <button class="hint-chip" onclick="addHint('전주 대비 수치 비교 추가')">전주 비교 추가</button>
-        <button class="hint-chip" onclick="addHint('액션 아이템 섹션 추가')">액션 아이템 추가</button>
-        <button class="hint-chip" onclick="addHint('전체 톤 더 간결하게')">톤 간결화</button>
-        <button class="hint-chip" onclick="addHint('벤치마크 대비 포지션 명시')">벤치마크 명시</button>
+        <button class="hint-chip" onclick="addHint('CPL 비교가 약함 — 수치 더 명확히')" disabled>CPL 비교 보강</button>
+        <button class="hint-chip" onclick="addHint('LEVEL 2 캠페인별 딥다이브 추가')" disabled>LEVEL 2 딥다이브</button>
+        <button class="hint-chip" onclick="addHint('[확인됨]/[추정] 구분이 흐림 — 명확히 분리')" disabled>원인 구분 명확화</button>
+        <button class="hint-chip" onclick="addHint('[즉시] 액션이 너무 추상적 — 구체화')" disabled>즉시 액션 구체화</button>
+        <button class="hint-chip" onclick="addHint('정상 매체 설명이 너무 길어 — 1줄로 압축')" disabled>정상 매체 압축</button>
+        <button class="hint-chip" onclick="addHint('LEVEL 6 외부 요인 체크 보강')" disabled>LEVEL 6 보강</button>
+        <button class="hint-chip" onclick="addHint('B2B 롱세일즈 맥락 추가 — 단기 반응 자제')" disabled>B2B 맥락 추가</button>
+        <button class="hint-chip" onclick="addHint('다음 주 체크포인트 더 구체적으로')" disabled>체크포인트 구체화</button>
       </div>
 
       <div class="progress-wrap" id="refineProgress">
@@ -398,9 +511,8 @@
       </div>
       <div class="error-box" id="refineError"></div>
 
-      <button class="refine-btn" id="refineBtn" onclick="refineInsight()">↩ 피드백 반영하기</button>
+      <button class="refine-btn" id="refineBtn" onclick="refineInsight()" disabled>↩ 피드백 반영하기</button>
 
-      <!-- 수정 이력 -->
       <div class="history-section" id="historySection" style="display:none">
         <div class="history-title">수정 이력</div>
         <div id="historyList"></div>
@@ -408,9 +520,8 @@
 
     </div>
 
-    <!-- 하단: 대시보드 반영 -->
     <div class="panel-footer">
-      <button class="dashboard-btn" id="dashboardBtn" onclick="updateDashboard()">
+      <button class="dashboard-btn" id="dashboardBtn" onclick="updateDashboard()" disabled>
         🚀 대시보드에 반영하기
       </button>
       <div class="deploy-status" id="deployStatus"></div>
@@ -423,22 +534,26 @@
   // ── 상수 ──────────────────────────────────────────────────────
   const SHEET_ID    = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
   const SHEETS      = { naver: '네이버 검색광고', google: '구글 검색광고', meta: 'Meta 광고', leads: '리캐치_리드', deals: '리캐치_딜' };
-  // raw.githubusercontent.com = CDN 캐시 없이 항상 최신 커밋 파일을 반환 (CORS 허용)
   const DASHBOARD_URL = 'https://raw.githubusercontent.com/gloup-rachel/respace/main/respace_dashboard_v3.html';
   const API_INSIGHT   = '/api/weekly-report';
   const API_DEPLOY    = '/api/update-dashboard';
+  const ANOMALY_THRESHOLD = 20;
 
   // ── 상태 ──────────────────────────────────────────────────────
   let collectedData  = null;
   let weekInfoCache  = null;
   let userInputsCache = null;
-  let versions       = [];   // { entry, feedback } 배열 — 버전 이력
-  let currentVerIdx  = 0;    // 현재 보고 있는 버전 인덱스
+  let versions       = [];          // [{ entry, feedback, currentStep }]
+  let currentVerIdx  = 0;
+  let currentStep    = 0;           // 0 = 미시작, 1·2·3 = 해당 step 완료, 'done' = 전체 완료
   let dashboardHTML  = null;
+  let cachedComputed = null;        // 서버에서 계산된 메타
 
-  // ── 날짜 유틸 ─────────────────────────────────────────────────
+  // ── 유틸 ──────────────────────────────────────────────────────
   const fmtD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const getDow = s => ['일','월','화','수','목','금','토'][new Date(s).getDay()];
+  const fmtNum = n => Math.round(n||0).toLocaleString('ko-KR');
+  const parseNum = v => { if(v==null)return 0; if(typeof v==='number')return v; return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; };
 
   function getDateRange() {
     const s = document.getElementById('startDate').value;
@@ -459,16 +574,12 @@
     const d = gv ? new Date(+gv[1],+gv[2],+gv[3]) : new Date(v);
     return !isNaN(d) && d >= r.start && d <= r.end;
   }
-  const fmtNum = n => Math.round(n||0).toLocaleString('ko-KR');
-  const parseNum = v => { if(v==null)return 0; if(typeof v==='number')return v; return parseFloat(String(v).replace(/[^0-9.-]/g,''))||0; };
-  // 날짜 컬럼명 후보: 광고 매체 + 리캐치 CRM 공통 대응
   const getKey = r =>
     r['날짜']||r['일자']||r['Date']||r['date']||
     r['생성일']||r['생성일시']||r['등록일']||r['신청일']||
     r['리드 생성일']||r['리드생성일']||r['접수일']||r['문의일']||
     Object.values(r)[0];
 
-  // ── gviz/tq fetch — 에러 시 null 반환 (대시보드 방식 동일) ──────
   async function fetchSheet(name) {
     try {
       const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&tq=${encodeURIComponent('SELECT *')}`;
@@ -478,7 +589,7 @@
       return JSON.parse(m[1]).table;
     } catch(e) {
       console.error(`fetchSheet 오류 (${name}):`, e.message);
-      return null;   // null → parseTable → []로 안전 처리
+      return null;
     }
   }
   function parseTable(t) {
@@ -522,8 +633,6 @@
     });
     return {totalSpend:ts,totalImpressions:ti,totalClicks:tc,totalConv:tv,campaigns:camps};
   }
-  function aggCount(rows, r) { return rows.filter(row=>inRange(getKey(row),r)).length; }
-  // 리캐치 전용 — 대시보드와 동일한 컬럼명 직접 사용
   function aggLeads(rows, r) { return rows.filter(row=>inRange(row['생성일'],r)).length; }
   function aggDeals(rows, r) { return rows.filter(row=>inRange(row['폼 제출 일자'],r)).length; }
 
@@ -537,15 +646,14 @@
     document.getElementById('fetchLabel').textContent='수집 중...';
     document.getElementById('fetchError').className='error-box';
     document.getElementById('dataPreview').className='data-preview';
+    document.getElementById('anomalyNotice').style.display='none';
     try {
       const pr = getPrevRange();
-      // 각 시트를 독립 fetch — 하나 실패해도 나머지는 정상 수집
       const [nT,gT,mT,lT,dT] = await Promise.all([
         fetchSheet(SHEETS.naver), fetchSheet(SHEETS.google), fetchSheet(SHEETS.meta),
         fetchSheet(SHEETS.leads), fetchSheet(SHEETS.deals)
       ]);
 
-      // 실패 시트 경고 (null = fetch 오류)
       const failedSheets = [
         !nT && '네이버 검색광고', !gT && '구글 검색광고', !mT && 'Meta 광고',
         !lT && '리캐치_리드',    !dT && '리캐치_딜'
@@ -564,6 +672,7 @@
         prevMeta:pr?aggMeta(mR,pr):null, prevLeads:pr?aggLeads(lR,pr):null, prevDeals:pr?aggDeals(dR,pr):null
       };
       renderChips();
+      renderAnomalyNotice();
       document.getElementById('fetchIcon').textContent = failedSheets.length ? '⚠️' : '✅';
       document.getElementById('fetchLabel').textContent='수집 완료 — 다시 수집하기';
       btn.disabled=false;
@@ -576,43 +685,118 @@
     }
   }
 
+  // ── CPL 사전 계산 (UI 표시용) ─────────────────────────────────
+  function computeCPLs() {
+    const d = collectedData; if (!d) return null;
+    const cpl = (s, c) => c > 0 ? Math.round(s / c) : null;
+    const tSpend = (d.naver.totalSpend||0) + (d.google.totalSpend||0) + (d.meta.totalSpend||0);
+    const pSpend = (d.prevNaver?.totalSpend||0) + (d.prevGoogle?.totalSpend||0) + (d.prevMeta?.totalSpend||0);
+    const total = cpl(tSpend, d.leads);
+    const prevTotal = cpl(pSpend, d.prevLeads);
+    const g = cpl(d.google.totalSpend, d.google.totalConv);
+    const n = cpl(d.naver.totalSpend, d.naver.totalConv);
+    const m = cpl(d.meta.totalSpend, d.meta.totalConv);
+    const pg = cpl(d.prevGoogle?.totalSpend||0, d.prevGoogle?.totalConv||0);
+    const pn = cpl(d.prevNaver?.totalSpend||0, d.prevNaver?.totalConv||0);
+    const pm = cpl(d.prevMeta?.totalSpend||0, d.prevMeta?.totalConv||0);
+    const change = (now, prev) => (now == null || prev == null || prev === 0) ? null : Math.round(((now - prev)/prev)*1000)/10;
+    return {
+      total, totalDelta: change(total, prevTotal),
+      google: g, googleDelta: change(g, pg),
+      naver: n, naverDelta: change(n, pn),
+      meta: m, metaDelta: change(m, pm),
+    };
+  }
+
   function renderChips() {
-    const {naver:n,google:g,meta:m,leads:l,deals:d} = collectedData;
+    const {naver:n,google:g,meta:m,leads:l} = collectedData;
     const total = n.totalSpend+g.totalSpend+m.totalSpend;
+    const cpls = computeCPLs();
+    const cplStr = cpls.total != null ? `₩${fmtNum(cpls.total)}` : 'N/A';
+    const cplSub = cpls.totalDelta != null ? `${cpls.totalDelta > 0 ? '+' : ''}${cpls.totalDelta}% vs 전주` : '전주 데이터 없음';
+
     document.getElementById('dataChips').innerHTML = [
-      {label:'네이버',value:`₩${fmtNum(n.totalSpend)}`,sub:`전환 ${n.totalConv}건`},
-      {label:'구글',value:`₩${fmtNum(g.totalSpend)}`,sub:`전환 ${g.totalConv}건`},
-      {label:'Meta',value:`₩${fmtNum(m.totalSpend)}`,sub:`전환 ${m.totalConv}건`},
-      {label:'리드',value:`${l}건`,sub:'리캐치 리드'},
-      {label:'딜',value:`${d}건`,sub:'리캐치 딜'},
-      {label:'총 광고비',value:`₩${fmtNum(total)}`,sub:'3매체 합산'}
-    ].map(c=>`<div class="data-chip"><div class="data-chip-label">${c.label}</div><div class="data-chip-value">${c.value}</div><div class="data-chip-sub">${c.sub}</div></div>`).join('');
+      {label:'CPL (Primary)', value: cplStr, sub: cplSub, primary: true},
+      {label:'총 리드', value:`${l}건`, sub:`전주 ${collectedData.prevLeads||0}건`},
+      {label:'총 광고비', value:`₩${fmtNum(total)}`, sub:'3매체 합산'},
+      {label:'네이버', value:`₩${fmtNum(n.totalSpend)}`, sub:`전환 ${n.totalConv}건 · CPL ${cpls.naver!=null?'₩'+fmtNum(cpls.naver):'N/A'}`},
+      {label:'구글', value:`₩${fmtNum(g.totalSpend)}`, sub:`전환 ${g.totalConv}건 · CPL ${cpls.google!=null?'₩'+fmtNum(cpls.google):'N/A'}`},
+      {label:'Meta', value:`₩${fmtNum(m.totalSpend)}`, sub:`전환 ${m.totalConv}건 · CPL ${cpls.meta!=null?'₩'+fmtNum(cpls.meta):'N/A'}`}
+    ].map(c=>`<div class="data-chip${c.primary?' primary':''}"><div class="data-chip-label">${c.label}</div><div class="data-chip-value">${c.value}</div><div class="data-chip-sub">${c.sub}</div></div>`).join('');
     document.getElementById('dataPreview').className='data-preview show';
   }
 
-  // ── 인사이트 생성 ──────────────────────────────────────────────
-  async function generateInsight() {
-    if (!collectedData) {
-      showErr('generateError','⬆️ 먼저 위의 [데이터 수집 시작] 버튼을 눌러 데이터를 수집해 주세요.');
-      document.getElementById('fetchBtn').scrollIntoView({ behavior:'smooth', block:'center' });
-      return;
+  function renderAnomalyNotice() {
+    const cpls = computeCPLs();
+    const anomalies = [];
+    if (cpls.googleDelta != null && Math.abs(cpls.googleDelta) >= ANOMALY_THRESHOLD)
+      anomalies.push(`Google CPL ${cpls.googleDelta > 0 ? '+' : ''}${cpls.googleDelta}%`);
+    if (cpls.naverDelta != null && Math.abs(cpls.naverDelta) >= ANOMALY_THRESHOLD)
+      anomalies.push(`Naver CPL ${cpls.naverDelta > 0 ? '+' : ''}${cpls.naverDelta}%`);
+    if (cpls.metaDelta != null && Math.abs(cpls.metaDelta) >= ANOMALY_THRESHOLD)
+      anomalies.push(`Meta CPL ${cpls.metaDelta > 0 ? '+' : ''}${cpls.metaDelta}%`);
+
+    const el = document.getElementById('anomalyNotice');
+    if (anomalies.length === 0) {
+      el.style.display='none';
+    } else {
+      el.style.display='block';
+      el.innerHTML = `⚠ <strong>이상 신호 감지 (±${ANOMALY_THRESHOLD}% 이상)</strong> — ${anomalies.join(' / ')}<br />→ STEP 2 딥다이브에서 해당 매체가 자동으로 분석됩니다.`;
     }
+  }
+
+  // ── 공통 callAPI (SSE) ───────────────────────────────────────
+  async function callAPI(body, onProgress) {
+    const res = await fetch(API_INSIGHT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok || !res.body) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `서버 오류 (${res.status})`);
+    }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        let event;
+        try { event = JSON.parse(raw); } catch (_) { continue; }
+        if (event.type === 'progress' && onProgress) onProgress(event.chars);
+        else if (event.type === 'done') return event;  // {result, computed} 또는 {entry}
+        else if (event.type === 'error') throw new Error(event.message || '오류');
+      }
+    }
+    throw new Error('응답 스트림이 예기치 않게 종료되었습니다.');
+  }
+
+  // ── 주차 정보 준비 (모든 step 공통) ───────────────────────────
+  function prepareWeekInfo() {
     const weekNum=document.getElementById('weekNum').value.trim();
     const startDate=document.getElementById('startDate').value;
     const endDate=document.getElementById('endDate').value;
     const meetingDate=document.getElementById('meetingDate').value;
     const compareWeek=document.getElementById('compareWeek').value.trim();
-    if (!weekNum||!startDate||!endDate) { showErr('generateError','주차 번호와 날짜를 모두 입력해 주세요.'); return; }
-
+    if (!weekNum||!startDate||!endDate) return null;
     const sFmt=fmtD(new Date(startDate)), eFmt=fmtD(new Date(endDate));
-    weekInfoCache = {
+    return {
       id:`${new Date(startDate).getFullYear()}-${weekNum}`,
       weekLabel:`${weekNum} (${sFmt.slice(5).replace('-','/')}~${eFmt.slice(5).replace('-','/')})`,
       meetingDate: meetingDate?`${fmtD(new Date(meetingDate))} (${getDow(meetingDate)})`:'',
       periodLabel:`${sFmt} ~ ${eFmt}`,
       comparePeriod:compareWeek?`지난 주 ${compareWeek}`:'전주 데이터 기준'
     };
-    userInputsCache = {
+  }
+  function prepareInputs() {
+    return {
       adjustments:[
         document.getElementById('adj_naver').value?`네이버: ${document.getElementById('adj_naver').value}`:'',
         document.getElementById('adj_google').value?`구글: ${document.getElementById('adj_google').value}`:'',
@@ -621,49 +805,221 @@
       issues:document.getElementById('issues').value||'없음',
       nextAgenda:document.getElementById('nextAgenda').value||'없음'
     };
+  }
 
-    setGenerating(true);
+  // ── STEP 1: 한 줄 요약 + KPI + LEVEL 0,1 ──────────────────────
+  async function runStep1() {
+    if (!collectedData) {
+      showErr('generateError','⬆️ 먼저 [데이터 수집 시작] 버튼을 눌러 데이터를 수집해 주세요.');
+      return;
+    }
+    const wi = prepareWeekInfo();
+    if (!wi) { showErr('generateError','주차 번호와 날짜를 모두 입력해 주세요.'); return; }
+    weekInfoCache = wi;
+    userInputsCache = prepareInputs();
+
+    setInputGenerating(true);
     try {
-      const entry = await callAPI(
-        { mode:'generate', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache },
-        (chars) => updateGeneratingProgress(chars)
+      const evt = await callAPI(
+        { mode:'step1', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache },
+        (chars) => updateProgress('progressMsg', chars, 'STEP 1')
       );
+      cachedComputed = evt.computed;
+
+      // entry 초기 조립 — sections는 항상 자동 리넘버링 적용
+      const entry = {
+        id: weekInfoCache.id,
+        weekLabel: weekInfoCache.weekLabel,
+        meetingDate: weekInfoCache.meetingDate,
+        periodLabel: weekInfoCache.periodLabel,
+        comparePeriod: weekInfoCache.comparePeriod,
+        isLatest: true,
+        oneLineSummary: evt.result.oneLineSummary || '',
+        kpis: Array.isArray(evt.result.kpis) ? evt.result.kpis : [],
+        sections: renumberSections(Array.isArray(evt.result.sections) ? evt.result.sections : []),
+        _system: 'insight-v2',
+        _computed: cachedComputed,
+      };
       versions = [{ entry, feedback: null }];
       currentVerIdx = 0;
-      await loadDashboardHTML(entry);
+      currentStep = 1;
+
       switchToFeedbackPhase();
       renderInsightPanel(currentVerIdx);
-      renderVersionTabs();
-    } catch(e) {
-      showErr('generateError', `인사이트 생성 실패: ${e.message}`);
+      renderStepProgress();
+      renderNextStepZone();
+    } catch (e) {
+      showErr('generateError', `STEP 1 실패: ${e.message}`);
     } finally {
-      setGenerating(false);
+      setInputGenerating(false);
     }
   }
 
-  function setGenerating(on) {
+  // ── STEP 2: LEVEL 2~5 딥다이브 ────────────────────────────────
+  async function runStep2() {
+    if (currentStep < 1) return;
+    setStepGenerating(true);
+    try {
+      const prev = versions[currentVerIdx].entry;
+      const evt = await callAPI(
+        { mode:'step2', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev },
+        (chars) => updateProgress('stepProgressMsg', chars, 'STEP 2')
+      );
+      const newSections = Array.isArray(evt.result.sections) ? evt.result.sections : [];
+      prev.sections = renumberSections(prev.sections.concat(newSections));
+      if (evt.result._skipped) {
+        prev._step2_skipped = true;
+        prev._step2_reason = evt.result._reason;
+      }
+      currentStep = 2;
+      renderInsightPanel(currentVerIdx);
+      renderStepProgress();
+      renderNextStepZone();
+    } catch (e) {
+      showErr('stepError', `STEP 2 실패: ${e.message}`);
+      renderNextStepZone(true); // 재시도 옵션
+    } finally {
+      setStepGenerating(false);
+    }
+  }
+
+  // ── STEP 3: LEVEL 6 + 액션 + 다음 주 체크 ─────────────────────
+  async function runStep3() {
+    if (currentStep < 1) return;
+    setStepGenerating(true);
+    try {
+      const prev = versions[currentVerIdx].entry;
+      const evt = await callAPI(
+        { mode:'step3', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev },
+        (chars) => updateProgress('stepProgressMsg', chars, 'STEP 3')
+      );
+      const newSections = Array.isArray(evt.result.sections) ? evt.result.sections : [];
+      prev.sections = renumberSections(prev.sections.concat(newSections));
+      currentStep = 'done';
+
+      await loadDashboardHTML(prev);
+      renderInsightPanel(currentVerIdx);
+      renderStepProgress();
+      renderNextStepZone();
+      enableFeedback(true);
+      document.getElementById('dashboardBtn').disabled = false;
+
+      // 자동 배포 토글이 켜져 있으면 STEP 3 완료 직후 자동으로 대시보드 반영
+      const autoDeploy = document.getElementById('autoDeployToggle')?.checked;
+      if (autoDeploy) {
+        // UI가 한 번 그려진 후 호출되도록 약간의 딜레이
+        setTimeout(() => {
+          if (dashboardHTML) {
+            showDeployStatus('', '⏳ 자동 배포 진행 중...');
+            updateDashboard();
+          }
+        }, 600);
+      }
+    } catch (e) {
+      showErr('stepError', `STEP 3 실패: ${e.message}`);
+      renderNextStepZone(true);
+    } finally {
+      setStepGenerating(false);
+    }
+  }
+
+  // ── 진행도 인디케이터 렌더링 ──────────────────────────────────
+  function renderStepProgress() {
+    const set = (id, state) => {
+      const el = document.getElementById(id);
+      el.classList.remove('done','active');
+      if (state) el.classList.add(state);
+    };
+    set('sp1', currentStep >= 1 ? 'done' : 'active');
+    set('sp2', currentStep === 'done' || currentStep >= 2 ? 'done' : (currentStep === 1 ? 'active' : null));
+    set('sp3', currentStep === 'done' ? 'done' : (currentStep === 2 ? 'active' : null));
+  }
+
+  // ── 다음 단계 버튼 영역 렌더링 ────────────────────────────────
+  function renderNextStepZone(showRetry) {
+    const el = document.getElementById('nextStepZone');
+    const entry = versions[currentVerIdx]?.entry;
+    const anomalyCount = cachedComputed?.anomalies?.length || 0;
+
+    if (showRetry) {
+      // 마지막 step 실패 → 재시도 버튼
+      const retryFn = currentStep === 1 ? 'runStep2()' : 'runStep3()';
+      const retryLabel = currentStep === 1 ? 'STEP 2 다시 시도' : 'STEP 3 다시 시도';
+      el.innerHTML = `<div class="next-step-zone">
+        <div class="next-step-zone-msg">⚠ 직전 단계가 실패했습니다. 다시 시도하거나 다음 단계로 건너뛸 수 있습니다.</div>
+        <button class="next-step-btn" onclick="${retryFn}">↻ ${retryLabel}</button>
+      </div>`;
+      return;
+    }
+
+    if (currentStep === 1) {
+      if (anomalyCount === 0) {
+        el.innerHTML = `<div class="next-step-zone skip">
+          <div class="next-step-zone-msg">
+            <strong>이상 매체 없음</strong> — 모든 매체 CPL이 ±${ANOMALY_THRESHOLD}% 이내. STEP 2 딥다이브를 건너뛰고 STEP 3 액션 도출로 진행할 수 있습니다.
+          </div>
+          <button class="next-step-btn skip" onclick="runStep3()">⏭ STEP 3 액션 도출로 건너뛰기</button>
+        </div>`;
+      } else {
+        const channels = cachedComputed.anomalyChannels.join(', ');
+        el.innerHTML = `<div class="next-step-zone">
+          <div class="next-step-zone-msg">
+            <strong>이상 매체: ${channels}</strong> — LEVEL 2~5 딥다이브로 캠페인·그룹·키워드 단위 원인 분석을 진행합니다.
+          </div>
+          <button class="next-step-btn" onclick="runStep2()">▶ STEP 2 딥다이브 진행</button>
+        </div>`;
+      }
+    } else if (currentStep === 2) {
+      el.innerHTML = `<div class="next-step-zone">
+        <div class="next-step-zone-msg">
+          <strong>딥다이브 완료</strong> — 이제 LEVEL 6 외부 요인 체크와 액션 아이템, 다음 주 체크포인트를 도출합니다.
+        </div>
+        <button class="next-step-btn" onclick="runStep3()">▶ STEP 3 액션 도출</button>
+      </div>`;
+    } else if (currentStep === 'done') {
+      el.innerHTML = `<div class="next-step-zone" style="border-color:#00b894;background:#f0fdf4">
+        <div class="next-step-zone-msg" style="color:#166534">
+          ✓ <strong>전체 분석 완료</strong> — 우측 피드백 입력란이 활성화되었습니다. 필요 시 수정 요청, 또는 대시보드 반영을 진행하세요.
+        </div>
+      </div>`;
+    } else {
+      el.innerHTML = '';
+    }
+  }
+
+  // ── 피드백 활성화/비활성화 ────────────────────────────────────
+  function enableFeedback(on) {
+    document.getElementById('feedbackInput').disabled = !on;
+    document.getElementById('refineBtn').disabled = !on;
+    document.querySelectorAll('.hint-chip').forEach(c => c.disabled = !on);
+    document.getElementById('feedbackDisabledNote').style.display = on ? 'none' : 'block';
+    if (on) document.getElementById('feedbackInput').placeholder = '수정이 필요한 부분을 자유롭게 입력해 주세요.';
+  }
+
+  // ── 진행 상태 UI ──────────────────────────────────────────────
+  function setInputGenerating(on) {
     document.getElementById('generateBtn').disabled = on;
     document.getElementById('progressWrap').className = on ? 'progress-wrap show' : 'progress-wrap';
     document.getElementById('generateError').className = 'error-box';
+    if (on) startProgressMsg('progressMsg', ['STEP 1 — LEVEL 0 전체 통합...', 'STEP 1 — LEVEL 1 매체별 CPL 비교...', 'KPI strip 작성 중...']);
+    else stopProgressMsg();
+  }
+  function setStepGenerating(on) {
+    document.getElementById('stepProgressWrap').className = on ? 'progress-wrap show' : 'progress-wrap';
+    document.getElementById('stepError').className = 'error-box';
     if (on) {
-      startProgressMsg('progressMsg', ['Claude가 데이터 분석 중...','인사이트 도출 중...','섹션 작성 중...','최종 검토 중...']);
-    } else {
-      stopProgressMsg();
-      const msg = document.getElementById('progressMsg');
-      if (msg) msg.textContent = '';
-    }
+      const label = currentStep === 1 ? 'STEP 2 (딥다이브)' : 'STEP 3 (액션·체크)';
+      startProgressMsg('stepProgressMsg', [`${label} 분석 중...`, `${label} 작성 중...`, `${label} 검토 중...`]);
+    } else stopProgressMsg();
   }
 
-  function updateGeneratingProgress(chars) {
-    const msg = document.getElementById('progressMsg');
+  function updateProgress(elId, chars, label) {
+    const msg = document.getElementById(elId);
     if (!msg) return;
-    if (chars < 500) msg.textContent = 'Claude가 데이터 분석 중...';
-    else if (chars < 2000) msg.textContent = `인사이트 도출 중... (${chars.toLocaleString()}자)`;
-    else if (chars < 5000) msg.textContent = `섹션 작성 중... (${chars.toLocaleString()}자)`;
-    else msg.textContent = `거의 완료... (${chars.toLocaleString()}자)`;
+    msg.textContent = `${label} 작성 중... (${chars.toLocaleString()}자)`;
   }
 
-  // ── 피드백 반영 ────────────────────────────────────────────────
+  // ── 피드백 반영 (전체 entry refine) ───────────────────────────
   async function refineInsight() {
     const feedback = document.getElementById('feedbackInput').value.trim();
     if (!feedback) { showErr('refineError','피드백 내용을 입력해 주세요.'); return; }
@@ -675,7 +1031,7 @@
     startProgressMsg('refineProgressMsg',['피드백 분석 중...','섹션 수정 중...','검토 중...']);
 
     try {
-      const entry = await callAPI({
+      const evt = await callAPI({
         mode: 'refine',
         weekInfo: weekInfoCache,
         rawData: collectedData,
@@ -684,7 +1040,8 @@
         feedback
       }, null);
 
-      // 현재 버전 이후 항목 제거 후 새 버전 추가
+      const entry = evt.entry;
+      if (Array.isArray(entry.sections)) entry.sections = renumberSections(entry.sections);
       versions = versions.slice(0, currentVerIdx + 1);
       versions.push({ entry, feedback });
       currentVerIdx = versions.length - 1;
@@ -693,7 +1050,6 @@
       renderInsightPanel(currentVerIdx);
       renderVersionTabs();
       addHistory(feedback, currentVerIdx);
-
       document.getElementById('feedbackInput').value = '';
     } catch(e) {
       showErr('refineError', `피드백 반영 실패: ${e.message}`);
@@ -702,55 +1058,6 @@
       document.getElementById('refineProgress').className = 'progress-wrap';
       stopProgressMsg();
     }
-  }
-
-  // ── API 호출 공통 (SSE 스트리밍) ──────────────────────────────
-  async function callAPI(body, onProgress) {
-    const res = await fetch(API_INSIGHT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok || !res.body) {
-      // SSE 이전 단계 에러 (400, 500 등)
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `서버 오류 (${res.status})`);
-    }
-
-    // SSE 스트림 읽기
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // 마지막 불완전 라인은 다음 청크로
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const raw = line.slice(6).trim();
-        let event;
-        try {
-          event = JSON.parse(raw);
-        } catch (_) {
-          continue; // 불완전한 JSON 청크 무시
-        }
-        if (event.type === 'progress' && onProgress) {
-          onProgress(event.chars);
-        } else if (event.type === 'done') {
-          return event.entry;
-        } else if (event.type === 'error') {
-          throw new Error(event.message || '인사이트 생성 오류');
-        }
-      }
-    }
-
-    throw new Error('응답 스트림이 예기치 않게 종료되었습니다.');
   }
 
   // ── 대시보드 HTML 로드 & 삽입 ──────────────────────────────────
@@ -794,14 +1101,12 @@
             }`;
   }
 
-  // ── 대시보드 자동 반영 ────────────────────────────────────────
   async function updateDashboard() {
     if (!dashboardHTML) { showDeployStatus('fail','대시보드 HTML이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.'); return; }
     const btn = document.getElementById('dashboardBtn');
     btn.disabled = true;
     btn.textContent = '⏳ 업로드 중...';
     showDeployStatus('', '');
-
     try {
       const res = await fetch(API_DEPLOY, {
         method:'POST',
@@ -818,7 +1123,6 @@
       btn.textContent = '🚀 대시보드에 반영하기';
     }
   }
-
   function showDeployStatus(type, msg) {
     const el = document.getElementById('deployStatus');
     el.innerHTML = msg;
@@ -831,29 +1135,50 @@
     document.getElementById('feedback-phase').className = 'show';
   }
 
+  // ── 섹션 자동 리넘버링 ─────────────────────────────────────────
+  // STEP 2 SKIP 등으로 LLM 원본 title 번호가 비연속(1,2,3,5,6,7)이 되어도
+  // 표시 시 1,2,3,4,5,6 으로 매끄럽게 재부여. 4-a/4-b 서브 알파벳은 유지.
+  function renumberSections(sections) {
+    let mainCounter = 0;
+    let lastOriginalMain = null;
+    return sections.map(s => {
+      const m = (s.title || '').match(/^(\d+)(-[a-z])?\.\s*(.*)$/);
+      if (!m) return s;
+      const originalMain = parseInt(m[1], 10);
+      const sub = m[2] || '';
+      const rest = m[3];
+      if (originalMain !== lastOriginalMain) {
+        mainCounter += 1;
+        lastOriginalMain = originalMain;
+      }
+      return { ...s, title: `${mainCounter}${sub}. ${rest}` };
+    });
+  }
+
   function renderInsightPanel(vIdx) {
     const entry = versions[vIdx].entry;
     document.getElementById('insightTitle').textContent = entry.weekLabel;
     document.getElementById('insightSub').textContent = entry.oneLineSummary;
 
-    document.getElementById('kpiStrip').innerHTML = entry.kpis.map(k=>`
-      <div class="kpi-chip">
+    document.getElementById('kpiStrip').innerHTML = entry.kpis.map((k,i)=>{
+      const isPrimary = i === 0 || /primary/i.test(k.label||'');
+      const trend = k.trend==='pos' ? 'pos' : k.trend==='neg' ? 'neg' : 'neutral';
+      return `<div class="kpi-chip${isPrimary?' primary':''}">
         <div class="kpi-label">${k.label}</div>
         <div class="kpi-value">${k.value}</div>
-        <div class="kpi-delta ${k.trend==='pos'?'pos':k.trend==='neg'?'neg':'neutral'}">${k.delta}</div>
-      </div>`).join('');
+        <div class="kpi-delta ${trend}">${k.delta||''}</div>
+      </div>`;
+    }).join('');
 
     document.getElementById('sectionsContainer').innerHTML = entry.sections.map((s,i)=>`
       <div class="step-card" id="step-${i}">
         <div class="step-card-header" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')">
-          <span class="step-num-tag">STEP ${i+1}</span>
+          <span class="step-num-tag">${i+1}</span>
           <span class="step-title-text">${s.title}</span>
           <span class="step-toggle">▼</span>
         </div>
         <div class="step-content">${s.html}</div>
       </div>`).join('');
-
-    document.getElementById('insightScroll').scrollTop = 0;
   }
 
   function renderVersionTabs() {
@@ -861,12 +1186,7 @@
       <button class="ver-tab ${i===currentVerIdx?'active':''}" onclick="switchVersion(${i})">v${i+1}</button>
     `).join('');
   }
-
-  function switchVersion(i) {
-    currentVerIdx = i;
-    renderInsightPanel(i);
-    renderVersionTabs();
-  }
+  function switchVersion(i) { currentVerIdx = i; renderInsightPanel(i); renderVersionTabs(); }
 
   function addHistory(feedback, vIdx) {
     const section = document.getElementById('historySection');
@@ -880,13 +1200,14 @@
 
   function addHint(text) {
     const ta = document.getElementById('feedbackInput');
+    if (ta.disabled) return;
     ta.value = ta.value ? ta.value + ' ' + text : text;
     ta.focus();
   }
 
   function restartFlow() {
     collectedData=null; weekInfoCache=null; userInputsCache=null;
-    versions=[]; currentVerIdx=0; dashboardHTML=null;
+    versions=[]; currentVerIdx=0; currentStep=0; dashboardHTML=null; cachedComputed=null;
     document.getElementById('feedback-phase').className='';
     document.getElementById('input-phase').style.display='';
     document.getElementById('generateBtn').disabled=true;
@@ -896,26 +1217,30 @@
     document.getElementById('historySection').style.display='none';
     document.getElementById('historyList').innerHTML='';
     document.getElementById('feedbackInput').value='';
-    document.getElementById('dashboardBtn').disabled=false;
+    document.getElementById('dashboardBtn').disabled=true;
     document.getElementById('dashboardBtn').textContent='🚀 대시보드에 반영하기';
     document.getElementById('deployStatus').className='deploy-status';
+    document.getElementById('anomalyNotice').style.display='none';
+    document.getElementById('nextStepZone').innerHTML='';
+    const autoToggle = document.getElementById('autoDeployToggle');
+    if (autoToggle) autoToggle.checked = false;
+    enableFeedback(false);
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // ── 에러 표시 ──────────────────────────────────────────────────
   function showErr(id, msg) {
     const el = document.getElementById(id);
     el.textContent = msg;
     el.className = 'error-box show';
   }
 
-  // ── 진행 메시지 타이머 ─────────────────────────────────────────
   let _progTimer = null;
   function startProgressMsg(elId, msgs) {
     let i = 0;
-    _progTimer = setInterval(()=>{ document.getElementById(elId).textContent=msgs[i=(i+1)%msgs.length]; }, 2500);
+    stopProgressMsg();
+    _progTimer = setInterval(()=>{ const el=document.getElementById(elId); if(el) el.textContent=msgs[i=(i+1)%msgs.length]; }, 2500);
   }
-  function stopProgressMsg() { clearInterval(_progTimer); _progTimer=null; }
+  function stopProgressMsg() { if(_progTimer) clearInterval(_progTimer); _progTimer=null; }
 </script>
 </body>
 </html>
