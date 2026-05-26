@@ -398,15 +398,15 @@ body {
 
   <!-- ⑤ 채널별 기여도 -->
   <div>
-    <div class="sec-label">📡 채널별 리드 기여도 (6월)</div>
+    <div class="sec-label">📡 채널별 전환 기여도 (6월 · GA4 이벤트 기준)</div>
     <div class="two-col">
       <div class="card">
-        <canvas id="ch-chart" height="200"></canvas>
+        <canvas id="ch-chart" height="220"></canvas>
       </div>
       <div class="card">
         <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">채널별 상세 (6월)</div>
         <table class="ch-table" id="ch-table"></table>
-        <div style="margin-top:12px;font-size:10px;color:var(--text-muted)">* 딜은 채널별 분류 데이터 미제공. 총 딜 수는 KPI 카드 참고.</div>
+        <div style="margin-top:10px;font-size:10px;color:var(--text-muted)">* 채널별 기여도는 GA4 전환이벤트 소스/매체 기준. 리드: click_project_inquiry + click_download_intro | 딜: complete_project_inquiry</div>
       </div>
     </div>
   </div>
@@ -459,12 +459,25 @@ body {
 // ═══════════════════════════════════════════════════════════════════
 const SHEET_ID = '1_J-qPpFpz5CjYv33a9pxZNBhyEgHfZtgK1upS-oZKbU';
 const SHEETS = {
-  naver:  '네이버 검색광고',
-  google: '구글 검색광고',
-  meta:   'Meta 광고',
-  leads:  '리캐치_리드',
-  deals:  '리캐치_딜',
-  ga4:    'GA4 트래픽'
+  naver:   '네이버 검색광고',
+  google:  '구글 검색광고',
+  meta:    'Meta 광고',
+  leads:   '리캐치_리드',
+  deals:   '리캐치_딜',
+  ga4:     'GA4 트래픽',
+  ga4Conv: 'GA4 전환이벤트'
+};
+
+// GA4 이벤트 → KPI 매핑
+const GA4_EVENTS = {
+  // 직접 리드 전환
+  LEAD: ['click_project_inquiry', 'click_download_intro'],
+  // 직접 딜 전환
+  DEAL: ['complete_project_inquiry'],
+  // 간접 딜 기여 (문의 시도)
+  INDIRECT_DEAL: ['click_contact'],
+  // 간접 리드 기여 (프로젝트 보기)
+  INDIRECT_LEAD: ['click_project_view']
 };
 
 const CHANNELS = {
@@ -474,15 +487,26 @@ const CHANNELS = {
   etc:    { label: 'etc (오가닉 등)', color: '#8B8FA8', badgeCls: 'etc' }
 };
 
-// 채널 매핑 (유입경로 필드값 → 4개 채널)
-function mapChannel(src) {
-  if (!src) return 'etc';
-  const s = src.toLowerCase();
-  if (s.includes('meta') || s.includes('instagram') || s.includes('인스타') ||
-      s.includes('facebook') || s.includes('fb ')) return 'meta';
-  if (s.includes('naver') || s.includes('네이버')) return 'naver';
-  if (s.includes('google') || s.includes('구글')) return 'google';
+// GA4 소스/매체/캠페인 → 세부 채널 분류 (기존 대시보드 로직 동일)
+function classifyGA4Channel(source, medium, campaign) {
+  const s = (source   || '').toLowerCase();
+  const m = (medium   || '').toLowerCase();
+  const c = (campaign || '').toLowerCase();
+  if (s.includes('naver') && (m === 'cpc' || m === 'paidsearch')) return 'naver';
+  if (s.includes('google') && (m === 'cpc' || m === 'paidsearch')) return 'google';
+  if (s.includes('facebook') || s.includes('instagram') || s.includes('meta') ||
+      m === 'paid_social' || m === 'display') return 'meta';
+  // etc = 자연검색, 직접유입, 레퍼럴, 기타 통합
   return 'etc';
+}
+
+// 이벤트 타입 분류
+function getEventType(eventName) {
+  if (GA4_EVENTS.LEAD.includes(eventName))          return 'lead';
+  if (GA4_EVENTS.DEAL.includes(eventName))          return 'deal';
+  if (GA4_EVENTS.INDIRECT_DEAL.includes(eventName)) return 'indirectDeal';
+  if (GA4_EVENTS.INDIRECT_LEAD.includes(eventName)) return 'indirectLead';
+  return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -559,15 +583,16 @@ async function loadData() {
   document.getElementById('loading-text').textContent = '구글 시트에서 데이터 로딩 중...';
 
   try {
-    const [naverRows, googleRows, metaRows, leadsRows, dealsRows, ga4Rows] = await Promise.all([
+    const [naverRows, googleRows, metaRows, leadsRows, dealsRows, ga4Rows, ga4ConvRows] = await Promise.all([
       fetchSheet(SHEETS.naver),
       fetchSheet(SHEETS.google),
       fetchSheet(SHEETS.meta),
       fetchSheet(SHEETS.leads),
       fetchSheet(SHEETS.deals),
-      fetchSheet(SHEETS.ga4)
+      fetchSheet(SHEETS.ga4),
+      fetchSheet(SHEETS.ga4Conv)
     ]);
-    rawData = { naver: naverRows, google: googleRows, meta: metaRows, leads: leadsRows, deals: dealsRows, ga4: ga4Rows };
+    rawData = { naver: naverRows, google: googleRows, meta: metaRows, leads: leadsRows, deals: dealsRows, ga4: ga4Rows, ga4Conv: ga4ConvRows };
     aggregateMonthly();
     render();
     setStatus('live', '실시간 데이터');
@@ -583,35 +608,46 @@ async function loadData() {
 // ═══════════════════════════════════════════════════════════════════
 // AGGREGATION
 // ═══════════════════════════════════════════════════════════════════
+function makeCh() { return { total: 0, meta: 0, naver: 0, google: 0, etc: 0 }; }
+
 function aggregateMonthly() {
   const months = ['2026-04', '2026-05', '2026-06'];
   monthly = {};
 
   months.forEach(ym => {
     monthly[ym] = {
-      leads:   { total: 0, meta: 0, naver: 0, google: 0, etc: 0 },
-      deals:   0,
-      spend:   { meta: 0, naver: 0, google: 0 },
+      // ── 리캐치 기준 총량 (primary KPI)
+      leads: 0,          // 리캐치_리드 총계
+      deals: 0,          // 리캐치_딜 총계
+
+      // ── GA4 이벤트 기준 채널별 기여도
+      ga4Lead:         makeCh(), // click_project_inquiry + click_download_intro (직접 리드)
+      ga4Deal:         makeCh(), // complete_project_inquiry (직접 딜)
+      ga4IndirectDeal: makeCh(), // click_contact (간접 딜 기여)
+      ga4IndirectLead: makeCh(), // click_project_view (간접 리드 기여)
+
+      // ── 광고비 / 세션
+      spend:    { meta: 0, naver: 0, google: 0 },
       sessions: 0,
-      dealsByDay: {},  // day → count (for June cumulative)
+
+      // ── 6월 일별 누적 (트렌드 차트용)
+      dealsByDay: {},
       leadsByDay: {}
     };
   });
 
-  // LEADS (리캐치_리드) — 생성일 기준
+  // ① 리캐치_리드 (총량만 집계 — 채널은 GA4로 대체)
   rawData.leads.forEach(row => {
     const ym = getMonthKey(row['생성일']);
     if (!monthly[ym]) return;
-    const ch = mapChannel(row['유입경로']);
-    monthly[ym].leads.total++;
-    monthly[ym].leads[ch]++;
+    monthly[ym].leads++;
     if (ym === '2026-06') {
       const d = getDayOfMonth(row['생성일']);
       if (d) monthly[ym].leadsByDay[d] = (monthly[ym].leadsByDay[d] || 0) + 1;
     }
   });
 
-  // DEALS (리캐치_딜) — 폼 제출 일자 기준
+  // ② 리캐치_딜 (총량만 집계 — 채널은 GA4로 대체)
   rawData.deals.forEach(row => {
     const ym = getMonthKey(row['폼 제출 일자']);
     if (!monthly[ym]) return;
@@ -622,28 +658,44 @@ function aggregateMonthly() {
     }
   });
 
-  // AD SPEND — 네이버
+  // ③ GA4 전환이벤트 — 채널별 기여도 집계
+  (rawData.ga4Conv || []).forEach(row => {
+    const ym = getMonthKey(row['날짜']);
+    if (!monthly[ym]) return;
+    const ch   = classifyGA4Channel(row['소스'], row['매체'], row['캠페인']);
+    const etype = getEventType(row['이벤트명']);
+    if (!etype) return;
+    const cnt = Number(row['이벤트 횟수']) || 0;
+
+    const key = {
+      lead:         'ga4Lead',
+      deal:         'ga4Deal',
+      indirectDeal: 'ga4IndirectDeal',
+      indirectLead: 'ga4IndirectLead'
+    }[etype];
+
+    monthly[ym][key].total += cnt;
+    monthly[ym][key][ch]   += cnt;
+  });
+
+  // ④ 광고비 집계
   rawData.naver.forEach(row => {
     const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.naver += (row['비용'] || 0);
+    if (monthly[ym]) monthly[ym].spend.naver += (Number(row['비용']) || 0);
   });
-
-  // AD SPEND — 구글
   rawData.google.forEach(row => {
     const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.google += (row['비용'] || 0);
+    if (monthly[ym]) monthly[ym].spend.google += (Number(row['비용']) || 0);
   });
-
-  // AD SPEND — Meta
   rawData.meta.forEach(row => {
     const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].spend.meta += (row['비용'] || 0);
+    if (monthly[ym]) monthly[ym].spend.meta += (Number(row['비용']) || 0);
   });
 
-  // GA4 세션
-  rawData.ga4.forEach(row => {
+  // ⑤ GA4 세션
+  (rawData.ga4 || []).forEach(row => {
     const ym = getMonthKey(row['날짜']);
-    if (monthly[ym]) monthly[ym].sessions += (row['세션'] || row['sessions'] || 0);
+    if (monthly[ym]) monthly[ym].sessions += (Number(row['세션수'] || row['세션'] || row['sessions']) || 0);
   });
 }
 
@@ -667,61 +719,113 @@ function render() {
 function renderHistorical() {
   const apr = monthly['2026-04'];
   const may = monthly['2026-05'];
+
+  // 월 평균 계산 (GA4 기반 채널 포함)
+  function avgCh(aprC, mayC) {
+    return {
+      total:  Math.round((aprC.total  + mayC.total)  / 2),
+      meta:   Math.round((aprC.meta   + mayC.meta)   / 2),
+      naver:  Math.round((aprC.naver  + mayC.naver)  / 2),
+      google: Math.round((aprC.google + mayC.google) / 2),
+      etc:    Math.round((aprC.etc    + mayC.etc)    / 2),
+    };
+  }
+
   const avg = {
-    leads:  { total: Math.round((apr.leads.total + may.leads.total) / 2),
-              meta:  Math.round((apr.leads.meta  + may.leads.meta)  / 2),
-              naver: Math.round((apr.leads.naver + may.leads.naver) / 2),
-              google:Math.round((apr.leads.google+ may.leads.google)/ 2),
-              etc:   Math.round((apr.leads.etc   + may.leads.etc)   / 2) },
-    deals:  Math.round((apr.deals + may.deals) / 2),
-    spend:  {
-      meta:  Math.round((apr.spend.meta  + may.spend.meta)  / 2),
-      naver: Math.round((apr.spend.naver + may.spend.naver) / 2),
-      google:Math.round((apr.spend.google+ may.spend.google)/ 2)
+    leads:          Math.round((apr.leads + may.leads) / 2),
+    deals:          Math.round((apr.deals + may.deals) / 2),
+    ga4Lead:         avgCh(apr.ga4Lead,         may.ga4Lead),
+    ga4Deal:         avgCh(apr.ga4Deal,         may.ga4Deal),
+    ga4IndirectDeal: avgCh(apr.ga4IndirectDeal, may.ga4IndirectDeal),
+    ga4IndirectLead: avgCh(apr.ga4IndirectLead, may.ga4IndirectLead),
+    spend: {
+      meta:   Math.round((apr.spend.meta   + may.spend.meta)   / 2),
+      naver:  Math.round((apr.spend.naver  + may.spend.naver)  / 2),
+      google: Math.round((apr.spend.google + may.spend.google) / 2),
     }
   };
   window._histAvg = avg;
 
   const months = [
-    { key: '2026-04', label: '4월 실적', cls: 'apr', data: apr },
-    { key: '2026-05', label: '5월 실적', cls: 'may', data: may },
-    { key: 'avg',     label: '월 평균',  cls: 'avg', data: avg }
+    { label: '4월 실적', cls: 'apr', data: apr },
+    { label: '5월 실적', cls: 'may', data: may },
+    { label: '월 평균',  cls: 'avg', data: avg }
   ];
 
-  document.getElementById('hist-grid').innerHTML = months.map(m => {
-    const d = m.data;
-    const maxLead = Math.max(d.leads.meta, d.leads.naver, d.leads.google, d.leads.etc, 1);
-    const totalSpend = (d.spend.meta || 0) + (d.spend.naver || 0) + (d.spend.google || 0);
-    const spendStr = totalSpend > 0 ? `₩${Math.round(totalSpend/10000).toLocaleString('ko-KR')}만` : '—';
-
-    const chBars = ['meta','naver','google','etc'].map(ch => {
-      const val = d.leads[ch] || 0;
-      const pct = Math.round((val / maxLead) * 100);
+  // GA4 채널바 헬퍼
+  function chBars(metricObj, colorAlpha) {
+    const max = Math.max(metricObj.meta, metricObj.naver, metricObj.google, metricObj.etc, 1);
+    return ['meta','naver','google','etc'].map(ch => {
+      const val = metricObj[ch] || 0;
+      const pct = Math.round((val / max) * 100);
       return `
         <div class="ch-bar-row">
           <span class="ch-dot" style="background:${CHANNELS[ch].color}"></span>
-          <span class="ch-bar-label">${CHANNELS[ch].label.split(' ')[0]}</span>
-          <div class="ch-bar-track"><div class="ch-bar-fill" style="width:${pct}%;background:${CHANNELS[ch].color}"></div></div>
+          <span class="ch-bar-label" style="font-size:10px;width:36px">${CHANNELS[ch].label.split('(')[0].trim().split(' ')[0]}</span>
+          <div class="ch-bar-track"><div class="ch-bar-fill" style="width:${pct}%;background:${CHANNELS[ch].color + (colorAlpha||'CC')}"></div></div>
           <span class="ch-bar-val">${val}</span>
-        </div>
-      `;
+        </div>`;
     }).join('');
+  }
+
+  document.getElementById('hist-grid').innerHTML = months.map(m => {
+    const d = m.data;
+    const totalSpend = (d.spend.meta || 0) + (d.spend.naver || 0) + (d.spend.google || 0);
+    const spendStr = totalSpend > 0 ? `₩${Math.round(totalSpend/10000).toLocaleString('ko-KR')}만` : '—';
+
+    // 리캐치 기준 총량 vs GA4 이벤트 기준 차이 노트
+    const leadTotal  = d.leads ?? 0;
+    const dealTotal  = d.deals ?? 0;
+    const ga4LeadTot = d.ga4Lead?.total  ?? 0;
+    const ga4DealTot = d.ga4Deal?.total  ?? 0;
+    const indDeal    = d.ga4IndirectDeal?.total ?? 0;
+    const indLead    = d.ga4IndirectLead?.total ?? 0;
 
     return `
       <div class="hist-card ${m.cls}">
         <div class="hist-month">${m.label}</div>
+
+        <!-- Primary KPI (리캐치 기준) -->
         <div class="hist-kpi-row">
           <div class="hist-kpi">
-            <div class="hist-kpi-val deal">${d.deals}</div>
-            <div class="hist-kpi-lbl">딜 (상담)</div>
+            <div class="hist-kpi-val deal">${dealTotal}</div>
+            <div class="hist-kpi-lbl">딜 (리캐치)</div>
           </div>
           <div class="hist-kpi">
-            <div class="hist-kpi-val lead">${d.leads.total}</div>
-            <div class="hist-kpi-lbl">리드 (소개서)</div>
+            <div class="hist-kpi-val lead">${leadTotal}</div>
+            <div class="hist-kpi-lbl">리드 (리캐치)</div>
           </div>
         </div>
-        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">리드 채널별</div>
-        <div class="ch-bars">${chBars}</div>
+
+        <!-- GA4 직접 리드 채널별 -->
+        <div style="font-size:10px;font-weight:700;color:var(--lead);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;display:flex;align-items:center;gap:6px">
+          <span>▶ 리드 채널별</span>
+          <span style="color:var(--text-muted);font-weight:400">(GA4 · ${ga4LeadTot}건)</span>
+        </div>
+        <div class="ch-bars">${chBars(d.ga4Lead ?? makeCh())}</div>
+
+        <!-- GA4 직접 딜 채널별 -->
+        <div style="font-size:10px;font-weight:700;color:var(--deal);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;display:flex;align-items:center;gap:6px">
+          <span>▶ 딜 채널별</span>
+          <span style="color:var(--text-muted);font-weight:400">(GA4 · ${ga4DealTot}건)</span>
+        </div>
+        <div class="ch-bars">${chBars(d.ga4Deal ?? makeCh(), 'AA')}</div>
+
+        <!-- 간접 전환 기여 -->
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">간접 전환 기여</div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--warning)">${indDeal}</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px">문의 시도<br>(click_contact)</div>
+            </div>
+            <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--accent)">${indLead}</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px">프로젝트 보기<br>(click_project_view)</div>
+            </div>
+          </div>
+        </div>
+
         <div class="hist-spend">
           <span class="hist-spend-lbl">총 광고비</span>
           <span class="hist-spend-val">${spendStr}</span>
@@ -767,7 +871,7 @@ function applyScenario(id) {
   const avg = window._histAvg; if (!avg) return;
   const s = SIM_SCENARIOS.find(x => x.id === id) || SIM_SCENARIOS[0];
   const tDeal = Math.ceil(avg.deals * s.dealMult);
-  const tLead = Math.ceil(avg.leads.total * s.leadMult);
+  const tLead = Math.ceil(avg.leads * s.leadMult);
 
   document.getElementById('goal-deal').value = tDeal;
   document.getElementById('goal-lead').value = tLead;
@@ -938,81 +1042,105 @@ function renderChannelSection() {
   const jun = monthly['2026-06']; if (!jun) return;
   const keys = ['meta', 'naver', 'google', 'etc'];
 
-  // 채널별 광고비 (etc는 광고비 없음)
-  const chSpend = {
-    meta:   jun.spend.meta,
-    naver:  jun.spend.naver,
-    google: jun.spend.google,
-    etc:    0
-  };
+  const ga4Lead         = jun.ga4Lead         ?? makeCh();
+  const ga4Deal         = jun.ga4Deal         ?? makeCh();
+  const ga4IndirectDeal = jun.ga4IndirectDeal ?? makeCh();
+  const ga4IndirectLead = jun.ga4IndirectLead ?? makeCh();
 
-  // Chart
+  const chSpend = { meta: jun.spend.meta, naver: jun.spend.naver, google: jun.spend.google, etc: 0 };
+
+  // ── 차트: 직접 리드 + 직접 딜 + 간접 기여 스택
   if (chChart) chChart.destroy();
   const ctx = document.getElementById('ch-chart').getContext('2d');
   chChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: keys.map(k => CHANNELS[k].label),
-      datasets: [{
-        label: '리드',
-        data: keys.map(k => jun.leads[k] || 0),
-        backgroundColor: keys.map(k => CHANNELS[k].color + 'CC'),
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
+      datasets: [
+        {
+          label: '직접 리드 (소개서)',
+          data: keys.map(k => ga4Lead[k] || 0),
+          backgroundColor: keys.map(k => CHANNELS[k].color + 'CC'),
+          borderRadius: 4, borderSkipped: false,
+        },
+        {
+          label: '직접 딜 (문의 완료)',
+          data: keys.map(k => ga4Deal[k] || 0),
+          backgroundColor: '#FF6B6B88',
+          borderRadius: 4, borderSkipped: false,
+        },
+        {
+          label: '간접 딜 기여 (문의 시도)',
+          data: keys.map(k => ga4IndirectDeal[k] || 0),
+          backgroundColor: '#FFB34750',
+          borderRadius: 4, borderSkipped: false,
+        },
+      ]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { display: false },
+        legend: {
+          position: 'bottom', align: 'start',
+          labels: { color: '#8B8FA8', font: { size: 10 }, boxWidth: 12, boxHeight: 12, padding: 12 }
+        },
         tooltip: {
           backgroundColor: '#1E2130', borderColor: '#252838', borderWidth: 1,
           titleColor: '#EDF0FA', bodyColor: '#8B8FA8', padding: 10,
-          callbacks: { label: ctx => `리드: ${ctx.raw}건` }
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}건` }
         }
       },
       scales: {
-        x: { ticks: { color: '#8B8FA8', font: { size: 11 } }, grid: { color: '#252838' } },
+        x: { ticks: { color: '#8B8FA8', font: { size: 10 } }, grid: { color: '#252838' } },
         y: { ticks: { color: '#8B8FA8', font: { size: 11 }, stepSize: 1 }, grid: { color: '#252838' }, beginAtZero: true }
       }
     }
   });
 
-  // Table
-  const totalLeads = jun.leads.total;
-  const totalSpend = jun.spend.meta + jun.spend.naver + jun.spend.google;
+  // ── 테이블
+  const totalLeads     = ga4Lead.total;
+  const totalDeals     = ga4Deal.total;
+  const totalIndDeal   = ga4IndirectDeal.total;
+  const totalIndLead   = ga4IndirectLead.total;
+  const totalSpend     = jun.spend.meta + jun.spend.naver + jun.spend.google;
 
   function moneyStr(n) {
     if (!n || n === 0) return '<span class="v-muted">—</span>';
     return n >= 1000000 ? `${(n/10000).toFixed(0)}만원` : `${Math.round(n/1000)}천원`;
   }
-  function cplStr(spend, leads) {
-    if (!spend || !leads) return '<span class="v-muted">—</span>';
-    const cpl = Math.round(spend / leads);
-    return `<span class="v-accent">${cpl >= 10000 ? (cpl/10000).toFixed(1)+'만' : cpl.toLocaleString('ko-KR')}원</span>`;
+  function cplStr(spend, cnt) {
+    if (!spend || !cnt) return '<span class="v-muted">—</span>';
+    const v = Math.round(spend / cnt);
+    return `<span class="v-accent">${v >= 10000 ? (v/10000).toFixed(1)+'만' : v.toLocaleString('ko-KR')}원</span>`;
   }
+  function share(v, tot) { return tot > 0 ? `${Math.round((v/tot)*100)}%` : '—'; }
 
   const rows = keys.map(k => {
-    const leads = jun.leads[k] || 0;
-    const spend = chSpend[k] || 0;
-    const share = totalLeads > 0 ? Math.round((leads / totalLeads) * 100) : 0;
+    const lead    = ga4Lead[k]         || 0;
+    const deal    = ga4Deal[k]         || 0;
+    const iDeal   = ga4IndirectDeal[k] || 0;
+    const iLead   = ga4IndirectLead[k] || 0;
+    const spend   = chSpend[k]         || 0;
     return `
       <tr>
         <td><span class="ch-badge ${CHANNELS[k].badgeCls}">${CHANNELS[k].label}</span></td>
-        <td class="v-lead">${leads}건</td>
-        <td style="color:var(--text-secondary)">${share}%</td>
+        <td class="v-lead">${lead}<span class="v-muted" style="font-size:10px"> (${share(lead, totalLeads)})</span></td>
+        <td class="v-deal">${deal}</td>
+        <td style="color:var(--warning)">${iDeal}</td>
+        <td style="color:var(--accent)">${iLead}</td>
         <td>${moneyStr(spend)}</td>
-        <td>${cplStr(spend, leads)}</td>
-      </tr>
-    `;
+        <td>${cplStr(spend, lead)}</td>
+      </tr>`;
   }).join('');
 
   document.getElementById('ch-table').innerHTML = `
     <thead>
       <tr>
         <th style="text-align:left">채널</th>
-        <th>리드</th>
-        <th>점유율</th>
+        <th title="click_project_inquiry + click_download_intro">리드↓</th>
+        <th title="complete_project_inquiry">딜✓</th>
+        <th title="click_contact">간접딜</th>
+        <th title="click_project_view">간접리드</th>
         <th>광고비</th>
         <th>CPL</th>
       </tr>
@@ -1021,13 +1149,19 @@ function renderChannelSection() {
       ${rows}
       <tr class="total-row">
         <td>합계</td>
-        <td class="v-lead">${totalLeads}건</td>
-        <td style="color:var(--text-secondary)">100%</td>
+        <td class="v-lead">${totalLeads}</td>
+        <td class="v-deal">${totalDeals}</td>
+        <td style="color:var(--warning)">${totalIndDeal}</td>
+        <td style="color:var(--accent)">${totalIndLead}</td>
         <td style="color:var(--text-secondary)">${moneyStr(totalSpend)}</td>
         <td>${cplStr(totalSpend, totalLeads)}</td>
       </tr>
     </tbody>
   `;
+
+  // 하단 안내 텍스트 업데이트
+  const note = document.querySelector('#ch-table + div');
+  if (note) note.textContent = '* 채널별 기여도는 GA4 전환이벤트 소스/매체 기준. 리드: click_project_inquiry + click_download_intro | 딜: complete_project_inquiry';
 }
 
 // ═══════════════════════════════════════════════════════════════════
