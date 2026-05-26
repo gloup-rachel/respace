@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESPACE — KPI 통합 트래킹</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0F1117;
+  --surface: #181B24;
+  --surface2: #1E2130;
+  --border: #252838;
+  --text-primary: #EDF0FA;
+  --text-secondary: #8B8FA8;
+  --text-muted: #4E5268;
+  --deal: #FF6B6B;
+  --deal-dim: rgba(255,107,107,0.12);
+  --lead: #4ECDC4;
+  --lead-dim: rgba(78,205,196,0.12);
+  --accent: #6C8EFF;
+  --accent-dim: rgba(108,142,255,0.1);
+  --success: #52D68A;
+  --warning: #FFB347;
+}
+
+body {
+  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ──────────────────────────── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.logo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--text-primary);
+}
+.logo em { color: var(--accent); font-style: normal; }
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+  letter-spacing: 0.2px;
+}
+.btn-primary:hover { opacity: .82; }
+
+/* ── LAYOUT ──────────────────────────── */
+.main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sec-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 12px;
+}
+
+/* ── KPI CARDS ───────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.kcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.kcard:hover { border-color: #3A3D55; }
+
+.kcard::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+.kcard.deal::after { background: var(--deal); }
+.kcard.lead::after { background: var(--lead); }
+.kcard.pace::after { background: var(--accent); }
+
+.kcard-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+}
+.kcard-value {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.kcard.deal .kcard-value { color: var(--deal); }
+.kcard.lead .kcard-value { color: var(--lead); }
+.kcard.pace .kcard-value { color: var(--accent); }
+
+.kcard-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.kcard-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.kcard-sub .hi { color: var(--text-secondary); font-weight: 600; }
+
+.kbar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+.kbar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .7s cubic-bezier(.4,0,.2,1);
+}
+.deal .kbar-fill { background: var(--deal); }
+.lead .kbar-fill { background: var(--lead); }
+
+/* ── PACING BAR ──────────────────────── */
+.pacing-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.pacing-bar .divider {
+  position: absolute;
+  left: 50%;
+  top: 14px; bottom: 14px;
+  width: 1px;
+  background: var(--border);
+}
+
+.pace-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 8px;
+  position: relative;
+}
+.pace-item:first-child { padding-left: 0; padding-right: 24px; border-right: 1px solid var(--border); }
+.pace-item:last-child  { padding-left: 24px; }
+
+.pace-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.pace-icon.deal { background: var(--deal-dim); }
+.pace-icon.lead { background: var(--lead-dim); }
+
+.pace-main { font-size: 13px; color: var(--text-primary); margin-bottom: 3px; }
+.pace-main strong { font-weight: 700; }
+.pace-sub { font-size: 11px; color: var(--text-muted); }
+.pace-sub .warn { color: var(--warning); font-weight: 500; }
+.pace-sub .ok { color: var(--success); font-weight: 500; }
+
+/* ── FUNNEL ──────────────────────────── */
+.funnel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 24px 36px;
+}
+
+.funnel-wrap {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  gap: 0;
+}
+
+.funnel-step { flex: 1; position: relative; }
+
+.funnel-block {
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: filter .2s;
+}
+.funnel-block:hover { filter: brightness(1.12); }
+
+/* Arrow shapes via clip-path */
+.funnel-step:nth-child(1) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); }
+.funnel-step:nth-child(2) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%); }
+.funnel-step:nth-child(3) .funnel-block { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%); }
+.funnel-step:nth-child(4) .funnel-block { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%); }
+
+.funnel-num  { font-size: 22px; font-weight: 700; color: #fff; }
+.funnel-name { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+.funnel-rate {
+  position: absolute;
+  bottom: -26px;
+  left: 50%; transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-align: center;
+}
+.funnel-rate .arrow { color: var(--text-muted); margin-right: 2px; }
+
+/* ── CHANNELS ────────────────────────── */
+.channels-grid {
+  display: grid;
+  grid-template-columns: 5fr 4fr;
+  gap: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.ch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+}
+.ch-table th {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0 10px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.ch-table th:not(:first-child) { text-align: right; }
+.ch-table td {
+  padding: 10px 10px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.ch-table tr:last-child td { border-bottom: none; }
+.ch-table td:not(:first-child) { text-align: right; }
+
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.v-deal  { color: var(--deal); font-weight: 600; }
+.v-lead  { color: var(--lead); font-weight: 600; }
+.v-cost  { color: var(--text-secondary); }
+.v-cp    { color: var(--accent); font-weight: 500; }
+.v-muted { color: var(--text-muted); }
+
+/* ── SIMULATION ──────────────────────── */
+.sim-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.sim-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.toggle {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.toggle button {
+  padding: 7px 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.toggle button.on {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sim-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sstat {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.sstat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+.sstat-value { font-size: 20px; font-weight: 700; }
+.sstat-value.green  { color: var(--success); }
+.sstat-value.yellow { color: var(--warning); }
+.sstat-value.red    { color: var(--deal); }
+.sstat-value.plain  { color: var(--text-primary); }
+
+/* ── MODAL ───────────────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  width: 440px;
+  transform: translateY(20px);
+  transition: transform .2s;
+}
+.overlay.open .modal { transform: translateY(0); }
+
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.modal-desc  { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.modal-row.single { grid-template-columns: 1fr; }
+
+.fg label { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+.fg input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s;
+}
+.fg input:focus { border-color: var(--accent); }
+
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+.btn-cancel {
+  padding: 9px 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-save {
+  padding: 9px 22px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── DATA EDIT PANEL ─────────────────── */
+.data-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.data-panel-header {
+  padding: 14px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.data-panel-header:hover { background: #232638; }
+.data-panel-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+.data-panel-body { padding: 20px; display: none; }
+.data-panel-body.open { display: block; }
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.data-grid.two { grid-template-columns: repeat(2, 1fr); }
+.dfg label { font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+.dfg input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+.dfg input:focus { border-color: var(--accent); }
+.btn-update {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 16px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-update:hover { background: var(--accent-dim); }
+
+.data-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.6px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="logo">RESPACE <em>KPI</em></div>
+    <div class="pill">통합 트래킹 v1.0</div>
+  </div>
+  <div class="header-meta">
+    <div class="pill" id="period-badge">2026년 6월</div>
+    <button class="btn-primary" onclick="openModal()">🎯 월 목표 설정</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- 1. KPI 현황 -->
+  <div>
+    <div class="sec-label">KPI 현황</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+  </div>
+
+  <!-- 2. Pacing 요약 -->
+  <div class="pacing-bar" id="pacing-bar"></div>
+
+  <!-- 3. 전환 퍼널 -->
+  <div class="funnel-card">
+    <div class="sec-label">전환 퍼널</div>
+    <div class="funnel-wrap" id="funnel-wrap"></div>
+  </div>
+
+  <!-- 4. 채널별 기여도 -->
+  <div>
+    <div class="sec-label">채널별 딜·리드 기여도</div>
+    <div class="channels-grid">
+      <div class="card">
+        <canvas id="ch-chart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="sec-label" style="margin-bottom:0">채널별 상세</div>
+        <table class="ch-table" id="ch-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 시뮬레이션 -->
+  <div class="sim-card">
+    <div class="sim-head">
+      <div class="sec-label" style="margin:0">목표 달성 시뮬레이션</div>
+      <div class="toggle">
+        <button class="on" onclick="switchSim('deal',this)">딜 시뮬레이션</button>
+        <button onclick="switchSim('lead',this)">리드 시뮬레이션</button>
+      </div>
+    </div>
+    <canvas id="sim-chart" height="260"></canvas>
+    <div class="sim-stats" id="sim-stats"></div>
+  </div>
+
+  <!-- 6. 데이터 직접 입력 패널 -->
+  <div class="data-panel">
+    <div class="data-panel-header" onclick="togglePanel()">
+      <span class="data-panel-title">📊 Raw 데이터 직접 입력</span>
+      <span id="panel-arrow" style="color:var(--text-muted);font-size:12px">▼ 펼치기</span>
+    </div>
+    <div class="data-panel-body" id="data-panel-body">
+
+      <div class="data-section-title">퍼널 데이터</div>
+      <div class="data-grid">
+        <div class="dfg"><label>세션</label><input type="number" id="d-session" value="3240"></div>
+        <div class="dfg"><label>참여세션</label><input type="number" id="d-engaged" value="1456"></div>
+        <div class="dfg"><label>리드 (소개서)</label><input type="number" id="d-lead-act" value="38"></div>
+        <div class="dfg"><label>딜 (상담문의)</label><input type="number" id="d-deal-act" value="8"></div>
+        <div class="dfg" style="display:flex;align-items:flex-end">
+          <button class="btn-update" onclick="applyFunnel()" style="width:100%;margin-bottom:0">적용</button>
+        </div>
+      </div>
+
+      <div class="data-section-title">채널별 데이터</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:6px 10px;color:var(--text-muted);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)">채널</th>
+            <th style="padding:6px 10px;color:var(--text-muted);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)">딜 (건)</th>
+            <th style="padding:6px 10px;color:var(--text-muted);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)">리드 (건)</th>
+            <th style="padding:6px 10px;color:var(--text-muted);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)">광고비 (원)</th>
+          </tr>
+        </thead>
+        <tbody id="ch-edit-body"></tbody>
+      </table>
+      <button class="btn-update" onclick="applyChannels()" style="margin-top:10px">채널 데이터 적용</button>
+
+      <div class="data-section-title">딜 일별 누적 (최대 31일, 쉼표 구분)</div>
+      <textarea id="d-deal-daily" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-primary);font-size:12px;resize:vertical;min-height:60px;font-family:monospace;outline:none"></textarea>
+
+      <div class="data-section-title" style="margin-top:14px">리드 일별 누적 (최대 31일, 쉼표 구분)</div>
+      <textarea id="d-lead-daily" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-primary);font-size:12px;resize:vertical;min-height:60px;font-family:monospace;outline:none"></textarea>
+
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn-update" onclick="applyDailyData()">일별 데이터 적용</button>
+        <span style="font-size:11px;color:var(--text-muted);align-self:center">누적값 입력 · 실적 입력 일수가 경과일로 자동 설정됩니다</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">🎯 월 목표 설정</div>
+    <div class="modal-desc">6월부터 월별 목표값을 입력하면 달성 현황과 시뮬레이션이 자동으로 업데이트됩니다.</div>
+    <div class="modal-row">
+      <div class="fg">
+        <label>딜 목표 (상담 문의, 건)</label>
+        <input type="number" id="in-deal" placeholder="예: 10" min="0">
+      </div>
+      <div class="fg">
+        <label>리드 목표 (소개서 다운, 건)</label>
+        <input type="number" id="in-lead" placeholder="예: 60" min="0">
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="fg">
+        <label>설정 월</label>
+        <input type="text" id="in-month" value="2026년 6월">
+      </div>
+      <div class="fg">
+        <label>경과 일수 (오늘까지)</label>
+        <input type="number" id="in-elapsed" placeholder="예: 1" min="1" max="31">
+      </div>
+    </div>
+    <div class="modal-row single">
+      <div class="fg">
+        <label>월 총 일수</label>
+        <input type="number" id="in-total" value="30" min="28" max="31">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" onclick="saveGoal()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  month: '2026년 6월',
+  elapsed: 1,
+  total: 30,
+
+  deal: { goal: 0, actual: 0 },
+  lead: { goal: 0, actual: 0 },
+
+  funnel: [
+    { name: '세션',      value: 3240,  color: '#6C8EFF' },
+    { name: '참여세션',   value: 1456,  color: '#4E9EFF' },
+    { name: '리드',      value: 38,    color: '#4ECDC4' },
+    { name: '딜',        value: 8,     color: '#FF6B6B' },
+  ],
+
+  channels: [
+    { name: '네이버 SA', color: '#03C75A', deals: 3,  leads: 15, cost: 450000 },
+    { name: 'Google SA', color: '#4285F4', deals: 2,  leads: 8,  cost: 320000 },
+    { name: 'Meta',      color: '#0866FF', deals: 1,  leads: 5,  cost: 180000 },
+    { name: 'Organic',   color: '#6C8EFF', deals: 2,  leads: 7,  cost: 0      },
+    { name: 'Direct',    color: '#8B8FA8', deals: 0,  leads: 3,  cost: 0      },
+  ],
+
+  dealDaily: [0],
+  leadDaily: [0],
+
+  simMode: 'deal',
+};
+
+// ═══════════════════════════════════════════════════════
+// UTIL
+// ═══════════════════════════════════════════════════════
+const fmt  = n => n != null ? Number(n).toLocaleString('ko-KR') : '0';
+const pct  = (a, b) => b > 0 ? ((a / b) * 100).toFixed(1) : '0.0';
+const ceil = Math.ceil;
+const round = Math.round;
+
+function fmtMoney(n) {
+  if (!n || n === 0) return '—';
+  if (n >= 10000) return `${(n / 10000).toFixed(1)}만원`;
+  return `${fmt(n)}원`;
+}
+
+function pacing(actual, goal, elapsed, total) {
+  const rate      = elapsed > 0 ? actual / elapsed : 0;
+  const projected = round(rate * total);
+  const remaining = total - elapsed;
+  const needed    = goal > actual && remaining > 0 ? ceil((goal - actual) / remaining) : 0;
+  const gap       = goal - projected;
+  const status    = projected >= goal ? 'green' : projected >= goal * 0.75 ? 'yellow' : 'red';
+  return { rate, projected, remaining, needed, gap, status };
+}
+
+// ═══════════════════════════════════════════════════════
+// 1. KPI CARDS
+// ═══════════════════════════════════════════════════════
+function renderKPI() {
+  const { deal, lead } = S;
+  const dp = pacing(deal.actual, deal.goal, S.elapsed, S.total);
+  const lp = pacing(lead.actual, lead.goal, S.elapsed, S.total);
+
+  const goalSet = g => g > 0;
+
+  const cards = [
+    {
+      cls:   'deal',
+      label: '딜 달성 (상담 문의)',
+      val:   deal.actual,
+      unit:  '건',
+      sub:   goalSet(deal.goal) ? `목표 <span class="hi">${deal.goal}건</span>` : '목표 미설정',
+      prog:  goalSet(deal.goal) ? Math.min(100, (deal.actual / deal.goal) * 100) : null,
+    },
+    {
+      cls:   'deal',
+      label: '딜 달성률',
+      val:   goalSet(deal.goal) ? pct(deal.actual, deal.goal) : '—',
+      unit:  goalSet(deal.goal) ? '%' : '',
+      sub:   goalSet(deal.goal) ? `${deal.actual}건 / ${deal.goal}건` : '목표를 먼저 설정해 주세요',
+    },
+    {
+      cls:   'pace',
+      label: '딜 페이스 예측',
+      val:   dp.projected,
+      unit:  '건',
+      sub:   goalSet(deal.goal)
+               ? dp.needed > 0
+                 ? `잔여 ${dp.remaining}일 · 일 <span class="hi">${dp.needed}건</span> 추가 필요`
+                 : `목표 달성 페이스 ✓`
+               : `현재 페이스 기준 예측`,
+    },
+    {
+      cls:   'lead',
+      label: '리드 달성 (소개서 다운)',
+      val:   lead.actual,
+      unit:  '건',
+      sub:   goalSet(lead.goal) ? `목표 <span class="hi">${lead.goal}건</span>` : '목표 미설정',
+      prog:  goalSet(lead.goal) ? Math.min(100, (lead.actual / lead.goal) * 100) : null,
+    },
+    {
+      cls:   'lead',
+      label: '리드 달성률',
+      val:   goalSet(lead.goal) ? pct(lead.actual, lead.goal) : '—',
+      unit:  goalSet(lead.goal) ? '%' : '',
+      sub:   goalSet(lead.goal) ? `${lead.actual}건 / ${lead.goal}건` : '목표를 먼저 설정해 주세요',
+    },
+    {
+      cls:   'pace',
+      label: '리드 페이스 예측',
+      val:   lp.projected,
+      unit:  '건',
+      sub:   goalSet(lead.goal)
+               ? lp.needed > 0
+                 ? `잔여 ${lp.remaining}일 · 일 <span class="hi">${lp.needed}건</span> 추가 필요`
+                 : `목표 달성 페이스 ✓`
+               : `현재 페이스 기준 예측`,
+    },
+  ];
+
+  document.getElementById('kpi-grid').innerHTML = cards.map(c => `
+    <div class="kcard ${c.cls}">
+      <div class="kcard-label">${c.label}</div>
+      <div class="kcard-value">
+        ${c.val}<span class="kcard-unit"> ${c.unit}</span>
+      </div>
+      <div class="kcard-sub">${c.sub}</div>
+      ${c.prog != null ? `<div class="kbar"><div class="kbar-fill" style="width:${c.prog}%"></div></div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// 2. PACING BAR
+// ═══════════════════════════════════════════════════════
+function renderPacing() {
+  const { deal, lead } = S;
+  const dp = pacing(deal.actual, deal.goal, S.elapsed, S.total);
+  const lp = pacing(lead.actual, lead.goal, S.elapsed, S.total);
+
+  function paceSub(p, goal) {
+    if (!goal) return `현재 일평균 ${p.rate.toFixed(2)}건 · 잔여 ${p.remaining}일`;
+    const cls = p.needed > 0 ? 'warn' : 'ok';
+    const msg = p.needed > 0 ? `목표 달성 위해 일 ${p.needed}건 필요` : '목표 달성 페이스 ✓';
+    return `잔여 ${p.remaining}일 · 일평균 ${p.rate.toFixed(2)}건 · <span class="${cls}">${msg}</span>`;
+  }
+
+  document.getElementById('pacing-bar').innerHTML = `
+    <div class="pace-item">
+      <div class="pace-icon deal">📋</div>
+      <div>
+        <div class="pace-main">딜: 현재 페이스 → 월말 <strong>${dp.projected}건</strong> 예상${deal.goal ? ` (목표 ${deal.goal}건)` : ''}</div>
+        <div class="pace-sub">${paceSub(dp, deal.goal)}</div>
+      </div>
+    </div>
+    <div class="pace-item">
+      <div class="pace-icon lead">📄</div>
+      <div>
+        <div class="pace-main">리드: 현재 페이스 → 월말 <strong>${lp.projected}건</strong> 예상${lead.goal ? ` (목표 ${lead.goal}건)` : ''}</div>
+        <div class="pace-sub">${paceSub(lp, lead.goal)}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// 3. FUNNEL
+// ═══════════════════════════════════════════════════════
+function renderFunnel() {
+  const steps = S.funnel;
+  document.getElementById('funnel-wrap').innerHTML = steps.map((s, i) => {
+    const fromPrev = i === 0 ? null : pct(s.value, steps[i - 1].value);
+    const rateLabel = i === 0
+      ? `<span class="arrow"></span>기준`
+      : `<span class="arrow">▼</span>${fromPrev}%`;
+    return `
+      <div class="funnel-step">
+        <div class="funnel-block" style="background:${s.color}">
+          <div class="funnel-num">${fmt(s.value)}</div>
+          <div class="funnel-name">${s.name}</div>
+        </div>
+        <div class="funnel-rate">${rateLabel}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// 4. CHANNEL CHART & TABLE
+// ═══════════════════════════════════════════════════════
+let chChart = null;
+
+function renderChannel() {
+  const ch = S.channels;
+  const ctx = document.getElementById('ch-chart').getContext('2d');
+  if (chChart) chChart.destroy();
+
+  chChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ch.map(c => c.name),
+      datasets: [
+        {
+          label: '딜',
+          data: ch.map(c => c.deals),
+          backgroundColor: 'rgba(255,107,107,0.85)',
+          borderRadius: 5,
+          borderSkipped: false,
+        },
+        {
+          label: '리드',
+          data: ch.map(c => c.leads),
+          backgroundColor: 'rgba(78,205,196,0.8)',
+          borderRadius: 5,
+          borderSkipped: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: { color: '#8B8FA8', font: { size: 11 }, boxWidth: 10, boxHeight: 10, padding: 16 },
+        },
+        tooltip: {
+          backgroundColor: '#1E2130',
+          borderColor: '#252838',
+          borderWidth: 1,
+          titleColor: '#EDF0FA',
+          bodyColor: '#8B8FA8',
+          padding: 10,
+        },
+      },
+      scales: {
+        x: { ticks: { color: '#8B8FA8', font: { size: 11 } }, grid: { color: '#252838' } },
+        y: {
+          ticks: { color: '#8B8FA8', font: { size: 11 }, stepSize: 1 },
+          grid: { color: '#252838' },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  // Table
+  const totalCost = S.channels.reduce((s, c) => s + c.cost, 0);
+  const totalDeals = S.channels.reduce((s, c) => s + c.deals, 0);
+  const totalLeads = S.channels.reduce((s, c) => s + c.leads, 0);
+
+  const rows = ch.map(c => {
+    const cpDeal = c.cost > 0 && c.deals > 0 ? round(c.cost / c.deals) : null;
+    return `
+      <tr>
+        <td><span class="dot" style="background:${c.color}"></span>${c.name}</td>
+        <td class="v-deal">${c.deals}건</td>
+        <td class="v-lead">${c.leads}건</td>
+        <td class="v-cost">${fmtMoney(c.cost)}</td>
+        <td class="v-cp">${cpDeal ? fmtMoney(cpDeal) : '<span class="v-muted">—</span>'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const totalCpDeal = totalCost > 0 && totalDeals > 0 ? round(totalCost / totalDeals) : null;
+
+  document.getElementById('ch-table').innerHTML = `
+    <thead>
+      <tr>
+        <th>채널</th>
+        <th style="text-align:right">딜</th>
+        <th style="text-align:right">리드</th>
+        <th style="text-align:right">광고비</th>
+        <th style="text-align:right">CPDeal</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+      <tr style="border-top:1px solid var(--border)">
+        <td style="font-weight:600;color:var(--text-secondary)">합계</td>
+        <td class="v-deal" style="font-weight:700">${totalDeals}건</td>
+        <td class="v-lead" style="font-weight:700">${totalLeads}건</td>
+        <td class="v-cost">${fmtMoney(totalCost)}</td>
+        <td class="v-cp">${totalCpDeal ? fmtMoney(totalCpDeal) : '—'}</td>
+      </tr>
+    </tbody>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// 5. SIMULATION
+// ═══════════════════════════════════════════════════════
+let simChart = null;
+
+function buildSim(mode) {
+  const { elapsed, total } = S;
+  const goal    = mode === 'deal' ? S.deal.goal : S.lead.goal;
+  const daily   = mode === 'deal' ? S.dealDaily : S.leadDaily;
+  const color   = mode === 'deal' ? '#FF6B6B' : '#4ECDC4';
+
+  const actual  = daily[daily.length - 1] ?? 0;
+  const rate    = elapsed > 0 ? actual / elapsed : 0;
+  const labels  = Array.from({ length: total }, (_, i) => `${i + 1}일`);
+
+  // 목표선
+  const goalLine = goal > 0
+    ? labels.map((_, i) => +((goal / total) * (i + 1)).toFixed(2))
+    : null;
+
+  // 실적선
+  const actualLine = labels.map((_, i) =>
+    i < daily.length ? daily[i] : null
+  );
+
+  // 현재 페이스 예측 (마지막 실적점 → 월말)
+  const lastIdx = daily.length - 1;
+  const paceLine = labels.map((_, i) => {
+    if (i < lastIdx) return null;
+    return +((actual + rate * (i - lastIdx)).toFixed(2));
+  });
+
+  // 필요 페이스 (남은 일에 목표까지 채우기)
+  const remaining = total - elapsed;
+  const needRate  = goal > actual && remaining > 0 ? (goal - actual) / remaining : 0;
+  const neededLine = goal > 0 ? labels.map((_, i) => {
+    if (i < lastIdx) return null;
+    return +((actual + needRate * (i - lastIdx)).toFixed(2));
+  }) : null;
+
+  return { labels, goalLine, actualLine, paceLine, neededLine, color, actual, rate, goal, remaining, needRate };
+}
+
+function renderSim(mode = 'deal') {
+  const d = buildSim(mode);
+  const ctx = document.getElementById('sim-chart').getContext('2d');
+  if (simChart) simChart.destroy();
+
+  const datasets = [
+    {
+      label: '실적',
+      data: d.actualLine,
+      borderColor: d.color,
+      backgroundColor: d.color + '1A',
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointBackgroundColor: d.color,
+      fill: false,
+      tension: 0.15,
+      spanGaps: false,
+    },
+    {
+      label: '현재 페이스 예측',
+      data: d.paceLine,
+      borderColor: d.color,
+      borderWidth: 1.5,
+      borderDash: [5, 4],
+      pointRadius: 0,
+      fill: false,
+      tension: 0,
+    },
+  ];
+
+  if (d.goalLine) {
+    datasets.unshift({
+      label: '목표선',
+      data: d.goalLine,
+      borderColor: '#6C8EFF',
+      borderWidth: 2,
+      borderDash: [7, 3],
+      pointRadius: 0,
+      fill: false,
+      tension: 0,
+    });
+  }
+  if (d.neededLine) {
+    datasets.push({
+      label: '목표 달성 필요 페이스',
+      data: d.neededLine,
+      borderColor: '#52D68A',
+      borderWidth: 1.5,
+      borderDash: [3, 3],
+      pointRadius: 0,
+      fill: false,
+      tension: 0,
+    });
+  }
+
+  simChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: d.labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#8B8FA8',
+            font: { size: 11 },
+            boxWidth: 18, boxHeight: 2,
+            usePointStyle: true,
+            pointStyle: 'line',
+            padding: 16,
+          },
+        },
+        tooltip: {
+          backgroundColor: '#1E2130',
+          borderColor: '#252838',
+          borderWidth: 1,
+          titleColor: '#EDF0FA',
+          bodyColor: '#8B8FA8',
+          padding: 10,
+          callbacks: {
+            label: ctx => ctx.raw != null ? `${ctx.dataset.label}: ${ctx.raw}건` : null,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#4E5268', font: { size: 10 }, maxTicksLimit: 16 },
+          grid: { color: '#1E2130' },
+        },
+        y: {
+          ticks: { color: '#8B8FA8', font: { size: 11 } },
+          grid: { color: '#252838' },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  renderSimStats(d);
+}
+
+function renderSimStats(d) {
+  const projected = round(d.actual + d.rate * d.remaining);
+  const gap       = d.goal > 0 ? d.goal - projected : null;
+  const statusCls = gap == null ? 'plain' : gap <= 0 ? 'green' : gap <= d.goal * 0.2 ? 'yellow' : 'red';
+  const needStr   = d.goal > d.actual && d.remaining > 0 ? `${d.needRate.toFixed(1)}건` : '—';
+
+  document.getElementById('sim-stats').innerHTML = `
+    <div class="sstat">
+      <div class="sstat-label">현재 달성</div>
+      <div class="sstat-value plain">${d.actual}건</div>
+    </div>
+    <div class="sstat">
+      <div class="sstat-label">월말 예상 달성</div>
+      <div class="sstat-value ${statusCls}">${projected}건</div>
+    </div>
+    <div class="sstat">
+      <div class="sstat-label">목표 GAP</div>
+      <div class="sstat-value ${gap == null ? 'plain' : gap <= 0 ? 'green' : 'red'}">
+        ${gap == null ? '—' : gap <= 0 ? '달성 ✓' : `−${gap}건`}
+      </div>
+    </div>
+    <div class="sstat">
+      <div class="sstat-label">필요 일평균 (잔여 ${d.remaining}일)</div>
+      <div class="sstat-value ${needStr !== '—' ? 'yellow' : 'plain'}">${needStr}</div>
+    </div>
+  `;
+}
+
+function switchSim(mode, btn) {
+  S.simMode = mode;
+  document.querySelectorAll('.toggle button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderSim(mode);
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal() {
+  document.getElementById('in-deal').value    = S.deal.goal || '';
+  document.getElementById('in-lead').value    = S.lead.goal || '';
+  document.getElementById('in-month').value   = S.month;
+  document.getElementById('in-elapsed').value = S.elapsed;
+  document.getElementById('in-total').value   = S.total;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+function saveGoal() {
+  S.deal.goal = parseInt(document.getElementById('in-deal').value) || 0;
+  S.lead.goal = parseInt(document.getElementById('in-lead').value) || 0;
+  S.month     = document.getElementById('in-month').value || S.month;
+  S.elapsed   = parseInt(document.getElementById('in-elapsed').value) || S.elapsed;
+  S.total     = parseInt(document.getElementById('in-total').value) || S.total;
+
+  document.getElementById('period-badge').textContent = S.month;
+  closeModal();
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// DATA PANEL
+// ═══════════════════════════════════════════════════════
+let panelOpen = false;
+
+function togglePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('data-panel-body').classList.toggle('open', panelOpen);
+  document.getElementById('panel-arrow').textContent = panelOpen ? '▲ 접기' : '▼ 펼치기';
+  if (panelOpen) buildChannelEditRows();
+}
+
+function buildChannelEditRows() {
+  document.getElementById('ch-edit-body').innerHTML = S.channels.map((c, i) => `
+    <tr>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border)">
+        <span class="dot" style="background:${c.color}"></span>${c.name}
+      </td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border)">
+        <input type="number" class="dfg input" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text-primary);font-size:12px;outline:none" data-i="${i}" data-f="deals" value="${c.deals}">
+      </td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border)">
+        <input type="number" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text-primary);font-size:12px;outline:none" data-i="${i}" data-f="leads" value="${c.leads}">
+      </td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border)">
+        <input type="number" style="width:100px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text-primary);font-size:12px;outline:none" data-i="${i}" data-f="cost" value="${c.cost}">
+      </td>
+    </tr>
+  `).join('');
+
+  // Init textarea
+  document.getElementById('d-deal-daily').value = S.dealDaily.join(', ');
+  document.getElementById('d-lead-daily').value = S.leadDaily.join(', ');
+}
+
+function applyFunnel() {
+  S.funnel[0].value = parseInt(document.getElementById('d-session').value)  || 0;
+  S.funnel[1].value = parseInt(document.getElementById('d-engaged').value)  || 0;
+  S.funnel[2].value = parseInt(document.getElementById('d-lead-act').value) || 0;
+  S.funnel[3].value = parseInt(document.getElementById('d-deal-act').value) || 0;
+  S.lead.actual = S.funnel[2].value;
+  S.deal.actual = S.funnel[3].value;
+  renderAll();
+}
+
+function applyChannels() {
+  document.querySelectorAll('#ch-edit-body input').forEach(inp => {
+    const i = +inp.dataset.i;
+    const f = inp.dataset.f;
+    S.channels[i][f] = +inp.value || 0;
+  });
+  // Recalc actuals from channels
+  S.deal.actual = S.channels.reduce((s, c) => s + c.deals, 0);
+  S.lead.actual = S.channels.reduce((s, c) => s + c.leads, 0);
+  renderAll();
+}
+
+function applyDailyData() {
+  const parse = str => str.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  S.dealDaily = parse(document.getElementById('d-deal-daily').value);
+  S.leadDaily = parse(document.getElementById('d-lead-daily').value);
+  S.elapsed   = Math.max(S.dealDaily.length, S.leadDaily.length);
+
+  // Sync actuals with last daily value
+  if (S.dealDaily.length) S.deal.actual = S.dealDaily[S.dealDaily.length - 1];
+  if (S.leadDaily.length) S.lead.actual = S.leadDaily[S.leadDaily.length - 1];
+
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function renderAll() {
+  renderKPI();
+  renderPacing();
+  renderFunnel();
+  renderChannel();
+  renderSim(S.simMode);
+}
+
+// 초기 데이터 세팅 - 샘플 데이터 (5월 실적 기준 참고용)
+// 실제 사용 시: 아래 데이터 직접 교체하거나 하단 패널에서 입력
+S.elapsed     = 1;
+S.deal.actual = 0;
+S.lead.actual = 0;
+S.dealDaily   = [0];
+S.leadDaily   = [0];
+
+renderAll();
+</script>
+</body>
+</html>
