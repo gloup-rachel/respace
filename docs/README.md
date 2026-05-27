@@ -97,6 +97,27 @@
 
 ---
 
+## 대시보드 CSS 의존성 (중요)
+
+인사이트 엔진이 생성하는 HTML은 다음 CSS 클래스에 **반드시** 의존:
+
+| 클래스 | 정의 위치 | 용도 |
+|---|---|---|
+| `.weekly-summary-card` | dashboard 608줄 | 일반 강조 카드 |
+| `.weekly-summary-card-highlight` | dashboard 616줄 | **빨간 좌측 border** — 한 줄 요약·통합 총평 |
+| `.weekly-table` | dashboard 621줄 | 수치 비교 표 |
+| `.delta-pos / .delta-neg` | dashboard | 변화율 색상 (녹/적) |
+| `.channel-card .normal/.anomaly` | dashboard 754줄+ | LEVEL 1 매체 카드 |
+| `.anomaly-badge` | dashboard | 이상 매체 빨간 뱃지 |
+| `.insight-block` (fact·cause·action) | dashboard | LEVEL 2~5 딥다이브 3단계 카드 |
+| `.cause-tag .confirmed/.estimated` | dashboard | [확인됨]/[추정] 색상 태그 |
+| `.action-grid .immediate/.verify/.longterm` | dashboard | 액션 3분류 그리드 |
+
+⚠ 인사이트 엔진의 HTML_GUIDE 변경 시 위 클래스가 깨지지 않는지 반드시 확인.
+새 클래스 추가 시 `respace_dashboard_v3.html`에도 동일 정의 추가 필수.
+
+---
+
 ## 파일 구조
 
 ```

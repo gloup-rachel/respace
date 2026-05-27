@@ -155,11 +155,27 @@ Strategic A(이커머스/D2C), Strategic B(공공기관)
 // ────────────────────────────────────────────────────────────────────
 const HTML_GUIDE = `
 ## 공통 HTML 작성 규칙
+> 대시보드에서 가독성 높게 렌더링되려면 아래 클래스를 정확히 사용할 것.
+> 클래스를 빠뜨리거나 임의로 변경하면 평면 텍스트로 깨져 보임.
 
-### 핵심 카드
-<div class="weekly-summary-card"><strong>한 줄 핵심</strong> 부연 1문장</div>
+### 한 줄 요약 (강조 카드 — 빨간 좌측 border, 가장 눈에 띄게)
+<div class="weekly-summary-card weekly-summary-card-highlight">
+  <strong>한 줄 핵심 메시지 (수치 포함)</strong> · 부연 1~2문장
+</div>
 
-### 수치 비교 표
+### 일반 강조 카드 (섹션별 핵심 요약)
+<div class="weekly-summary-card"><strong>핵심 메시지</strong> 부연 설명</div>
+
+### 통합 총평 박스 (LEVEL 0 또는 각 섹션 마무리에 사용)
+<div class="weekly-summary-card weekly-summary-card-highlight">
+  <strong>W## 통합 총평</strong>
+  <ul style="margin-top: 8px; padding-left: 20px;">
+    <li>핵심 포인트 1 — 수치 포함</li>
+    <li>핵심 포인트 2 — [확인됨]/[추정] 표기</li>
+  </ul>
+</div>
+
+### 수치 비교 표 (LEVEL 0, LEVEL 1, 캠페인별 비교 등)
 <table class="weekly-table">
   <thead><tr><th>지표</th><th>이번 주</th><th>전주</th><th>변화율</th></tr></thead>
   <tbody>
@@ -236,15 +252,15 @@ const STEP1_SCHEMA = `
   "sections": [
     {
       "title": "1. 한 줄 요약 — CPL 기준",
-      "html": "weekly-summary-card 1개로 핵심 1문장 + 부연 1문장. CPL 중심."
+      "html": "★ 반드시 weekly-summary-card-highlight 사용 (빨간 강조 카드). <div class=\"weekly-summary-card weekly-summary-card-highlight\"><strong>핵심 1문장</strong> 부연 1~2문장</div>"
     },
     {
       "title": "2. LEVEL 0 — 전체 통합 성과",
-      "html": "weekly-table로 CPL/리드/광고비/CPC/CTR/CVR 전주 비교. CPL에만 평가 코멘트 1줄."
+      "html": "weekly-table로 CPL/리드/광고비/CPC/CTR/CVR 전주 비교 (6행 권장). 표 다음에 weekly-summary-card로 평가 코멘트 추가. CPL 변화에 대한 1줄 진단 포함."
     },
     {
       "title": "3. LEVEL 1 — 매체별 CPL 비교",
-      "html": "3개 매체 channel-card 형태. 이상 매체는 anomaly 클래스 + anomaly-badge. 정상 매체는 1줄."
+      "html": "3개 매체 channel-card 형태. 이상 매체는 'channel-card anomaly' 클래스 + anomaly-badge. 정상 매체는 'channel-card normal' 1줄 요약만. 정상/이상 분석 깊이 비대칭."
     }
   ]
 }
