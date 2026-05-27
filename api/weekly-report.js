@@ -269,6 +269,12 @@ const STEP1_SCHEMA = `
 - trend 방향: CPL/CPC/CAC 하락=pos, 리드/전환/CTR 상승=pos.
 - 사전 계산 값을 그대로 사용. CPL을 다시 계산하지 말 것.
 - LEVEL 2 이하 분석은 STEP 2에서 진행하므로 여기서 다루지 말 것.
+
+## ⚠ 분량 제한
+- 섹션 1: weekly-summary-card 1개, 최대 200자.
+- 섹션 2: weekly-table 6행 + 코멘트 1줄, 전체 최대 1,200자.
+- 섹션 3: channel-card 정확히 3개 (네이버/구글/Meta). 정상 매체는 1줄, 이상 매체는 2~3줄. 전체 최대 1,000자.
+- 전체 sections html 합계 최대 약 2,400자.
 `;
 
 const STEP2_SCHEMA = `
@@ -313,9 +319,15 @@ const STEP2_CHANNEL_SCHEMA = `
 - sections 배열에는 정확히 1개의 섹션만 포함.
 - 섹션 제목은 "4. LEVEL 2~5 — [매체명] 딥다이브" 형식 — 4-a/4-b 등 서브 알파벳은 클라이언트가 자동 부여하므로 LLM은 항상 "4. "로 작성.
 - 해당 매체의 raw data(캠페인·그룹별 수치)를 우선 활용해 구체적 수치 인용.
-- 한 매체당 3~5개 insight-block. [팩트]→[원인 확인됨/추정]→[액션] 3단계 강제.
 - 원인 [확인됨]은 사전 계산 + 해당 매체 raw data로 검증 가능한 것만.
 - 원인 [추정]은 가설 + 검증 방법(예: "Auction Insights 확인 필요").
+
+## ⚠ 분량 제한 (반드시 지킬 것 — 위반 시 응답 잘림)
+- **insight-block 정확히 3개** (4개 이상 절대 금지)
+- 한 insight-block 최대 300자 (HTML 포함). cause-list는 최대 3개 항목.
+- 그룹/캠페인이 많아도 **CPL 영향 큰 상위 1~2개만** 다룸. 나머지는 한 문장 요약.
+- 전체 html 분량 최대 약 1,800자 — 이 한도를 의식하며 작성.
+- 핵심만 간결하게. "추정" 가설은 1개만, "확인됨" 원인은 임팩트 큰 것 2개까지.
 `;
 
 const STEP3_SCHEMA = `
@@ -344,6 +356,12 @@ const STEP3_SCHEMA = `
 - 이전 단계(STEP 1, 2)에서 도출된 이상 신호·원인을 종합해서 액션 도출.
 - [즉시] 박스에 P0 조정사항(userInputs.adjustments)이 있으면 상단에 명시.
 - [중장기]는 1개월 이상 호흡의 구조 개선 (예: 캠페인 구조 재편, 새 매체 테스트).
+
+## ⚠ 분량 제한
+- 섹션 5 (LEVEL 6): 체크리스트 5~6개 항목, 각 1줄. 전체 최대 600자.
+- 섹션 6 (액션): action-grid 3박스. 각 박스 최대 3개 항목, 각 1줄. 전체 최대 1,200자.
+- 섹션 7 (다음 주 체크): bullet 3~5개. 전체 최대 500자.
+- 전체 sections html 합계 최대 약 2,300자.
 `;
 
 const REFINE_SCHEMA = `
@@ -536,15 +554,16 @@ export default async function handler(req) {
   else if (mode === 'refine-section') userMessage = buildSectionRefineMessage(weekInfo, rawData, userInputs, computed, sectionIndex, currentSection, allSections || [], feedback);
 
   // max_tokens — mode별로 다르게
-  // 시뮬레이션 결과 (2026-05-27): 한국어+JSON+HTML escape 감안 1자당 ~1.2토큰.
-  //   step2-channel: 단일 매체 ~1,631 토큰. 3500이면 2.1배 여유.
-  //   step2 (구버전): 매체 2~3개 합산 ~4,800 토큰 → 잘림 위험. step2-channel 권장.
+  // 시뮬레이션 vs 실측 격차 보정 (2026-05-27 사용자 보고 반영):
+  //   step2-channel: 시뮬 1,631 → 실측 4,200자(5,040 토큰) 잘림 발생 → 7000으로 상향
+  //   step3: 동일 위험 가능성 (LEVEL 6+액션+체크) → 4500 → 6000 상향
+  //   step1: 6000 유지 (현재 안정)
   const maxTokens =
     mode === 'step1' ? 6000 :
     mode === 'step2' ? 6000 :
-    mode === 'step2-channel' ? 3500 :
-    mode === 'step3' ? 4500 :
-    mode === 'refine-section' ? 3500 :
+    mode === 'step2-channel' ? 7000 :   // 4,200자 잘림 사례 반영 (1.4배 여유)
+    mode === 'step3' ? 6000 :            // STEP 2와 비슷한 액션·체크 분량
+    mode === 'refine-section' ? 5000 :   // 섹션 자체가 무거우면 같은 위험
     10000; // refine은 전체 entry 재생성이므로 가장 큰 한도
 
   const systemPrompt = buildSystemPrompt(mode);
@@ -627,12 +646,14 @@ export default async function handler(req) {
 
         // 응답이 max_tokens로 잘렸으면 명확한 에러 반환 (JSON 파싱 시도 전)
         if (stopReason === 'max_tokens') {
+          console.error(`[${mode}] stop_reason=max_tokens — 응답 잘림. 출력 토큰: ${usageOutputTokens}, 한도: ${maxTokens}, 응답 글자수: ${fullText.length}`);
           send({
             type: 'error',
-            message: `${mode} 응답이 토큰 한도(${maxTokens})에 도달하여 잘렸습니다.\n출력 토큰: ${usageOutputTokens ?? 'N/A'} / 한도: ${maxTokens}\n→ "재시도" 또는 다음 단계로 진행 후 해당 단계만 다시 실행해 주세요.`,
+            message: `${mode} 응답이 토큰 한도에 도달하여 잘렸습니다 (출력 ${usageOutputTokens} / 한도 ${maxTokens}, ${fullText.length}자).\n분량 제한을 더 엄격히 적용해 다시 시도해 주세요.`,
             stopReason,
             outputTokens: usageOutputTokens,
             maxTokens,
+            truncated: true,
           });
           controller.close();
           return;

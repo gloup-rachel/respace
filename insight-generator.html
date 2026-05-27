@@ -857,7 +857,13 @@
         try { event = JSON.parse(raw); } catch (_) { continue; }
         if (event.type === 'progress' && onProgress) onProgress(event.chars);
         else if (event.type === 'done') return event;  // {result, computed} 또는 {entry}
-        else if (event.type === 'error') throw new Error(event.message || '오류');
+        else if (event.type === 'error') {
+          // 잘림(max_tokens) 에러는 별도 표시 — 자동 재시도해도 같은 결과 나올 가능성 ↑
+          const err = new Error(event.message || '오류');
+          if (event.truncated) err.truncated = true;
+          if (event.stopReason) err.stopReason = event.stopReason;
+          throw err;
+        }
       }
     }
     throw new Error('응답 스트림이 예기치 않게 종료되었습니다.');
