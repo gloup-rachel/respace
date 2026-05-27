@@ -385,6 +385,81 @@ const REFINE_SCHEMA = `
 - 분석 원칙(단일 KPI · 펀넬 분해 · 3단계 시퀀스)은 절대 깨지 말 것.
 `;
 
+const TRANSFORM_TEMPLATE_SCHEMA = `
+# 주간 리포트 최종 템플릿 변환 (mode: transform-template)
+
+기존 인사이트(STEP1+2+3 결과 전체)를 받아 대시보드 반영용 최종 템플릿 7섹션으로 가공.
+인사이트 분석 도구의 결과 → 리스페이스 팀이 한눈에 보는 주간 리포트로 변환.
+
+## 출력 구조 (반드시 이 순서·이 갯수)
+
+{
+  "oneLineSummary": "이번 주 한 줄 총평 (80자 이내, CPD 중심 · 핵심 변동 + 다음 주 가장 중요한 액션 1개)",
+  "kpis": [
+    { "label": "CPD (Primary · 딜당 비용)", "value": "₩XX,XXX", "delta": "+/-X% vs 전주", "trend": "..." },
+    { "label": "리캐치 딜", "value": "XX건", "delta": "...", "trend": "..." },
+    { "label": "총 광고비", "value": "₩XXX", "delta": "...", "trend": "..." },
+    { "label": "리캐치 리드", "value": "XX건", "delta": "...", "trend": "..." },
+    { "label": "CPL (보조)", "value": "₩X,XXX", "delta": "...", "trend": "..." },
+    { "label": "광고 전환 합계", "value": "XX건", "delta": "...", "trend": "..." }
+  ],
+  "sections": [
+    {
+      "title": "1. 통합 총평 Summary",
+      "html": "weekly-summary-card-highlight 1개 (이번 주 핵심 1문장) + ul 5줄 이내 핵심 포인트. CPD 중심 + 전주 비교 + 다음 주 우선 액션 1개 언급."
+    },
+    {
+      "title": "2-1. 네이버 — 이슈 사항",
+      "html": "네이버의 팩트(수치 변화) + 원인(확인됨/추정 구분) 정리. insight-block 1~2개. 정상 매체면 'channel-card normal'로 1줄 요약만."
+    },
+    {
+      "title": "2-2. 구글 — 이슈 사항",
+      "html": "구글 동일 구조."
+    },
+    {
+      "title": "2-3. Meta — 이슈 사항",
+      "html": "Meta 동일 구조."
+    },
+    {
+      "title": "3-1. 네이버 — 최종 액션",
+      "html": "네이버 액션 카드 1~3개. 각 카드는 [무엇을] [어떻게(수치·기준)] [왜(근거 §2-1 참조)] [언제까지] 4요소. action-box.immediate/verify/longterm 분류."
+    },
+    {
+      "title": "3-2. 구글 — 최종 액션",
+      "html": "구글 동일 구조."
+    },
+    {
+      "title": "3-3. Meta — 최종 액션",
+      "html": "Meta 동일 구조."
+    }
+  ]
+}
+
+## 액션 카드 작성 규칙 (3-1, 3-2, 3-3 공통)
+한 액션 = 1개의 action-box. 각 action-box 안에:
+<div class="action-box immediate|verify|longterm">
+  <div class="action-head">⚡ 즉시 · [한 줄 액션 제목]</div>
+  <ul>
+    <li><strong>어떻게:</strong> 구체적 실행 방법 (입찰가·키워드명·매체 메뉴 등)</li>
+    <li><strong>왜:</strong> §2-1 참조 — 근거 데이터 또는 [확인됨] 원인 1줄</li>
+    <li><strong>언제까지:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
+  </ul>
+</div>
+
+## 작성 지침
+- 기존 entry의 데이터·원인·액션을 가공할 뿐, 새로운 분석 추가 금지.
+- 동일 매체에 대한 이슈(섹션 2-X)와 액션(섹션 3-X)이 일관되어야 함.
+- 정상 매체(이상 신호 없음)도 섹션은 유지 — "정상 범위, 별도 조치 불필요" 1줄.
+- "어떻게"는 반드시 구체적 (예: '입찰가 ₩3,500 하향' / '키워드 OFF' 같은 동사 + 수치/대상).
+- "왜"는 반드시 §2-X 또는 [확인됨]/[추정] 근거 표기.
+
+## 분량 제한
+- 섹션 1 (통합 총평): 최대 500자
+- 섹션 2-X 각각: 최대 400자
+- 섹션 3-X 각각: 최대 600자 (액션 카드 1~3개)
+- 전체 sections html 합계 최대 약 3,800자
+`;
+
 const SECTION_REFINE_SCHEMA = `
 # 섹션별 피드백 반영 출력 스키마 (mode: refine-section)
 
@@ -423,6 +498,7 @@ function buildSystemPrompt(mode) {
     mode === 'step3' ? STEP3_SCHEMA :
     mode === 'refine' ? REFINE_SCHEMA :
     mode === 'refine-section' ? SECTION_REFINE_SCHEMA :
+    mode === 'transform-template' ? TRANSFORM_TEMPLATE_SCHEMA :
     STEP1_SCHEMA;
 
   const rules = `
@@ -522,6 +598,11 @@ export default async function handler(req) {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
+  if (mode === 'transform-template' && !previousEntry) {
+    return new Response(JSON.stringify({ error: 'transform-template 모드: previousEntry(STEP1+2+3 결과 entry) 필요.' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
   // 사전 계산 — 모든 step에서 일관 사용
   const computed = computeMetrics(rawData);
@@ -552,6 +633,7 @@ export default async function handler(req) {
   else if (mode === 'step3') userMessage = buildStep3Message(weekInfo, rawData, userInputs, computed, previousResult);
   else if (mode === 'refine') userMessage = buildRefineMessage(weekInfo, rawData, userInputs, computed, previousEntry, feedback);
   else if (mode === 'refine-section') userMessage = buildSectionRefineMessage(weekInfo, rawData, userInputs, computed, sectionIndex, currentSection, allSections || [], feedback);
+  else if (mode === 'transform-template') userMessage = buildTransformTemplateMessage(weekInfo, rawData, userInputs, computed, previousEntry);
 
   // max_tokens — mode별로 다르게
   // 시뮬레이션 vs 실측 격차 보정 (2026-05-27 사용자 보고 반영):
@@ -564,6 +646,7 @@ export default async function handler(req) {
     mode === 'step2-channel' ? 7000 :   // 4,200자 잘림 사례 반영 (1.4배 여유)
     mode === 'step3' ? 6000 :            // STEP 2와 비슷한 액션·체크 분량
     mode === 'refine-section' ? 5000 :   // 섹션 자체가 무거우면 같은 위험
+    mode === 'transform-template' ? 7000 : // 7섹션 합계 3,800자 → ~4,560 토큰. 1.5배 여유
     10000; // refine은 전체 entry 재생성이므로 가장 큰 한도
 
   const systemPrompt = buildSystemPrompt(mode);
@@ -751,6 +834,22 @@ export default async function handler(req) {
             return;
           }
           send({ type: 'done', result: { section: parsed.section, sectionIndex }, computed });
+        } else if (mode === 'transform-template') {
+          // 최종 템플릿 변환 — 7섹션 entry 반환
+          const entry = {
+            id: previousEntry.id || weekInfo.id,
+            weekLabel: previousEntry.weekLabel || weekInfo.weekLabel,
+            meetingDate: previousEntry.meetingDate || weekInfo.meetingDate,
+            periodLabel: previousEntry.periodLabel || weekInfo.periodLabel,
+            comparePeriod: previousEntry.comparePeriod || weekInfo.comparePeriod,
+            isLatest: true,
+            oneLineSummary: parsed.oneLineSummary || '',
+            kpis: Array.isArray(parsed.kpis) ? parsed.kpis : [],
+            sections: Array.isArray(parsed.sections) ? parsed.sections : [],
+            _system: 'insight-v2-transformed',
+            _computed: computed,
+          };
+          send({ type: 'done', entry });
         } else if (mode === 'step2-channel') {
           // 단일 매체 결과 — { sections: [{ title, html }] } 정확히 1개
           const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
@@ -830,13 +929,29 @@ function computeMetrics(raw) {
   const leadsDelta = change(leads, prevLeads);
   const leadEmergency = leadsDelta != null && leadsDelta <= -30;
 
+  // CPD (Cost Per Deal) — 딜 기준 비용. transform-template의 Primary KPI
+  const deals = raw.deals || 0;
+  const prevDeals = raw.prevDeals || 0;
+  const totalCPD = deals > 0 ? Math.round(totalSpend / deals) : null;
+  const prevTotalCPD = prevDeals > 0 ? Math.round(prevTotalSpend / prevDeals) : null;
+  const cpdDelta = change(totalCPD, prevTotalCPD);
+  const dealsDelta = change(deals, prevDeals);
+
+  // 광고 전환 합계 (매체 합산)
+  const totalConv = (n.totalConv || 0) + (g.totalConv || 0) + (m.totalConv || 0);
+  const prevTotalConv = (pn.totalConv || 0) + (pg.totalConv || 0) + (pm.totalConv || 0);
+  const convDelta = change(totalConv, prevTotalConv);
+
   return {
     totalCPL, prevTotalCPL, cplDelta: change(totalCPL, prevTotalCPL),
+    totalCPD, prevTotalCPD, cpdDelta,
     naverCPL, prevNaverCPL, naverCplDelta: naverDelta,
     googleCPL, prevGoogleCPL, googleCplDelta: googleDelta,
     metaCPL, prevMetaCPL, metaCplDelta: metaDelta,
     totalSpend, prevTotalSpend, spendDelta: change(totalSpend, prevTotalSpend),
     leads, prevLeads, leadsDelta,
+    deals, prevDeals, dealsDelta,
+    totalConv, prevTotalConv, convDelta,
     anomalies, leadEmergency,
     anomalyChannels: anomalies.map(a => a.channel),
   };
@@ -1052,6 +1167,74 @@ function buildStep3Message(weekInfo, raw, inputs, c, prevResult) {
 // ────────────────────────────────────────────────────────────────────
 // 9. 피드백 refine 메시지 빌더 (전체 + 섹션별)
 // ────────────────────────────────────────────────────────────────────
+// 최종 템플릿 변환 — 기존 인사이트를 받아 [Summary/매체별 이슈/매체별 액션] 7섹션으로 가공
+function buildTransformTemplateMessage(weekInfo, raw, inputs, c, prevEntry) {
+  const f = (n) => (n == null ? 'N/A' : Number(n).toLocaleString('ko-KR'));
+  const signFn = (v) => (v == null ? '-' : (v > 0 ? `+${v}%` : `${v}%`));
+
+  const lines = [];
+  lines.push(`# 분석 주차: ${weekInfo.weekLabel}`);
+  lines.push(`기간: ${weekInfo.periodLabel}`);
+  lines.push(`비교: ${weekInfo.comparePeriod}`);
+  lines.push('');
+
+  // 사전 계산된 KPI — CPD Primary 자리
+  lines.push('## [사전 계산] 최종 KPI — 딜 기준');
+  lines.push(`- CPD (Primary, 딜당 비용): ${f(c.totalCPD)}원 (전주 ${f(c.prevTotalCPD)}원, ${signFn(c.cpdDelta)})`);
+  lines.push(`- 리캐치 딜: ${c.deals}건 (전주 ${c.prevDeals}건, ${signFn(c.dealsDelta)})`);
+  lines.push(`- 총 광고비: ${f(c.totalSpend)}원 (전주 ${f(c.prevTotalSpend)}원, ${signFn(c.spendDelta)})`);
+  lines.push(`- 리캐치 리드: ${c.leads}건 (전주 ${c.prevLeads}건, ${signFn(c.leadsDelta)})`);
+  lines.push(`- CPL (보조): ${f(c.totalCPL)}원 (전주 ${f(c.prevTotalCPL)}원, ${signFn(c.cplDelta)})`);
+  lines.push(`- 광고 전환 합계: ${c.totalConv}건 (전주 ${c.prevTotalConv}건, ${signFn(c.convDelta)})`);
+  lines.push('');
+
+  // 매체별 CPL (이상 신호 식별용)
+  lines.push('## [매체별 CPL · 이상 신호]');
+  lines.push(`- Google: ${f(c.googleCPL)}원 (전주 ${f(c.prevGoogleCPL)}원, ${signFn(c.googleCplDelta)})`);
+  lines.push(`- Naver:  ${f(c.naverCPL)}원 (전주 ${f(c.prevNaverCPL)}원, ${signFn(c.naverCplDelta)})`);
+  lines.push(`- Meta:   ${f(c.metaCPL)}원 (전주 ${f(c.prevMetaCPL)}원, ${signFn(c.metaCplDelta)})`);
+  lines.push(`- 이상 매체(±20%): ${c.anomalyChannels.length ? c.anomalyChannels.join(', ') : '없음'}`);
+  lines.push('');
+
+  // 운영 정보
+  lines.push('## [운영 정보]');
+  lines.push(`- 이번 주 조정/변경: ${inputs?.adjustments || '없음'}`);
+  lines.push(`- 특이사항/이슈: ${inputs?.issues || '없음'}`);
+  lines.push(`- 다음 주 논의 안건: ${inputs?.nextAgenda || '없음'}`);
+  lines.push('');
+
+  // 기존 인사이트 (가공 대상)
+  lines.push('## [가공 대상 — 기존 인사이트]');
+  lines.push(`oneLineSummary: ${prevEntry.oneLineSummary || ''}`);
+  lines.push('');
+  if (Array.isArray(prevEntry.sections)) {
+    prevEntry.sections.forEach((s) => {
+      lines.push(`### ${s.title || '(제목 없음)'}`);
+      // HTML 태그 제거 후 텍스트만 (LLM이 다시 마크업 만들도록)
+      const stripped = String(s.html || '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(li|p|div|tr)>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 800);
+      lines.push(stripped);
+      lines.push('');
+    });
+  }
+
+  lines.push('---');
+  lines.push('## 변환 지시');
+  lines.push('1. 위 기존 인사이트의 데이터·원인·액션을 그대로 활용. 새로운 분석·수치 추가 금지.');
+  lines.push('2. 출력은 7섹션 고정 (1. Summary / 2-1·2-2·2-3 매체별 이슈 / 3-1·3-2·3-3 매체별 액션).');
+  lines.push('3. 정상 매체도 섹션은 유지 — "정상 범위, 별도 조치 불필요" 1줄.');
+  lines.push('4. 액션 카드는 [어떻게 / 왜 / 언제까지] 3요소 필수.');
+  lines.push('5. KPI Primary는 CPD (딜당 비용) — kpis 배열 첫 번째 자리.');
+  lines.push('6. 한 줄 총평은 CPD 중심 + 다음 주 가장 중요한 액션 1개 언급.');
+  return lines.join('\n');
+}
+
 function buildSectionRefineMessage(weekInfo, raw, inputs, computed, sectionIndex, currentSection, allSections, feedback) {
   const lines = [];
   lines.push(commonContext(weekInfo, raw, computed));

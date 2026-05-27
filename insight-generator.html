@@ -604,8 +604,9 @@
     </div>
 
     <div class="panel-footer">
-      <button class="dashboard-btn" id="dashboardBtn" onclick="updateDashboard()" disabled>
-        🚀 대시보드에 반영하기
+      <button class="dashboard-btn" id="dashboardBtn" onclick="updateDashboard()" disabled
+        title="인사이트를 [Summary / 매체별 이슈 / 매체별 액션] 7섹션 최종 템플릿으로 변환 후 대시보드에 push">
+        🚀 최종 템플릿 변환 + 대시보드 반영
       </button>
       <div class="deploy-status" id="deployStatus"></div>
       <button class="restart-btn" onclick="restartFlow()">← 처음부터 다시</button>
@@ -1350,12 +1351,42 @@
   }
 
   async function updateDashboard() {
-    if (!dashboardHTML) { showDeployStatus('fail','대시보드 HTML이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.'); return; }
     const btn = document.getElementById('dashboardBtn');
     btn.disabled = true;
-    btn.textContent = '⏳ 업로드 중...';
     showDeployStatus('', '');
+
     try {
+      // ── 신규: 변환 단계 (최종 템플릿) ─────────────────────────
+      // 인사이트 생성기 결과를 [Summary / 매체별 이슈 / 매체별 액션] 7섹션으로 가공
+      const prev = versions[currentVerIdx].entry;
+      if (!prev) throw new Error('변환할 인사이트가 없습니다.');
+
+      btn.textContent = '⏳ 최종 템플릿으로 변환 중...';
+      console.log('[updateDashboard] step 1: transform-template 호출...');
+      const transformEvt = await callAPI({
+        mode: 'transform-template',
+        weekInfo: weekInfoCache,
+        rawData: collectedData,
+        userInputs: userInputsCache,
+        previousEntry: prev
+      }, null);
+
+      const transformedEntry = transformEvt.entry;
+      if (!transformedEntry || !Array.isArray(transformedEntry.sections)) {
+        throw new Error('변환 결과에 sections가 없습니다.');
+      }
+      // 리넘버링 (1./2-1./3-1. 등 사용자 정의 번호 그대로 유지하되, 안전망)
+      transformedEntry.sections = renumberSections(transformedEntry.sections);
+      console.log(`[updateDashboard] step 1 완료 — 변환 섹션 ${transformedEntry.sections.length}개`);
+
+      // ── dashboard HTML 다시 빌드 (변환 결과 기준) ─────────────
+      btn.textContent = '⏳ 대시보드 HTML 빌드 중...';
+      await loadDashboardHTML(transformedEntry);
+      if (!dashboardHTML) throw new Error('대시보드 HTML 빌드 실패');
+
+      // ── GitHub push ──────────────────────────────────────────
+      btn.textContent = '⏳ GitHub 업로드 중...';
+      console.log('[updateDashboard] step 2: GitHub push...');
       const res = await fetch(API_DEPLOY, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -1363,9 +1394,12 @@
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error||'업로드 실패');
+      console.log('[updateDashboard] ✓ 성공:', json.commitUrl);
+
       showDeployStatus('ok', `✓ ${json.message}${json.commitUrl ? `\n<a href="${json.commitUrl}" target="_blank" style="color:#15803d">커밋 확인 →</a>` : ''}`);
       btn.textContent = '✓ 반영 완료';
     } catch(e) {
+      console.error('[updateDashboard] 실패:', e);
       showDeployStatus('fail', `✗ ${e.message}`);
       btn.disabled = false;
       btn.textContent = '🚀 대시보드에 반영하기';

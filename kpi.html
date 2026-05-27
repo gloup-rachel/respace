@@ -1357,7 +1357,7 @@ function renderChannelSection() {
         <td class="v-warn">${iDeal}</td>
         <td style="color:var(--accent)">${iLead}</td>
         <td>${moneyStr(spend)}</td>
-        <td>${cplStr(spend, lead)}</td>
+        <td>${cplStr(spend, deal)}</td>
       </tr>
       ${detailRow}`;
   }).join('');
@@ -1371,7 +1371,7 @@ function renderChannelSection() {
         <th title="click_contact" style="color:var(--warning)">간접딜</th>
         <th title="click_project_view" style="color:var(--accent)">간접리드</th>
         <th>광고비</th>
-        <th>CPL</th>
+        <th title="광고비 ÷ 딜수 (상담문의 완료 기준)">CPL</th>
       </tr>
     </thead>
     <tbody>
@@ -1383,7 +1383,7 @@ function renderChannelSection() {
         <td class="v-warn">${totInd}</td>
         <td style="color:var(--accent)">${totIL}</td>
         <td style="color:var(--text-secondary)">${moneyStr(totSpend)}</td>
-        <td>${cplStr(totSpend, totLead)}</td>
+        <td>${cplStr(totSpend, totDeal)}</td>
       </tr>
     </tbody>`;
 }
