@@ -417,7 +417,17 @@ function buildSystemPrompt(mode) {
 6. 액션은 [즉시]/[검증 후]/[중장기] 3분류로만 작성.
 7. 한 인사이트 = 최대 5문장 이내.
 8. trend 값: "pos" (CPL 하락 = 좋음), "neg" (CPL 상승 = 나쁨), "neutral" (변동 미미).
-   ※ 리드/전환/CTR은 상승이 pos.`;
+   ※ 리드/전환/CTR은 상승이 pos.
+
+## ⚠ JSON 출력 형식 절대 규칙 (위반 시 파싱 실패)
+9. HTML 안의 모든 큰따옴표는 반드시 \\\\" 로 escape.
+   ❌ "html": "<div class="weekly-summary-card">..."
+   ✅ "html": "<div class=\\\\"weekly-summary-card\\\\">..."
+10. HTML은 반드시 한 줄로 작성 — JSON 문자열 안에 raw newline(엔터) 금지.
+    여러 줄로 보이고 싶다면 <br> 태그 사용. \\\\n 같은 escape도 금지.
+11. trailing comma 금지. 마지막 항목 뒤에 쉼표 없음.
+12. JSON 시작 { 부터 끝 } 까지 완전한 구조. 중간에 자르지 말 것.
+13. 응답은 오직 { ... } 한 덩어리. 앞뒤에 어떤 텍스트·공백·마크다운도 금지.`;
 
   return [intro, ANALYSIS_FRAMEWORK, RESPACE_CONFIG, HTML_GUIDE, schema, rules].join('\n\n');
 }
@@ -628,20 +638,71 @@ export default async function handler(req) {
           return;
         }
 
+        // ── JSON 파싱 견고화 ──────────────────────────────────────
+        // LLM 응답의 흔한 실수(raw newline, escape 누락)를 자동 복구 시도
         const cleaned = fullText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
         const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-          send({ type: 'error', message: `${mode} JSON 파싱 실패 — 응답에서 JSON을 찾을 수 없습니다.` });
+          console.error(`[${mode}] JSON 시작 패턴 못 찾음. 응답 앞부분:`, cleaned.slice(0, 300));
+          send({ type: 'error', message: `${mode} JSON 파싱 실패 — 응답에서 JSON 객체를 찾을 수 없습니다.` });
           controller.close();
           return;
         }
 
-        let parsed;
+        let parsed = null;
+        let parseAttempts = [];
+
+        // 1차 시도 — 그대로 파싱
         try { parsed = JSON.parse(jsonMatch[0]); }
-        catch (e) {
-          send({ type: 'error', message: `${mode} JSON 파싱 오류: ${e.message}` });
-          controller.close();
-          return;
+        catch (e1) {
+          parseAttempts.push(`1차: ${e1.message}`);
+
+          // 2차 시도 — 문자열 안 control character 자동 escape
+          // JSON 문자열 리터럴 안의 raw \n, \r, \t를 \\n, \\r, \\t로 치환
+          try {
+            const repaired = jsonMatch[0].replace(
+              /"((?:[^"\\]|\\.)*)"/g,
+              (match, inner) => {
+                const fixed = inner
+                  .replace(/\r\n/g, '\\n')
+                  .replace(/\n/g, '\\n')
+                  .replace(/\r/g, '\\n')
+                  .replace(/\t/g, '\\t');
+                return `"${fixed}"`;
+              }
+            );
+            parsed = JSON.parse(repaired);
+            console.warn(`[${mode}] JSON 1차 파싱 실패 → 2차(control char escape) 복구 성공.`);
+          } catch (e2) {
+            parseAttempts.push(`2차: ${e2.message}`);
+
+            // 3차 시도 — 더 공격적인 복구: 마지막 쉼표 제거, 닫는 } 추가
+            try {
+              let aggressive = jsonMatch[0];
+              // trailing comma 제거
+              aggressive = aggressive.replace(/,(\s*[}\]])/g, '$1');
+              // 닫는 } 부족 시 추가 (열린 { 개수 = 닫힌 } 개수 맞추기)
+              const openCount = (aggressive.match(/\{/g) || []).length;
+              const closeCount = (aggressive.match(/\}/g) || []).length;
+              if (openCount > closeCount) aggressive += '}'.repeat(openCount - closeCount);
+
+              parsed = JSON.parse(aggressive);
+              console.warn(`[${mode}] JSON 3차(공격적 복구) 성공.`);
+            } catch (e3) {
+              parseAttempts.push(`3차: ${e3.message}`);
+              console.error(`[${mode}] JSON 파싱 3회 모두 실패:`, parseAttempts);
+              console.error(`[${mode}] 응답 앞부분:`, jsonMatch[0].slice(0, 500));
+              console.error(`[${mode}] 응답 끝부분:`, jsonMatch[0].slice(-300));
+              send({
+                type: 'error',
+                message: `${mode} JSON 파싱 실패 (3회 복구 시도) — ${e1.message}`,
+                stopReason, outputTokens: usageOutputTokens, maxTokens,
+                snippet: jsonMatch[0].slice(0, 200) + '...'
+              });
+              controller.close();
+              return;
+            }
+          }
         }
 
         // 응답 형식 분기

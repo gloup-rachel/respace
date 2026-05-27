@@ -893,7 +893,8 @@
   }
 
   // ── STEP 1: 한 줄 요약 + KPI + LEVEL 0,1 ──────────────────────
-  async function runStep1() {
+  // 첫 시도 실패 시 자동 1회 재시도
+  async function runStep1(retryCount = 0) {
     if (!collectedData) {
       showErr('generateError','⬆️ 먼저 [데이터 수집 시작] 버튼을 눌러 데이터를 수집해 주세요.');
       return;
@@ -904,10 +905,14 @@
     userInputsCache = prepareInputs();
 
     setInputGenerating(true);
+    if (retryCount > 0) {
+      const msg = document.getElementById('progressMsg');
+      if (msg) msg.textContent = `STEP 1 자동 재시도 중 (${retryCount + 1}/2)...`;
+    }
     try {
       const evt = await callAPI(
         { mode:'step1', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache },
-        (chars) => updateProgress('progressMsg', chars, 'STEP 1')
+        (chars) => updateProgress('progressMsg', chars, `STEP 1${retryCount > 0 ? ' (재시도)' : ''}`)
       );
       cachedComputed = evt.computed;
 
@@ -934,7 +939,14 @@
       renderStepProgress();
       renderNextStepZone();
     } catch (e) {
-      showErr('generateError', `STEP 1 실패: ${e.message}`);
+      if (retryCount === 0) {
+        console.warn(`[STEP 1] 1차 실패, 자동 재시도: ${e.message}`);
+        setInputGenerating(false);
+        await new Promise(r => setTimeout(r, 800));
+        return runStep1(1);
+      }
+      console.error('[STEP 1] 2회 모두 실패:', e);
+      showErr('generateError', `STEP 1 실패 (자동 재시도 후): ${e.message}`);
     } finally {
       setInputGenerating(false);
     }
@@ -942,15 +954,21 @@
 
   // ── STEP 2: 매체별 LEVEL 2~5 딥다이브 (단일 매체 호출) ────────
   // 이상 매체가 N개면 N번 호출 — 각 호출당 토큰 50%↓, 시간 50%↓, 안정성 ↑
-  async function runStep2Channel(channel) {
+  // 첫 시도 실패 시 자동 1회 재시도 (LLM 응답 일관성 부족 대응)
+  async function runStep2Channel(channel, retryCount = 0) {
     if (currentStep < 1) return;
     if (step2Done.includes(channel)) return;  // 이미 완료된 매체
     setStepGenerating(true, channel);
+    if (retryCount > 0) {
+      // 재시도 알림
+      const msgEl = document.getElementById('stepProgressMsg');
+      if (msgEl) msgEl.textContent = `STEP 2 · ${channel} 자동 재시도 중 (${retryCount + 1}/2)...`;
+    }
     try {
       const prev = versions[currentVerIdx].entry;
       const evt = await callAPI(
         { mode:'step2-channel', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev, channel },
-        (chars) => updateProgress('stepProgressMsg', chars, `STEP 2 · ${channel}`)
+        (chars) => updateProgress('stepProgressMsg', chars, `STEP 2 · ${channel}${retryCount > 0 ? ' (재시도)' : ''}`)
       );
       const newSections = Array.isArray(evt.result.sections) ? evt.result.sections : [];
       if (newSections.length === 0) throw new Error(`${channel} 응답에 sections 없음`);
@@ -977,7 +995,16 @@
       renderStepProgress();
       renderNextStepZone();
     } catch (e) {
-      showErr('stepError', `STEP 2 (${channel}) 실패: ${e.message}`);
+      // 첫 시도 실패 → 자동 1회 재시도 (LLM 응답 일관성 부족 대응)
+      if (retryCount === 0) {
+        console.warn(`[STEP 2 · ${channel}] 1차 실패, 자동 재시도 진행: ${e.message}`);
+        // 약간의 딜레이 후 재시도 (Anthropic API 안정성)
+        await new Promise(r => setTimeout(r, 800));
+        return runStep2Channel(channel, 1);
+      }
+      // 2회째도 실패 — 사용자에게 노출
+      console.error(`[STEP 2 · ${channel}] 2회 모두 실패:`, e);
+      showErr('stepError', `STEP 2 (${channel}) 실패 (자동 재시도 후): ${e.message}`);
       renderNextStepZone(true, channel);
     } finally {
       setStepGenerating(false);
@@ -985,14 +1012,18 @@
   }
 
   // ── STEP 3: LEVEL 6 + 액션 + 다음 주 체크 ─────────────────────
-  async function runStep3() {
+  async function runStep3(retryCount = 0) {
     if (currentStep < 1) return;
     setStepGenerating(true);
+    if (retryCount > 0) {
+      const msgEl = document.getElementById('stepProgressMsg');
+      if (msgEl) msgEl.textContent = `STEP 3 자동 재시도 중 (${retryCount + 1}/2)...`;
+    }
     try {
       const prev = versions[currentVerIdx].entry;
       const evt = await callAPI(
         { mode:'step3', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev },
-        (chars) => updateProgress('stepProgressMsg', chars, 'STEP 3')
+        (chars) => updateProgress('stepProgressMsg', chars, `STEP 3${retryCount > 0 ? ' (재시도)' : ''}`)
       );
       const newSections = Array.isArray(evt.result.sections) ? evt.result.sections : [];
       prev.sections = renumberSections(prev.sections.concat(newSections));
@@ -1017,7 +1048,14 @@
         }, 600);
       }
     } catch (e) {
-      showErr('stepError', `STEP 3 실패: ${e.message}`);
+      if (retryCount === 0) {
+        console.warn(`[STEP 3] 1차 실패, 자동 재시도: ${e.message}`);
+        setStepGenerating(false);
+        await new Promise(r => setTimeout(r, 800));
+        return runStep3(1);
+      }
+      console.error('[STEP 3] 2회 모두 실패:', e);
+      showErr('stepError', `STEP 3 실패 (자동 재시도 후): ${e.message}`);
       renderNextStepZone(true);
     } finally {
       setStepGenerating(false);

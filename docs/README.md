@@ -198,6 +198,31 @@ git push origin main
 
 ---
 
+## 응답 안정성 개선 (2026-05-27)
+
+LLM 응답 일관성 부족으로 "첫 시도 실패 → 두 번째 성공" 패턴이 반복되던 문제를 3단 방어로 해결:
+
+**1. JSON 파싱 견고화** (`api/weekly-report.js`)
+- 1차: 그대로 파싱
+- 2차: HTML 안의 raw newline(`\n`)·tab을 `\\n`/`\\t`로 자동 변환 후 재파싱
+- 3차: trailing comma 제거 + 닫는 `}` 부족 시 자동 보충
+- 3회 모두 실패해야 에러. 응답 앞/끝 부분 콘솔 로깅으로 디버그 가능
+
+**2. 클라이언트 자동 1회 재시도** (`insight-generator.html`)
+- STEP 1·STEP 2-channel·STEP 3 모두 적용
+- 1차 실패 시 800ms 딜레이 후 자동 재호출 — 사용자 클릭 불필요
+- 진행 메시지: `"STEP 2 · Naver 자동 재시도 중 (2/2)..."`
+- 2회째도 실패해야 사용자에게 실패 알림
+
+**3. 시스템 프롬프트 JSON escape 절대 규칙 추가**
+- HTML 안 큰따옴표 `\"` escape 강제
+- HTML 한 줄 작성 강제 (raw newline 금지)
+- trailing comma 금지
+
+→ 사용자 경험: "재시도 중..." 메시지 잠깐 보고 자동으로 성공. 명시적 재시도 클릭 불필요.
+
+---
+
 ## 향후 확장 포인트
 
 - **Prompt caching**: ANALYSIS_FRAMEWORK + RESPACE_CONFIG 등 시스템 프롬프트가 모든 단계 반복 → Anthropic prompt caching 적용 시 비용·지연시간 ↓
