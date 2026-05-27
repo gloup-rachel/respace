@@ -388,10 +388,10 @@ const REFINE_SCHEMA = `
 const TRANSFORM_TEMPLATE_SCHEMA = `
 # 주간 리포트 최종 템플릿 변환 (mode: transform-template)
 
-기존 인사이트(STEP1+2+3 결과 전체)를 받아 대시보드 반영용 최종 템플릿 7섹션으로 가공.
+기존 인사이트(STEP1+2+3 결과 전체)를 받아 대시보드 반영용 최종 템플릿 4섹션으로 가공.
 인사이트 분석 도구의 결과 → 리스페이스 팀이 한눈에 보는 주간 리포트로 변환.
 
-## 출력 구조 (반드시 이 순서·이 갯수)
+## 출력 구조 (반드시 이 순서·이 갯수 — 3섹션 고정)
 
 {
   "oneLineSummary": "이번 주 한 줄 총평 (80자 이내, CPD 중심 · 핵심 변동 + 다음 주 가장 중요한 액션 1개)",
@@ -406,58 +406,133 @@ const TRANSFORM_TEMPLATE_SCHEMA = `
   "sections": [
     {
       "title": "1. 통합 총평 Summary",
-      "html": "weekly-summary-card-highlight 1개 (이번 주 핵심 1문장) + ul 5줄 이내 핵심 포인트. CPD 중심 + 전주 비교 + 다음 주 우선 액션 1개 언급."
+      "html": "(1) 매체별 성과 비교 표 + (2) 효율 요약 카드 + (3) 5줄 이내 인사이트 요약"
     },
     {
-      "title": "2-1. 네이버 — 이슈 사항",
-      "html": "네이버의 팩트(수치 변화) + 원인(확인됨/추정 구분) 정리. insight-block 1~2개. 정상 매체면 'channel-card normal'로 1줄 요약만."
+      "title": "2. 매체별 성과 및 액션",
+      "html": "이상 매체만 inline 카드(channel-block)로 동적 노출. 이상 매체 0개면 '전 매체 정상' 1줄."
     },
     {
-      "title": "2-2. 구글 — 이슈 사항",
-      "html": "구글 동일 구조."
-    },
-    {
-      "title": "2-3. Meta — 이슈 사항",
-      "html": "Meta 동일 구조."
-    },
-    {
-      "title": "3-1. 네이버 — 최종 액션",
-      "html": "네이버 액션 카드 1~3개. 각 카드는 [무엇을] [어떻게(수치·기준)] [왜(근거 §2-1 참조)] [언제까지] 4요소. action-box.immediate/verify/longterm 분류."
-    },
-    {
-      "title": "3-2. 구글 — 최종 액션",
-      "html": "구글 동일 구조."
-    },
-    {
-      "title": "3-3. Meta — 최종 액션",
-      "html": "Meta 동일 구조."
+      "title": "3. 이 외 논의 필요 사항",
+      "html": "외부 요인 체크 + 다음 주 모니터링 + 미팅 안건."
     }
   ]
 }
 
-## 액션 카드 작성 규칙 (3-1, 3-2, 3-3 공통)
-한 액션 = 1개의 action-box. 각 action-box 안에:
-<div class="action-box immediate|verify|longterm">
-  <div class="action-head">⚡ 즉시 · [한 줄 액션 제목]</div>
-  <ul>
-    <li><strong>어떻게:</strong> 구체적 실행 방법 (입찰가·키워드명·매체 메뉴 등)</li>
-    <li><strong>왜:</strong> §2-1 참조 — 근거 데이터 또는 [확인됨] 원인 1줄</li>
-    <li><strong>언제까지:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
-  </ul>
+## 섹션 1 (통합 총평 Summary) — 상세 작성 규칙
+
+### (1) 매체별 성과 비교 표 — 섹션 최상단 고정
+<table class="weekly-table">
+  <thead>
+    <tr><th>매체</th><th>비용</th><th>전환</th><th>CPL</th><th>전주 대비 CPL</th><th>상태</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>네이버</strong></td>
+      <td class="num">₩XXX,XXX</td>
+      <td class="num">XX건</td>
+      <td class="num">₩XX,XXX</td>
+      <td class="num delta-neg">+XX%</td>
+      <td>⚠ 이상 / ✓ 정상</td>
+    </tr>
+    <tr>
+      <td><strong>구글</strong></td>
+      <td class="num">...</td>
+      <td class="num">...</td>
+      <td class="num">...</td>
+      <td class="num delta-neg">...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <td><strong>Meta</strong></td>
+      <td class="num">...</td>
+      <td class="num">...</td>
+      <td class="num">...</td>
+      <td class="num delta-pos">...</td>
+      <td>...</td>
+    </tr>
+    <tr style="background:#f5f7fa;font-weight:700">
+      <td>합계</td>
+      <td class="num">₩XXX,XXX</td>
+      <td class="num">XXX건</td>
+      <td class="num">CPD ₩XX,XXX</td>
+      <td class="num">+/-X%</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+### (2) 효율 요약 카드 — weekly-summary-card-highlight
+<div class="weekly-summary-card weekly-summary-card-highlight">
+  <strong>이번 주 CPD ₩XX,XXX (전주 대비 +/-X%)</strong> · 딜 XX건. [한 줄 핵심 진단]
 </div>
+
+### (3) 5줄 이내 인사이트 요약
+<ul>
+  <li>핵심 포인트 1 (CPD/CPL 변화 요약)</li>
+  <li>핵심 포인트 2 (가장 큰 이슈 매체)</li>
+  <li>핵심 포인트 3 (다음 주 우선 액션 1개)</li>
+  ... 최대 5줄
+</ul>
+
+## 섹션 2 (매체별 성과 및 액션) — 이상 매체만 동적 노출
+
+이상 매체(±20% 이상 변동)만 inline 카드(channel-block)로 표시. 정상 매체는 표시하지 말 것 (섹션 1 표에 이미 있음).
+
+### 이상 매체가 있을 때
+각 이상 매체당 1개의 channel-block 카드를 매체 식별 클래스와 함께:
+
+<div class="channel-block channel-naver">
+  <h4 class="channel-block-title">네이버 — CPL ₩XX,XXX (+/-X%)</h4>
+  <div class="weekly-summary-card" style="margin-bottom:8px">
+    <strong>📊 이슈</strong>
+    [팩트: 수치 변화] · [원인 [확인됨] / [추정] 구분, 1~2개]
+  </div>
+  <div class="action-grid" style="grid-template-columns:1fr">
+    <div class="action-box immediate">
+      <div class="action-head">⚡ 즉시 · [액션 제목]</div>
+      <ul>
+        <li><strong>어떻게:</strong> 구체적 실행 방법 (입찰가·키워드·수치)</li>
+        <li><strong>왜:</strong> 위 이슈 §[확인됨]/[추정] 원인 1줄</li>
+        <li><strong>언제까지:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
+      </ul>
+    </div>
+    <!-- 액션 1~2개 더 (검증 후·중장기, 필요 시) -->
+  </div>
+</div>
+
+매체 식별 클래스:
+- 네이버 → channel-block channel-naver
+- 구글 → channel-block channel-google
+- Meta → channel-block channel-meta
+
+### 이상 매체가 0개일 때
+<div class="weekly-summary-card weekly-summary-card-highlight" style="border-left-color:#27ae60;background:linear-gradient(135deg,#f0fdf4 0%,#d4edda 100%)">
+  ✓ <strong>전 매체 정상 — 이번 주 별도 조치 불필요.</strong> 모니터링 유지.
+</div>
+
+## 섹션 3 (이 외 논의 필요 사항)
+
+<ul>
+  <li><strong>외부 요인 체크:</strong> 시즌(성수기/비수기) · 경쟁 변화 · 랜딩페이지 · 예산 증감 · 외부 이슈 — 해당 사항만 1줄씩</li>
+  <li><strong>다음 주 모니터링:</strong> 핵심 지표·매체 3~5개 bullet</li>
+  <li><strong>미팅 안건:</strong> userInputs.nextAgenda 반영</li>
+</ul>
 
 ## 작성 지침
 - 기존 entry의 데이터·원인·액션을 가공할 뿐, 새로운 분석 추가 금지.
-- 동일 매체에 대한 이슈(섹션 2-X)와 액션(섹션 3-X)이 일관되어야 함.
-- 정상 매체(이상 신호 없음)도 섹션은 유지 — "정상 범위, 별도 조치 불필요" 1줄.
-- "어떻게"는 반드시 구체적 (예: '입찰가 ₩3,500 하향' / '키워드 OFF' 같은 동사 + 수치/대상).
-- "왜"는 반드시 §2-X 또는 [확인됨]/[추정] 근거 표기.
+- 매체별 성과 비교 표는 사전 계산 값을 그대로 사용 (재계산 금지).
+- 매체 카드 안에서 이슈와 액션이 자연스럽게 연결되도록.
+- "어떻게"는 반드시 구체적 (예: '입찰가 ₩3,500 하향' / '키워드 OFF').
+- "왜"는 반드시 [확인됨]/[추정] 근거 표기.
+- **정상 매체는 섹션 2에 표시하지 말 것** (섹션 1 표에 이미 있음). 이상 매체만 inline 카드로.
+- 이상 매체가 0개면 섹션 2에 "전 매체 정상" 메시지 1줄만.
 
 ## 분량 제한
-- 섹션 1 (통합 총평): 최대 500자
-- 섹션 2-X 각각: 최대 400자
-- 섹션 3-X 각각: 최대 600자 (액션 카드 1~3개)
-- 전체 sections html 합계 최대 약 3,800자
+- 섹션 1: 최대 1,200자 (표 700자 + 카드 200자 + 요약 300자)
+- 섹션 2: 이상 매체 N개당 600~800자 (N=0이면 100자, N=1이면 800자, N=2이면 1,400자, N=3이면 2,000자)
+- 섹션 3: 최대 500자
+- 전체 sections html 합계 최대 약 3,700자 (이상 매체 2개 기준)
 `;
 
 const SECTION_REFINE_SCHEMA = `
@@ -1188,12 +1263,20 @@ function buildTransformTemplateMessage(weekInfo, raw, inputs, c, prevEntry) {
   lines.push(`- 광고 전환 합계: ${c.totalConv}건 (전주 ${c.prevTotalConv}건, ${signFn(c.convDelta)})`);
   lines.push('');
 
-  // 매체별 CPL (이상 신호 식별용)
-  lines.push('## [매체별 CPL · 이상 신호]');
-  lines.push(`- Google: ${f(c.googleCPL)}원 (전주 ${f(c.prevGoogleCPL)}원, ${signFn(c.googleCplDelta)})`);
-  lines.push(`- Naver:  ${f(c.naverCPL)}원 (전주 ${f(c.prevNaverCPL)}원, ${signFn(c.naverCplDelta)})`);
-  lines.push(`- Meta:   ${f(c.metaCPL)}원 (전주 ${f(c.prevMetaCPL)}원, ${signFn(c.metaCplDelta)})`);
-  lines.push(`- 이상 매체(±20%): ${c.anomalyChannels.length ? c.anomalyChannels.join(', ') : '없음'}`);
+  // 매체별 성과 비교 표 작성용 raw 데이터 (섹션 1 상단의 weekly-table에 그대로 사용)
+  lines.push('## [매체별 성과 비교 표 — 섹션 1 상단 표 작성용]');
+  lines.push('| 매체 | 비용 | 전환 | CPL | 전주 CPL | 변화율 | 이상 |');
+  const formatRow = (name, ch, prevCh, channelCpl, prevChannelCpl, channelDelta) => {
+    const chSafe = ch || { totalSpend:0, totalClicks:0, totalConv:0 };
+    const anomaly = c.anomalyChannels.includes(name) ? '⚠' : '✓';
+    lines.push(`| ${name} | ${f(chSafe.totalSpend)}원 | ${chSafe.totalConv}건 | ${f(channelCpl)}원 | ${f(prevChannelCpl)}원 | ${signFn(channelDelta)} | ${anomaly} |`);
+  };
+  formatRow('Naver', raw.naver, raw.prevNaver, c.naverCPL, c.prevNaverCPL, c.naverCplDelta);
+  formatRow('Google', raw.google, raw.prevGoogle, c.googleCPL, c.prevGoogleCPL, c.googleCplDelta);
+  formatRow('Meta', raw.meta, raw.prevMeta, c.metaCPL, c.prevMetaCPL, c.metaCplDelta);
+  lines.push(`| 합계 | ${f(c.totalSpend)}원 | ${c.totalConv}건 | (전체 CPL ${f(c.totalCPL)}원) | (전주 ${f(c.prevTotalCPL)}원) | ${signFn(c.cplDelta)} | - |`);
+  lines.push('');
+  lines.push(`이상 매체(±20%): ${c.anomalyChannels.length ? c.anomalyChannels.join(', ') : '없음'}`);
   lines.push('');
 
   // 운영 정보
@@ -1227,11 +1310,15 @@ function buildTransformTemplateMessage(weekInfo, raw, inputs, c, prevEntry) {
   lines.push('---');
   lines.push('## 변환 지시');
   lines.push('1. 위 기존 인사이트의 데이터·원인·액션을 그대로 활용. 새로운 분석·수치 추가 금지.');
-  lines.push('2. 출력은 7섹션 고정 (1. Summary / 2-1·2-2·2-3 매체별 이슈 / 3-1·3-2·3-3 매체별 액션).');
-  lines.push('3. 정상 매체도 섹션은 유지 — "정상 범위, 별도 조치 불필요" 1줄.');
-  lines.push('4. 액션 카드는 [어떻게 / 왜 / 언제까지] 3요소 필수.');
-  lines.push('5. KPI Primary는 CPD (딜당 비용) — kpis 배열 첫 번째 자리.');
-  lines.push('6. 한 줄 총평은 CPD 중심 + 다음 주 가장 중요한 액션 1개 언급.');
+  lines.push('2. 출력은 **3섹션 고정** — (1) 통합 총평 / (2) 매체별 성과 및 액션 / (3) 이 외 논의.');
+  lines.push('3. 섹션 1 최상단에 매체별 성과 비교 표(weekly-table) 반드시 포함 — 위 사전 데이터 그대로.');
+  lines.push(`4. 섹션 2는 **이상 매체(${c.anomalyChannels.length ? c.anomalyChannels.join(', ') : '없음'})만** channel-block 카드로 inline 노출.`);
+  lines.push('   - 정상 매체는 절대 섹션 2에 표시하지 말 것 (섹션 1 표에 이미 있음).');
+  lines.push('   - 이상 매체 0개면 "전 매체 정상" 메시지 1줄만.');
+  lines.push('5. 매체 식별 클래스: 네이버=channel-naver, 구글=channel-google, Meta=channel-meta.');
+  lines.push('6. 액션은 [어떻게 / 왜 / 언제까지] 3요소 필수.');
+  lines.push('7. KPI Primary는 CPD (딜당 비용) — kpis 배열 첫 번째 자리.');
+  lines.push('8. 한 줄 총평은 CPD 중심 + 다음 주 가장 중요한 액션 1개 언급.');
   return lines.join('\n');
 }
 
