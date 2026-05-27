@@ -203,31 +203,27 @@ const HTML_GUIDE = `
   <p class="channel-note">→ LEVEL 2 딥다이브 진행</p>
 </div>
 
-### 3단계 시퀀스 (LEVEL 2~5)
+### 3단계 시퀀스 (LEVEL 2~5) — 이모지 사용 금지
 <div class="insight-block">
-  <p class="fact">📊 <strong>[팩트]</strong> 지표 변화 (수치 + 비교 기준)</p>
-  <p class="cause"><strong>[원인]</strong></p>
+  <p class="fact"><strong>팩트</strong> 지표 변화 (수치 + 비교 기준)</p>
+  <p class="cause"><strong>원인</strong></p>
   <ul class="cause-list">
-    <li><span class="cause-tag confirmed">[확인됨]</span> 데이터 기반 원인 — 임팩트 큰 것 먼저</li>
-    <li><span class="cause-tag estimated">[추정]</span> 가설 — 검증 방법 명시</li>
+    <li><span class="cause-tag confirmed">확인됨</span> 데이터 기반 원인 — 임팩트 큰 것 먼저</li>
+    <li><span class="cause-tag estimated">추정</span> 가설 — 검증 방법 명시</li>
   </ul>
-  <p class="action"><strong>[액션]</strong> 다음 단계로</p>
+  <p class="action"><strong>액션</strong> 다음 단계로</p>
 </div>
 
-### 액션 아이템 (3분류)
-<div class="action-grid">
-  <div class="action-box immediate">
-    <div class="action-head">⚡ 즉시 (이번 주~다음 주)</div>
-    <ul><li>구체적 액션 1줄</li></ul>
-  </div>
-  <div class="action-box verify">
-    <div class="action-head">🔍 검증 후</div>
-    <ul><li>추가 확인 후 실행할 액션</li></ul>
-  </div>
-  <div class="action-box longterm">
-    <div class="action-head">📅 중장기 (1개월+)</div>
-    <ul><li>구조 개선 액션</li></ul>
-  </div>
+### 액션 아이템 — "진행 액션" 통일 헤더 + 회색 칩 제목 + How/Why/Due Date
+모든 action-box는 다음 구조 동일:
+<div class="action-box immediate">  <!-- 우선순위는 클래스로만 (immediate/verify/longterm) -->
+  <div class="action-head">진행 액션</div>
+  <span class="action-title-chip">액션 제목 (동사형 짧은 문구)</span>
+  <ul>
+    <li><strong>How:</strong> 구체적 실행 방법</li>
+    <li><strong>Why:</strong> [확인됨]/[추정] 근거 1줄</li>
+    <li><strong>Due Date:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
+  </ul>
 </div>
 `;
 
@@ -480,35 +476,47 @@ const TRANSFORM_TEMPLATE_SCHEMA = `
 이상 매체(±20% 이상 변동)만 inline 카드(channel-block)로 표시. 정상 매체는 표시하지 말 것 (섹션 1 표에 이미 있음).
 
 ### 이상 매체가 있을 때
-각 이상 매체당 1개의 channel-block 카드를 매체 식별 클래스와 함께:
+각 이상 매체당 1개의 channel-block 카드. 이모지·아이콘 사용 금지. 다음 마크업 정확히 따를 것:
 
 <div class="channel-block channel-naver">
   <h4 class="channel-block-title">네이버 — CPL ₩XX,XXX (+/-X%)</h4>
-  <div class="weekly-summary-card" style="margin-bottom:8px">
-    <strong>📊 이슈</strong>
-    [팩트: 수치 변화] · [원인 [확인됨] / [추정] 구분, 1~2개]
+  <div class="insight-block">
+    <p class="fact"><strong>이슈</strong> [팩트: 수치 변화 한 문장]</p>
+    <p class="cause"><strong>원인</strong></p>
+    <ul class="cause-list">
+      <li><span class="cause-tag confirmed">확인됨</span> 데이터 기반 원인 1줄</li>
+      <li><span class="cause-tag estimated">추정</span> 가설 + 검증 방법 1줄</li>
+    </ul>
   </div>
   <div class="action-grid" style="grid-template-columns:1fr">
     <div class="action-box immediate">
-      <div class="action-head">⚡ 즉시 · [액션 제목]</div>
+      <div class="action-head">진행 액션</div>
+      <span class="action-title-chip">[액션 제목 — 동사형 1줄]</span>
       <ul>
-        <li><strong>어떻게:</strong> 구체적 실행 방법 (입찰가·키워드·수치)</li>
-        <li><strong>왜:</strong> 위 이슈 §[확인됨]/[추정] 원인 1줄</li>
-        <li><strong>언제까지:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
+        <li><strong>How:</strong> 구체적 실행 방법 (입찰가·키워드·수치)</li>
+        <li><strong>Why:</strong> 위 이슈 [확인됨]/[추정] 원인 1줄</li>
+        <li><strong>Due Date:</strong> 이번 주 / 다음 미팅 전 / 2주 / 1개월</li>
       </ul>
     </div>
-    <!-- 액션 1~2개 더 (검증 후·중장기, 필요 시) -->
+    <!-- 액션 1~2개 더 (verify·longterm, 필요 시 동일 구조) -->
   </div>
 </div>
 
-매체 식별 클래스:
+### 액션 박스 작성 절대 규칙
+- **action-head는 항상 "진행 액션"** (이 텍스트 그대로, 변형 금지)
+- **action-title-chip은 회색 칩** — 액션 제목을 동사형 짧은 문구로 (예: "전환 0건 그룹 중단", "고비용 그룹 입찰 하향")
+- **본문 라벨은 영문 3개로 고정**: How / Why / Due Date
+- **우선순위는 클래스로만 표시** — immediate(빨강) / verify(노랑) / longterm(파랑). 헤더 텍스트에 우선순위 단어 넣지 말 것.
+- 한 채널당 액션 박스 1~3개. 우선순위가 다르면 별도 박스로 분리.
+
+### 매체 식별 클래스
 - 네이버 → channel-block channel-naver
 - 구글 → channel-block channel-google
 - Meta → channel-block channel-meta
 
 ### 이상 매체가 0개일 때
-<div class="weekly-summary-card weekly-summary-card-highlight" style="border-left-color:#27ae60;background:linear-gradient(135deg,#f0fdf4 0%,#d4edda 100%)">
-  ✓ <strong>전 매체 정상 — 이번 주 별도 조치 불필요.</strong> 모니터링 유지.
+<div class="weekly-summary-card">
+  <strong>전 매체 정상 — 이번 주 별도 조치 불필요.</strong> 모니터링 유지.
 </div>
 
 ## 섹션 3 (이 외 논의 필요 사항)
@@ -596,7 +604,13 @@ function buildSystemPrompt(mode) {
     여러 줄로 보이고 싶다면 <br> 태그 사용. \\\\n 같은 escape도 금지.
 11. trailing comma 금지. 마지막 항목 뒤에 쉼표 없음.
 12. JSON 시작 { 부터 끝 } 까지 완전한 구조. 중간에 자르지 말 것.
-13. 응답은 오직 { ... } 한 덩어리. 앞뒤에 어떤 텍스트·공백·마크다운도 금지.`;
+13. 응답은 오직 { ... } 한 덩어리. 앞뒤에 어떤 텍스트·공백·마크다운도 금지.
+
+## ⚠ 디자인 톤 절대 규칙
+14. **이모지·아이콘 사용 절대 금지**. 📊⚡🔍📅✓⚠ 등 모든 유니코드 아이콘 사용 안 함.
+    헤더·라벨은 순수 텍스트로만 ("즉시", "검증 후", "중장기", "확인됨", "추정", "이슈", "원인", "액션").
+15. inline style 사용 최소화. 색상·border 등은 클래스만 사용.
+16. 폰트 크기·굵기 직접 지정 금지. 클래스가 정의된 스타일 따름.`;
 
   return [intro, ANALYSIS_FRAMEWORK, RESPACE_CONFIG, HTML_GUIDE, schema, rules].join('\n\n');
 }

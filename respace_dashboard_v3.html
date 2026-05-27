@@ -768,30 +768,24 @@
         }
 
         /* 섹션 2 안의 inline 매체 카드 (transform-template 3섹션용) */
+        /* 매체 식별은 좌측 border 4px만으로 표현. 배경은 흰색 통일. */
         .channel-block {
-            padding: 14px 18px;
-            border-radius: 8px;
+            padding: 16px 18px;
+            border-radius: 6px;
             margin-bottom: 14px;
-            background: #fff;
-            border: 1px solid #e5e5e5;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-left-width: 4px;
         }
-        .channel-block.channel-naver {
-            border-left: 4px solid #03c75a;
-            background: linear-gradient(135deg, #f6fef8 0%, #ebfaf1 100%);
-        }
-        .channel-block.channel-google {
-            border-left: 4px solid #4285f4;
-            background: linear-gradient(135deg, #f5f9ff 0%, #ebf2fc 100%);
-        }
-        .channel-block.channel-meta {
-            border-left: 4px solid #7e3aed;
-            background: linear-gradient(135deg, #faf7ff 0%, #f2eafc 100%);
-        }
+        .channel-block.channel-naver  { border-left-color: #03c75a; }
+        .channel-block.channel-google { border-left-color: #4285f4; }
+        .channel-block.channel-meta   { border-left-color: #7e3aed; }
         .channel-block-title {
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 700;
             color: #2c3e50;
-            margin: 0 0 10px;
+            margin: 0 0 12px;
+            line-height: 1.5;
         }
 
         /* 사이드바 리포트 삭제 버튼 (2026-05-27 추가) */
@@ -862,77 +856,123 @@
         .channel-cpl strong { color: #2c3e50; }
         .channel-note { font-size: 12px; color: #7f8c8d; margin-top: 3px; }
 
-        /* LEVEL 2~5 딥다이브 — 3단계 시퀀스 카드 */
+        /* ════════════════════════════════════════════════════════
+           디자인 단순화 (2026-05-27 갱신)
+           — 컬러 다이어트: 채널·우선순위만 좌측 border, 배경은 모두 흰색/연회색
+           — 이모지 제거, 폰트 13/14/12px · line-height 1.65 통일
+           ════════════════════════════════════════════════════════ */
+
+        /* 이슈 박스 — 일반 정보 카드 */
         .insight-block {
-            background: #f8f9fc;
-            border-radius: 8px;
+            background: #fafbfc;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
             padding: 14px 16px;
             margin-bottom: 12px;
-            border: 1px solid #e1e8ed;
         }
         .insight-block p.fact {
-            font-size: 13px; margin-bottom: 8px; color: #2c3e50;
-            line-height: 1.7;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            line-height: 1.65;
         }
-        .insight-block p.fact strong { color: #2c3e50; }
+        .insight-block p.fact strong { color: #2c3e50; font-weight: 700; }
         .insight-block p.cause {
-            font-size: 12px; margin: 4px 0 4px; color: #34495e; font-weight: 700;
+            font-size: 13px;
+            margin: 6px 0 4px;
+            color: #2c3e50;
+            font-weight: 700;
         }
         .insight-block ul.cause-list {
-            padding-left: 18px; margin: 4px 0 8px;
+            padding-left: 18px;
+            margin: 4px 0 8px;
         }
         .insight-block ul.cause-list li {
-            font-size: 12px; margin-bottom: 5px; line-height: 1.65; color: #34495e;
+            font-size: 13px;
+            margin-bottom: 5px;
+            line-height: 1.65;
+            color: #34495e;
         }
         .insight-block .cause-tag {
             display: inline-block;
-            font-size: 10px; font-weight: 800;
-            padding: 2px 7px; border-radius: 3px;
-            margin-right: 4px; letter-spacing: 0.03em;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin-right: 4px;
+            letter-spacing: 0;
             vertical-align: middle;
+            background: #eef1f4;
+            color: #5a6c7d;
+            border: 1px solid #dde2e7;
         }
-        .insight-block .cause-tag.confirmed { background: #d6eaf8; color: #1f618d; }
-        .insight-block .cause-tag.estimated { background: #fdebd0; color: #b9770e; }
+        .insight-block .cause-tag.confirmed { background: #eef1f4; color: #1f618d; }
+        .insight-block .cause-tag.estimated { background: #fdf6e3; color: #95721a; }
         .insight-block p.action {
-            font-size: 12px; color: #1e8449; margin-top: 6px; line-height: 1.65;
+            font-size: 13px;
+            color: #2c3e50;
+            margin-top: 6px;
+            line-height: 1.65;
         }
-        .insight-block p.action strong { color: #196f3d; }
+        .insight-block p.action strong { color: #196f3d; font-weight: 700; }
 
-        /* 액션 아이템 — 3분류 그리드 */
+        /* 액션 아이템 — 모노톤 + 좌측 border만 채색 */
         .action-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
             margin-top: 8px;
         }
         @media (max-width: 700px) {
             .action-grid { grid-template-columns: 1fr; }
         }
         .action-box {
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 14px 16px;
-            border: 1px solid #e5e5e5;
-            background: #fff;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-left-width: 3px;
         }
-        .action-box.immediate {
-            border-left: 3px solid #e74c3c;
-            background: linear-gradient(135deg, #fef7f5 0%, #fdedeb 100%);
-        }
-        .action-box.verify {
-            border-left: 3px solid #f39c12;
-            background: linear-gradient(135deg, #fffbeb 0%, #fef5d7 100%);
-        }
-        .action-box.longterm {
-            border-left: 3px solid #3498db;
-            background: linear-gradient(135deg, #f5f7ff 0%, #ebf2fc 100%);
-        }
+        .action-box.immediate { border-left-color: #c0392b; }
+        .action-box.verify    { border-left-color: #b9770e; }
+        .action-box.longterm  { border-left-color: #2874a6; }
+
+        /* 액션 헤더 — "진행 액션" 통일 라벨 (작은 회색) */
         .action-head {
-            font-size: 12px; font-weight: 800;
-            margin-bottom: 8px; color: #2c3e50;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            line-height: 1.4;
         }
-        .action-box ul { padding-left: 18px; margin: 4px 0; }
+        /* 액션 제목 — 회색 칩 */
+        .action-title-chip {
+            display: inline-block;
+            background: #eef1f4;
+            color: #2c3e50;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #dde2e7;
+            line-height: 1.5;
+        }
+        .action-box ul { padding-left: 16px; margin: 4px 0 0; }
         .action-box li {
-            font-size: 12px; margin-bottom: 4px; line-height: 1.65; color: #34495e;
+            font-size: 13px;
+            margin-bottom: 6px;
+            line-height: 1.65;
+            color: #34495e;
+        }
+        .action-box li:last-child { margin-bottom: 0; }
+        .action-box li strong {
+            color: #2c3e50;
+            font-weight: 700;
+            display: inline-block;
+            min-width: 70px;
         }
 
         @media (max-width: 900px) {
