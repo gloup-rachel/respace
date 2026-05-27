@@ -270,12 +270,36 @@ const STEP2_SCHEMA = `
   ]
 }
 
-## 작성 지침
+## 작성 지침 (구버전)
+⚠ 권장: 매체별 분할 호출(step2-channel) 사용. 매체 2~3개를 한 번에 처리하면 응답 잘림 위험.
 - 이상 매체로 명시된 채널만 분석. 정상 매체는 건드리지 말 것.
-- 각 insight-block은 한 가지 핵심 이슈만 다룸. 한 매체당 3~5개 block.
-- 원인 [확인됨]은 사전 계산 + LEVEL 1 raw data로 검증 가능한 것만.
-- 원인 [추정]은 가설 + 검증 방법(예: "Auction Insights 확인 필요").
+- 각 매체별로 별도 섹션 (4-a, 4-b 형태로 분리).
+- 한 매체당 3~5개 insight-block. [팩트]→[원인 확인됨/추정]→[액션] 3단계 강제.
 - 이상 매체가 0개로 전달되면 sections를 빈 배열 []로 반환.
+`;
+
+const STEP2_CHANNEL_SCHEMA = `
+# STEP 2-channel 출력 스키마 — 단일 매체 LEVEL 2~5 딥다이브
+
+반드시 아래 JSON만 출력. 다른 텍스트 일절 금지.
+
+{
+  "sections": [
+    {
+      "title": "4. LEVEL 2~5 — [매체명] 딥다이브",
+      "html": "캠페인 → 그룹 → 키워드/소재 순서. 3~5개의 insight-block. 각 block은 [팩트]→[원인 확인됨/추정]→[액션]."
+    }
+  ]
+}
+
+## 작성 지침
+- 지정된 매체 1개만 분석. 다른 매체는 절대 출력하지 말 것.
+- sections 배열에는 정확히 1개의 섹션만 포함.
+- 섹션 제목은 "4. LEVEL 2~5 — [매체명] 딥다이브" 형식 — 4-a/4-b 등 서브 알파벳은 클라이언트가 자동 부여하므로 LLM은 항상 "4. "로 작성.
+- 해당 매체의 raw data(캠페인·그룹별 수치)를 우선 활용해 구체적 수치 인용.
+- 한 매체당 3~5개 insight-block. [팩트]→[원인 확인됨/추정]→[액션] 3단계 강제.
+- 원인 [확인됨]은 사전 계산 + 해당 매체 raw data로 검증 가능한 것만.
+- 원인 [추정]은 가설 + 검증 방법(예: "Auction Insights 확인 필요").
 `;
 
 const STEP3_SCHEMA = `
@@ -361,6 +385,7 @@ function buildSystemPrompt(mode) {
   const schema =
     mode === 'step1' ? STEP1_SCHEMA :
     mode === 'step2' ? STEP2_SCHEMA :
+    mode === 'step2-channel' ? STEP2_CHANNEL_SCHEMA :
     mode === 'step3' ? STEP3_SCHEMA :
     mode === 'refine' ? REFINE_SCHEMA :
     mode === 'refine-section' ? SECTION_REFINE_SCHEMA :
@@ -423,7 +448,9 @@ export default async function handler(req) {
     weekInfo, rawData, userInputs,
     previousResult, previousEntry, feedback,
     // refine-section 전용
-    sectionIndex, currentSection, allSections
+    sectionIndex, currentSection, allSections,
+    // step2-channel 전용
+    channel
   } = body;
 
   if (!weekInfo || !rawData) {
@@ -431,8 +458,13 @@ export default async function handler(req) {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
-  if ((mode === 'step2' || mode === 'step3') && !previousResult) {
+  if ((mode === 'step2' || mode === 'step2-channel' || mode === 'step3') && !previousResult) {
     return new Response(JSON.stringify({ error: `${mode} 모드: previousResult 필요.` }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+  if (mode === 'step2-channel' && !channel) {
+    return new Response(JSON.stringify({ error: 'step2-channel 모드: channel(Naver/Google/Meta) 필요.' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
@@ -472,18 +504,19 @@ export default async function handler(req) {
   let userMessage;
   if (mode === 'step1') userMessage = buildStep1Message(weekInfo, rawData, userInputs, computed);
   else if (mode === 'step2') userMessage = buildStep2Message(weekInfo, rawData, userInputs, computed, previousResult);
+  else if (mode === 'step2-channel') userMessage = buildStep2ChannelMessage(weekInfo, rawData, userInputs, computed, previousResult, channel);
   else if (mode === 'step3') userMessage = buildStep3Message(weekInfo, rawData, userInputs, computed, previousResult);
   else if (mode === 'refine') userMessage = buildRefineMessage(weekInfo, rawData, userInputs, computed, previousEntry, feedback);
   else if (mode === 'refine-section') userMessage = buildSectionRefineMessage(weekInfo, rawData, userInputs, computed, sectionIndex, currentSection, allSections || [], feedback);
 
-  // max_tokens — step별로 다르게
-  // 시뮬레이션 결과 (2026-05-27): 한국어+JSON+HTML escape 감안 1자당 ~1.2토큰으로 재산정.
-  //   STEP 1 시뮬 응답 2,901자 ≈ 3,481 토큰 — 기존 3500은 한계 근접이라 잘림 발생.
-  //   STEP 2 이상 매체 2~3개 시나리오에서 분량 3배 증가 가능 → 6000으로 상향.
-  //   refine-section: 가장 무거운 섹션(딥다이브)이 ~1,631 토큰. 3500이면 2.1배 여유.
+  // max_tokens — mode별로 다르게
+  // 시뮬레이션 결과 (2026-05-27): 한국어+JSON+HTML escape 감안 1자당 ~1.2토큰.
+  //   step2-channel: 단일 매체 ~1,631 토큰. 3500이면 2.1배 여유.
+  //   step2 (구버전): 매체 2~3개 합산 ~4,800 토큰 → 잘림 위험. step2-channel 권장.
   const maxTokens =
     mode === 'step1' ? 6000 :
     mode === 'step2' ? 6000 :
+    mode === 'step2-channel' ? 3500 :
     mode === 'step3' ? 4500 :
     mode === 'refine-section' ? 3500 :
     10000; // refine은 전체 entry 재생성이므로 가장 큰 한도
@@ -620,6 +653,16 @@ export default async function handler(req) {
             return;
           }
           send({ type: 'done', result: { section: parsed.section, sectionIndex }, computed });
+        } else if (mode === 'step2-channel') {
+          // 단일 매체 결과 — { sections: [{ title, html }] } 정확히 1개
+          const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+          if (sections.length === 0) {
+            send({ type: 'error', message: `step2-channel(${channel}) 응답에 sections가 없습니다.` });
+            controller.close();
+            return;
+          }
+          // channel 정보를 응답에 포함 — 클라이언트가 4-a/4-b 부여
+          send({ type: 'done', result: { sections, channel }, computed });
         } else {
           // step별 부분 결과 + computed 메타 함께 전송
           send({ type: 'done', result: parsed, computed });
@@ -682,6 +725,9 @@ function computeMetrics(raw) {
   if (metaDelta != null && Math.abs(metaDelta) >= ANOMALY_THRESHOLD) {
     anomalies.push({ channel: 'Meta', delta: metaDelta, cpl: metaCPL, prevCpl: prevMetaCPL });
   }
+
+  // CPL 변동률 큰 순(절댓값 내림차순) 정렬 — STEP 2 딥다이브 우선순위
+  anomalies.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
 
   const leadsDelta = change(leads, prevLeads);
   const leadEmergency = leadsDelta != null && leadsDelta <= -30;
@@ -797,6 +843,70 @@ function buildStep1Message(weekInfo, raw, inputs, c) {
     '- 이상 매체는 channel-card anomaly + anomaly-badge로 명시.',
     '- 정상 매체는 1줄 요약만 — 분석 깊이 비대칭.'
   ].join('\n');
+}
+
+// 단일 매체 LEVEL 2~5 딥다이브 — 신규 권장 흐름
+function buildStep2ChannelMessage(weekInfo, raw, inputs, c, prevResult, channel) {
+  const channelKey = (channel || '').toLowerCase();
+  const channelData = raw[channelKey] || {};
+  const channelAnomaly = (c.anomalies || []).find(a => a.channel.toLowerCase() === channelKey);
+
+  const f = (n) => (n == null ? 'N/A' : Number(n).toLocaleString('ko-KR'));
+  const signFn = (v) => (v == null ? '-' : (v > 0 ? `+${v}%` : `${v}%`));
+
+  const lines = [];
+  lines.push(commonContext(weekInfo, raw, c));
+  lines.push('');
+
+  // 해당 매체의 raw data만 상세히 (다른 매체는 commonContext에 이미 사전 계산값 있음)
+  lines.push(`## [LEVEL 1 → 2~5 진입] 분석 대상 매체: ${channel}`);
+  if (channelAnomaly) {
+    lines.push(`- 이상 감지: CPL ${signFn(channelAnomaly.delta)} (${f(channelAnomaly.prevCpl)} → ${f(channelAnomaly.cpl)}원)`);
+  } else {
+    lines.push(`- ⚠ 사전 계산에서는 이상 매체로 분류되지 않았으나, 사용자가 분석 요청한 매체입니다.`);
+  }
+  const ctr = channelData.totalClicks && channelData.totalImpressions ? ((channelData.totalClicks / channelData.totalImpressions) * 100).toFixed(2) : '0';
+  const cpc = channelData.totalClicks ? Math.round(channelData.totalSpend / channelData.totalClicks) : 0;
+  const cvr = channelData.totalClicks ? ((channelData.totalConv / channelData.totalClicks) * 100).toFixed(2) : '0';
+  lines.push(`- 비용 ${f(channelData.totalSpend)}원 | 노출 ${f(channelData.totalImpressions)} | 클릭 ${f(channelData.totalClicks)} | 전환 ${channelData.totalConv}건`);
+  lines.push(`- CTR ${ctr}% | CPC ${f(cpc)}원 | CVR ${cvr}%`);
+
+  // 매체별 캠페인·그룹 데이터
+  if (channelKey === 'naver' && channelData.groups && Object.keys(channelData.groups).length) {
+    lines.push('- 그룹별 상세:');
+    Object.entries(channelData.groups).forEach(([k, v]) => {
+      const grpCpc = v.clicks ? Math.round(v.spend / v.clicks) : 0;
+      const grpCpl = v.conv ? Math.round(v.spend / v.conv) : null;
+      lines.push(`  · ${k}: 비용 ${f(v.spend)}원 | 클릭 ${v.clicks} | 전환 ${v.conv}건 | CPC ${f(grpCpc)}원${grpCpl ? ` | CPL ${f(grpCpl)}원` : ''}`);
+    });
+  }
+  if (channelKey === 'meta' && channelData.campaigns && Object.keys(channelData.campaigns).length) {
+    lines.push('- 캠페인별 상세:');
+    Object.entries(channelData.campaigns).forEach(([k, v]) => {
+      const cmpCpl = v.conv ? Math.round(v.spend / v.conv) : null;
+      lines.push(`  · ${k}: 비용 ${f(v.spend)}원 | 클릭 ${v.clicks} | 전환 ${v.conv}건${cmpCpl ? ` | CPL ${f(cmpCpl)}원` : ''}`);
+    });
+  }
+  lines.push('');
+
+  lines.push(inputsBlock(inputs));
+  lines.push('');
+
+  // 이전 단계 결과 (간단 요약)
+  if (prevResult) {
+    lines.push('## STEP 1 결과 (참고)');
+    if (prevResult.oneLineSummary) lines.push(`- ${prevResult.oneLineSummary}`);
+    lines.push('');
+  }
+
+  lines.push('---');
+  lines.push('## STEP 2-channel 작성 지시');
+  lines.push(`- ${channel} 매체 1개에 대한 LEVEL 2~5 딥다이브만 작성. 다른 매체는 절대 다루지 말 것.`);
+  lines.push(`- sections 배열에 정확히 1개의 섹션만 포함.`);
+  lines.push(`- 섹션 title은 "4. LEVEL 2~5 — ${channel} 딥다이브" 형식 (4-a/4-b는 클라이언트가 자동 부여).`);
+  lines.push('- 위 매체 raw data(캠페인·그룹별 수치)를 우선 활용해 구체적 수치 인용.');
+  lines.push('- insight-block 3~5개. 각 block은 [팩트]→[원인 확인됨/추정]→[액션] 3단계 강제.');
+  return lines.join('\n');
 }
 
 function buildStep2Message(weekInfo, raw, inputs, c, prevResult) {

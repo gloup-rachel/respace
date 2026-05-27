@@ -629,6 +629,7 @@
   let versions       = [];          // [{ entry, feedback, currentStep }]
   let currentVerIdx  = 0;
   let currentStep    = 0;           // 0 = 미시작, 1·2·3 = 해당 step 완료, 'done' = 전체 완료
+  let step2Done      = [];          // STEP 2 매체별 분할 — 완료된 채널들 (['Google', 'Naver', ...])
   let dashboardHTML  = null;
   let cachedComputed = null;        // 서버에서 계산된 메타
 
@@ -811,13 +812,14 @@
 
   function renderAnomalyNotice() {
     const cpls = computeCPLs();
-    const anomalies = [];
-    if (cpls.googleDelta != null && Math.abs(cpls.googleDelta) >= ANOMALY_THRESHOLD)
-      anomalies.push(`Google CPL ${cpls.googleDelta > 0 ? '+' : ''}${cpls.googleDelta}%`);
-    if (cpls.naverDelta != null && Math.abs(cpls.naverDelta) >= ANOMALY_THRESHOLD)
-      anomalies.push(`Naver CPL ${cpls.naverDelta > 0 ? '+' : ''}${cpls.naverDelta}%`);
-    if (cpls.metaDelta != null && Math.abs(cpls.metaDelta) >= ANOMALY_THRESHOLD)
-      anomalies.push(`Meta CPL ${cpls.metaDelta > 0 ? '+' : ''}${cpls.metaDelta}%`);
+    // 변동률 큰 순으로 정렬 — STEP 2 버튼 노출 순서와 일치
+    const raw = [
+      { name: 'Google', delta: cpls.googleDelta },
+      { name: 'Naver',  delta: cpls.naverDelta },
+      { name: 'Meta',   delta: cpls.metaDelta }
+    ].filter(c => c.delta != null && Math.abs(c.delta) >= ANOMALY_THRESHOLD)
+     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+    const anomalies = raw.map(c => `${c.name} CPL ${c.delta > 0 ? '+' : ''}${c.delta}%`);
 
     const el = document.getElementById('anomalyNotice');
     if (anomalies.length === 0) {
@@ -938,29 +940,45 @@
     }
   }
 
-  // ── STEP 2: LEVEL 2~5 딥다이브 ────────────────────────────────
-  async function runStep2() {
+  // ── STEP 2: 매체별 LEVEL 2~5 딥다이브 (단일 매체 호출) ────────
+  // 이상 매체가 N개면 N번 호출 — 각 호출당 토큰 50%↓, 시간 50%↓, 안정성 ↑
+  async function runStep2Channel(channel) {
     if (currentStep < 1) return;
-    setStepGenerating(true);
+    if (step2Done.includes(channel)) return;  // 이미 완료된 매체
+    setStepGenerating(true, channel);
     try {
       const prev = versions[currentVerIdx].entry;
       const evt = await callAPI(
-        { mode:'step2', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev },
-        (chars) => updateProgress('stepProgressMsg', chars, 'STEP 2')
+        { mode:'step2-channel', weekInfo:weekInfoCache, rawData:collectedData, userInputs:userInputsCache, previousResult: prev, channel },
+        (chars) => updateProgress('stepProgressMsg', chars, `STEP 2 · ${channel}`)
       );
       const newSections = Array.isArray(evt.result.sections) ? evt.result.sections : [];
-      prev.sections = renumberSections(prev.sections.concat(newSections));
-      if (evt.result._skipped) {
-        prev._step2_skipped = true;
-        prev._step2_reason = evt.result._reason;
-      }
-      currentStep = 2;
+      if (newSections.length === 0) throw new Error(`${channel} 응답에 sections 없음`);
+
+      // 클라이언트에서 4-a/4-b/... 자동 부여 (이상 매체가 2개 이상일 때)
+      const totalAnomalies = cachedComputed?.anomalyChannels?.length || 1;
+      const channelIdx = step2Done.length;  // 현재 몇 번째 매체인지 (0 = a)
+      const labeledSections = newSections.map(s => {
+        const cleanTitle = (s.title || '').replace(/^\d+(-[a-z])?\.\s*/, '');
+        const prefix = totalAnomalies > 1
+          ? `4-${String.fromCharCode(97 + channelIdx)}. `
+          : '4. ';
+        return { ...s, title: prefix + cleanTitle };
+      });
+      prev.sections = renumberSections(prev.sections.concat(labeledSections));
+      step2Done.push(channel);
+
+      // 모든 이상 매체 완료되면 currentStep을 2로
+      const anomalyChannels = cachedComputed?.anomalyChannels || [];
+      const allDone = anomalyChannels.every(c => step2Done.includes(c));
+      if (allDone) currentStep = 2;
+
       renderInsightPanel(currentVerIdx);
       renderStepProgress();
       renderNextStepZone();
     } catch (e) {
-      showErr('stepError', `STEP 2 실패: ${e.message}`);
-      renderNextStepZone(true); // 재시도 옵션
+      showErr('stepError', `STEP 2 (${channel}) 실패: ${e.message}`);
+      renderNextStepZone(true, channel);
     } finally {
       setStepGenerating(false);
     }
@@ -1014,28 +1032,58 @@
       if (state) el.classList.add(state);
     };
     set('sp1', currentStep >= 1 ? 'done' : 'active');
-    set('sp2', currentStep === 'done' || currentStep >= 2 ? 'done' : (currentStep === 1 ? 'active' : null));
+
+    // STEP 2 매체별 진행 — 부분 완료도 표시
+    const anomalyChannels = cachedComputed?.anomalyChannels || [];
+    const sp2State = (currentStep === 'done' || currentStep === 2)
+      ? 'done'
+      : (currentStep === 1 ? (step2Done.length > 0 ? 'active' : 'active') : null);
+    set('sp2', sp2State);
+
+    // STEP 2 라벨에 매체별 진행도 표시
+    const sp2El = document.getElementById('sp2');
+    if (sp2El) {
+      const baseText = 'STEP 2 · 딥다이브';
+      if (anomalyChannels.length === 0 && currentStep >= 1) {
+        sp2El.querySelector('span:last-child').textContent = `${baseText} (생략)`;
+      } else if (anomalyChannels.length > 0 && currentStep === 1) {
+        sp2El.querySelector('span:last-child').textContent = `${baseText} (${step2Done.length}/${anomalyChannels.length})`;
+      } else if (currentStep >= 2 && anomalyChannels.length > 0) {
+        sp2El.querySelector('span:last-child').textContent = `${baseText} (${anomalyChannels.length}/${anomalyChannels.length})`;
+      } else {
+        sp2El.querySelector('span:last-child').textContent = baseText;
+      }
+    }
+
     set('sp3', currentStep === 'done' ? 'done' : (currentStep === 2 ? 'active' : null));
   }
 
   // ── 다음 단계 버튼 영역 렌더링 ────────────────────────────────
-  function renderNextStepZone(showRetry) {
+  function renderNextStepZone(showRetry, retryChannel) {
     const el = document.getElementById('nextStepZone');
-    const entry = versions[currentVerIdx]?.entry;
-    const anomalyCount = cachedComputed?.anomalies?.length || 0;
+    const anomalyChannels = cachedComputed?.anomalyChannels || [];
+    const anomalyCount = anomalyChannels.length;
 
+    // 재시도 분기 — 어느 단계에서 실패했는지에 따라 분기
     if (showRetry) {
-      // 마지막 step 실패 → 재시도 버튼
-      const retryFn = currentStep === 1 ? 'runStep2()' : 'runStep3()';
-      const retryLabel = currentStep === 1 ? 'STEP 2 다시 시도' : 'STEP 3 다시 시도';
+      if (retryChannel) {
+        el.innerHTML = `<div class="next-step-zone">
+          <div class="next-step-zone-msg">⚠ <strong>${retryChannel}</strong> 딥다이브가 실패했습니다. 다시 시도하거나 다음 매체로 건너뛸 수 있습니다.</div>
+          <button class="next-step-btn" onclick="runStep2Channel('${retryChannel}')">↻ ${retryChannel} 다시 시도</button>
+          <button class="next-step-btn skip" style="margin-top:.4rem" onclick="skipChannel('${retryChannel}')">⏭ 이 매체 건너뛰기</button>
+        </div>`;
+        return;
+      }
+      const retryFn = currentStep === 2 ? 'runStep3()' : 'runStep3()';
       el.innerHTML = `<div class="next-step-zone">
-        <div class="next-step-zone-msg">⚠ 직전 단계가 실패했습니다. 다시 시도하거나 다음 단계로 건너뛸 수 있습니다.</div>
-        <button class="next-step-btn" onclick="${retryFn}">↻ ${retryLabel}</button>
+        <div class="next-step-zone-msg">⚠ 직전 단계가 실패했습니다.</div>
+        <button class="next-step-btn" onclick="${retryFn}">↻ STEP 3 다시 시도</button>
       </div>`;
       return;
     }
 
     if (currentStep === 1) {
+      // STEP 1 완료 → STEP 2 (매체별) 또는 SKIP
       if (anomalyCount === 0) {
         el.innerHTML = `<div class="next-step-zone skip">
           <div class="next-step-zone-msg">
@@ -1043,19 +1091,33 @@
           </div>
           <button class="next-step-btn skip" onclick="runStep3()">⏭ STEP 3 액션 도출로 건너뛰기</button>
         </div>`;
-      } else {
-        const channels = cachedComputed.anomalyChannels.join(', ');
-        el.innerHTML = `<div class="next-step-zone">
-          <div class="next-step-zone-msg">
-            <strong>이상 매체: ${channels}</strong> — LEVEL 2~5 딥다이브로 캠페인·그룹·키워드 단위 원인 분석을 진행합니다.
-          </div>
-          <button class="next-step-btn" onclick="runStep2()">▶ STEP 2 딥다이브 진행</button>
-        </div>`;
+        return;
       }
-    } else if (currentStep === 2) {
+      // 매체별 진행 상태 확인
+      const remaining = anomalyChannels.filter(c => !step2Done.includes(c));
+      if (remaining.length === 0) {
+        // 매체 모두 완료 — STEP 3로
+        currentStep = 2;
+        renderNextStepZone();
+        return;
+      }
+      const nextChannel = remaining[0];
+      const progress = `${step2Done.length} / ${anomalyChannels.length}`;
+      const doneList = step2Done.length ? ` · 완료: ${step2Done.join(', ')} ✓` : '';
+      const subLetter = String.fromCharCode(97 + step2Done.length); // a, b, c
+      const showLetter = anomalyChannels.length > 1 ? `-${subLetter}` : '';
       el.innerHTML = `<div class="next-step-zone">
         <div class="next-step-zone-msg">
-          <strong>딥다이브 완료</strong> — 이제 LEVEL 6 외부 요인 체크와 액션 아이템, 다음 주 체크포인트를 도출합니다.
+          <strong>이상 매체: ${anomalyChannels.join(', ')}</strong> — 매체별로 LEVEL 2~5 딥다이브를 순차 진행합니다.<br>
+          <span style="font-size:.74rem;color:#888">진행: ${progress}${doneList}</span>
+        </div>
+        <button class="next-step-btn" onclick="runStep2Channel('${nextChannel}')">▶ STEP 2${showLetter} · ${nextChannel} 딥다이브 진행</button>
+      </div>`;
+    } else if (currentStep === 2) {
+      // 모든 이상 매체 딥다이브 완료
+      el.innerHTML = `<div class="next-step-zone">
+        <div class="next-step-zone-msg">
+          <strong>딥다이브 완료</strong> (${step2Done.join(', ')}) — 이제 LEVEL 6 외부 요인 체크와 액션 아이템, 다음 주 체크포인트를 도출합니다.
         </div>
         <button class="next-step-btn" onclick="runStep3()">▶ STEP 3 액션 도출</button>
       </div>`;
@@ -1068,6 +1130,16 @@
     } else {
       el.innerHTML = '';
     }
+  }
+
+  // 특정 매체 분석을 건너뛰는 옵션 (실패 시 사용)
+  function skipChannel(channel) {
+    if (!step2Done.includes(channel)) step2Done.push(channel);
+    // 모두 처리됐으면 currentStep을 2로
+    const anomalyChannels = cachedComputed?.anomalyChannels || [];
+    if (anomalyChannels.every(c => step2Done.includes(c))) currentStep = 2;
+    renderStepProgress();
+    renderNextStepZone();
   }
 
   // ── 피드백 활성화/비활성화 ────────────────────────────────────
@@ -1087,11 +1159,14 @@
     if (on) startProgressMsg('progressMsg', ['STEP 1 — LEVEL 0 전체 통합...', 'STEP 1 — LEVEL 1 매체별 CPL 비교...', 'KPI strip 작성 중...']);
     else stopProgressMsg();
   }
-  function setStepGenerating(on) {
+  function setStepGenerating(on, channel) {
     document.getElementById('stepProgressWrap').className = on ? 'progress-wrap show' : 'progress-wrap';
     document.getElementById('stepError').className = 'error-box';
     if (on) {
-      const label = currentStep === 1 ? 'STEP 2 (딥다이브)' : 'STEP 3 (액션·체크)';
+      let label;
+      if (channel) label = `STEP 2 · ${channel} 딥다이브`;
+      else if (currentStep === 1) label = 'STEP 2 (딥다이브)';
+      else label = 'STEP 3 (액션·체크)';
       startProgressMsg('stepProgressMsg', [`${label} 분석 중...`, `${label} 작성 중...`, `${label} 검토 중...`]);
     } else stopProgressMsg();
   }
@@ -1393,7 +1468,7 @@
 
   function restartFlow() {
     collectedData=null; weekInfoCache=null; userInputsCache=null;
-    versions=[]; currentVerIdx=0; currentStep=0; dashboardHTML=null; cachedComputed=null;
+    versions=[]; currentVerIdx=0; currentStep=0; step2Done=[]; dashboardHTML=null; cachedComputed=null;
     document.getElementById('feedback-phase').className='';
     document.getElementById('input-phase').style.display='';
     document.getElementById('generateBtn').disabled=true;
