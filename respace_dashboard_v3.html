@@ -6495,44 +6495,65 @@
         }
 
         // ── 리포트 삭제 ────────────────────────────────────────
-        // 1) confirm → 2) GitHub raw에서 현재 dashboard HTML 가져옴
+        // 1) confirm → 2) GitHub raw에서 현재 dashboard HTML 가져옴 (cache-busting)
         // 3) 해당 id의 entry를 bracket counting으로 제거
-        // 4) update-dashboard API로 push → 5) 페이지 새로고침
+        // 4) update-dashboard API로 push → 5) 사용자에게 vercel 배포 대기 안내
         async function deleteWeeklyReport(reportId, weekLabel) {
             if (!confirm(`"${weekLabel}" 리포트를 삭제할까요?\n\n이 작업은 되돌릴 수 없으며, GitHub 대시보드에서 영구 제거됩니다.`)) {
                 return;
             }
 
-            const DASHBOARD_URL = 'https://raw.githubusercontent.com/gloup-rachel/respace/main/respace_dashboard_v3.html';
+            // cache-busting으로 최신 HTML 강제 (GitHub raw CDN 캐시 우회)
+            const DASHBOARD_URL = 'https://raw.githubusercontent.com/gloup-rachel/respace/main/respace_dashboard_v3.html?cb=' + Date.now();
             const API_DEPLOY = '/api/update-dashboard';
 
+            console.log(`[delete] 시작 — reportId="${reportId}", weekLabel="${weekLabel}"`);
+
             try {
-                // 1. 현재 dashboard HTML 가져오기
-                const res = await fetch(DASHBOARD_URL);
+                // 1. 현재 dashboard HTML 가져오기 (cache: 'no-store')
+                console.log('[delete] step 1: GitHub raw fetch...');
+                const res = await fetch(DASHBOARD_URL, { cache: 'no-store' });
                 if (!res.ok) throw new Error(`대시보드 HTML 로드 실패 (HTTP ${res.status})`);
                 let html = await res.text();
+                console.log(`[delete] step 1 완료 — HTML length: ${html.length.toLocaleString()} chars`);
 
-                // 2. 해당 id entry 제거 (bracket counting)
+                // 2. 해당 id entry 존재 확인 + 제거 (bracket counting)
                 const idMarker = `id:${JSON.stringify(reportId)}`;
+                const markerExists = html.includes(idMarker);
+                console.log(`[delete] step 2: 마커 검색 — "${idMarker}" 존재: ${markerExists}`);
+                if (!markerExists) {
+                    throw new Error(`HTML에 id="${reportId}"가 존재하지 않습니다.\n→ 이미 삭제됐거나, GitHub raw가 아직 최신 동기화 전입니다. 1~2분 후 새로고침하고 재시도해 주세요.`);
+                }
+
                 const cleaned = removeEntryFromHtml(html, idMarker);
+                const removedChars = html.length - cleaned.length;
+                console.log(`[delete] step 2 완료 — entry 제거됨 (${removedChars.toLocaleString()}자 감소)`);
+
                 if (cleaned === html) {
-                    throw new Error(`id="${reportId}" 의 entry를 찾을 수 없습니다.`);
+                    throw new Error(`id="${reportId}" 의 entry를 bracket counting으로 분리하지 못했습니다. (HTML 구조 이상)`);
                 }
 
                 // 3. update-dashboard로 push
+                console.log('[delete] step 3: update-dashboard API 호출...');
                 const pushRes = await fetch(API_DEPLOY, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content: cleaned, weekLabel: `[삭제] ${weekLabel}` })
                 });
                 const json = await pushRes.json().catch(() => ({}));
-                if (!pushRes.ok || !json.ok) throw new Error(json.error || '업로드 실패');
+                console.log('[delete] step 3 응답:', { status: pushRes.status, ok: pushRes.ok, json });
+                if (!pushRes.ok || !json.ok) throw new Error(json.error || `업로드 실패 (HTTP ${pushRes.status})`);
 
-                alert(`"${weekLabel}" 리포트가 삭제되었습니다.\n페이지를 새로고침합니다.`);
-                setTimeout(() => location.reload(), 300);
+                console.log(`[delete] ✓ 성공 — GitHub 커밋: ${json.commitUrl || '(URL 없음)'}`);
+
+                const commitInfo = json.commitUrl
+                    ? `\n\n✓ GitHub 커밋 완료\n${json.commitUrl}`
+                    : '';
+                alert(`"${weekLabel}" 리포트 삭제 요청 완료.${commitInfo}\n\n⏳ Vercel 자동 배포에 1~2분 소요됩니다.\n잠시 후 페이지를 강제 새로고침(Cmd+Shift+R)해 주세요.`);
+                // 즉시 reload 제거 — vercel 빌드 완료 전 reload 방지
             } catch (e) {
-                alert(`삭제 실패: ${e.message}`);
-                console.error('[deleteWeeklyReport]', e);
+                console.error('[deleteWeeklyReport] 실패:', e);
+                alert(`삭제 실패: ${e.message}\n\n자세한 로그는 브라우저 콘솔(F12) → Console 탭에서 확인 가능합니다.`);
             }
         }
 
