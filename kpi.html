@@ -1221,26 +1221,39 @@ function renderChannelSection() {
   const cDeal   = cssVar('--deal');
   const cWarn   = cssVar('--warning');
 
+  // 차트: X축 = 리드/딜/간접딜, 각 그룹 = 매체별 막대
+  // datasets → 채널별(Meta/Naver/Google/etc), data → [리드, 딜, 간접딜] 값
   if (chChart) chChart.destroy();
   const ctx = document.getElementById('ch-chart').getContext('2d');
+  const metricLabels = ['리드 (소개서)', '딜 (문의 완료)', '간접딜 기여'];
   chChart = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: keys.map(k => CH_CFG[k].label),
-      datasets:[
-        { label:'직접 리드 (소개서)',   data:keys.map(k=>gl[k]||0),  backgroundColor:keys.map(k=>CH_CFG[k].color+'CC'), borderRadius:4, borderSkipped:false },
-        { label:'직접 딜 (문의 완료)',  data:keys.map(k=>gd[k]||0),  backgroundColor:cDeal+'80', borderRadius:4, borderSkipped:false },
-        { label:'간접 딜 기여',        data:keys.map(k=>gid[k]||0), backgroundColor:cWarn+'50', borderRadius:4, borderSkipped:false },
-      ]
+    type: 'bar',
+    data: {
+      labels: metricLabels,
+      datasets: keys.map(k => ({
+        label:           CH_CFG[k].label,
+        data:            [gl[k]||0, gd[k]||0, gid[k]||0],
+        backgroundColor: CH_CFG[k].color + 'BB',
+        borderColor:     CH_CFG[k].color,
+        borderWidth:     1,
+        borderRadius:    4,
+        borderSkipped:   false,
+      }))
     },
     options:{
-      responsive:true,
+      responsive: true,
       plugins:{
         legend:{ position:'bottom', align:'start', labels:{ color:cSec, font:{size:10}, boxWidth:10, boxHeight:10, padding:10 } },
-        tooltip:{ backgroundColor:cSurf2, borderColor:cBorder, borderWidth:1, titleColor:cPri, bodyColor:cSec, padding:9 }
+        tooltip:{
+          backgroundColor:cSurf2, borderColor:cBorder, borderWidth:1, titleColor:cPri, bodyColor:cSec, padding:9,
+          callbacks:{
+            title: items => items[0].label,
+            label: item  => `${item.dataset.label}: ${item.raw}건`
+          }
+        }
       },
       scales:{
-        x:{ ticks:{color:cSec,font:{size:10}}, grid:{color:cBorder} },
+        x:{ ticks:{color:cSec,font:{size:11}}, grid:{color:cBorder} },
         y:{ ticks:{color:cSec,font:{size:11},stepSize:1}, grid:{color:cBorder}, beginAtZero:true }
       }
     }
