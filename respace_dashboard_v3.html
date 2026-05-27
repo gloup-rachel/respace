@@ -746,6 +746,39 @@
             color: #95a5a6;
         }
 
+        /* 사이드바 리포트 삭제 버튼 (2026-05-27 추가) */
+        .weekly-item-delete-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #bdc3c7;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            flex-shrink: 0;
+            opacity: 0;
+        }
+        .weekly-item:hover .weekly-item-delete-btn {
+            opacity: 1;
+        }
+        .weekly-item-delete-btn:hover {
+            color: #e74c3c;
+            border-color: #fadbd8;
+            background: #fef2f2;
+        }
+        .weekly-item.active .weekly-item-delete-btn {
+            opacity: 0.7;
+            color: rgba(255,255,255,0.7);
+        }
+        .weekly-item.active .weekly-item-delete-btn:hover {
+            color: #fff;
+            background: rgba(231, 76, 60, 0.3);
+            border-color: rgba(231, 76, 60, 0.4);
+        }
+
         /* ════════════════════════════════════════════════════════
            System 06 인사이트 클래스 (2026-05-27 추가)
            — channel-card / anomaly-badge / insight-block / cause-tag / action-grid
@@ -6473,13 +6506,39 @@
             if (!listEl) return;
             listEl.innerHTML = WEEKLY_REPORTS.map((r, idx) => `
                 <div class="weekly-item ${idx === 0 ? 'active' : ''}" data-report-id="${r.id}">
-                    <div class="weekly-item-week">${r.weekLabel}${r.isLatest ? '<span class="weekly-item-tag">최신</span>' : ''}</div>
-                    <div class="weekly-item-date">${r.meetingDate} 미팅</div>
+                    <div style="flex:1;min-width:0">
+                        <div class="weekly-item-week">${r.weekLabel || ''}${r.isLatest ? '<span class="weekly-item-tag">최신</span>' : ''}</div>
+                        <div class="weekly-item-date">${r.meetingDate || ''} 미팅</div>
+                    </div>
+                    <button class="weekly-item-delete-btn" data-report-id="${r.id}" data-week-label="${(r.weekLabel || '').replace(/"/g, '&quot;')}" title="이 리포트 삭제">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
                 </div>
             `).join('');
 
+            // weekly-item을 flex row로 표시되도록 동적 클래스 — 한 줄에 정렬
             listEl.querySelectorAll('.weekly-item').forEach(item => {
-                item.addEventListener('click', () => {
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.gap = '6px';
+
+                // 삭제 버튼은 별도 처리
+                const delBtn = item.querySelector('.weekly-item-delete-btn');
+                if (delBtn) {
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();  // item 선택 트리거 방지
+                        const reportId = delBtn.dataset.reportId;
+                        const weekLabel = delBtn.dataset.weekLabel;
+                        deleteWeeklyReport(reportId, weekLabel);
+                    });
+                }
+
+                // 본체 클릭은 리포트 표시
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.weekly-item-delete-btn')) return;
                     listEl.querySelectorAll('.weekly-item').forEach(i => i.classList.remove('active'));
                     item.classList.add('active');
                     renderWeeklyReportContent(item.dataset.reportId);
@@ -6487,16 +6546,87 @@
             });
         }
 
+        // ── 리포트 삭제 ────────────────────────────────────────
+        // 1) confirm → 2) GitHub raw에서 현재 dashboard HTML 가져옴
+        // 3) 해당 id의 entry를 bracket counting으로 제거
+        // 4) update-dashboard API로 push → 5) 페이지 새로고침
+        async function deleteWeeklyReport(reportId, weekLabel) {
+            if (!confirm(`"${weekLabel}" 리포트를 삭제할까요?\n\n이 작업은 되돌릴 수 없으며, GitHub 대시보드에서 영구 제거됩니다.`)) {
+                return;
+            }
+
+            const DASHBOARD_URL = 'https://raw.githubusercontent.com/gloup-rachel/respace/main/respace_dashboard_v3.html';
+            const API_DEPLOY = '/api/update-dashboard';
+
+            try {
+                // 1. 현재 dashboard HTML 가져오기
+                const res = await fetch(DASHBOARD_URL);
+                if (!res.ok) throw new Error(`대시보드 HTML 로드 실패 (HTTP ${res.status})`);
+                let html = await res.text();
+
+                // 2. 해당 id entry 제거 (bracket counting)
+                const idMarker = `id:${JSON.stringify(reportId)}`;
+                const cleaned = removeEntryFromHtml(html, idMarker);
+                if (cleaned === html) {
+                    throw new Error(`id="${reportId}" 의 entry를 찾을 수 없습니다.`);
+                }
+
+                // 3. update-dashboard로 push
+                const pushRes = await fetch(API_DEPLOY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: cleaned, weekLabel: `[삭제] ${weekLabel}` })
+                });
+                const json = await pushRes.json().catch(() => ({}));
+                if (!pushRes.ok || !json.ok) throw new Error(json.error || '업로드 실패');
+
+                alert(`"${weekLabel}" 리포트가 삭제되었습니다.\n페이지를 새로고침합니다.`);
+                setTimeout(() => location.reload(), 300);
+            } catch (e) {
+                alert(`삭제 실패: ${e.message}`);
+                console.error('[deleteWeeklyReport]', e);
+            }
+        }
+
+        // entry 시작 '{' ~ 종료 '}' + 뒤따르는 ',' 까지 정확히 제거 (bracket counting)
+        function removeEntryFromHtml(text, marker) {
+            let result = text;
+            let safetyCounter = 0;
+            while (safetyCounter++ < 50) {
+                const markerIdx = result.indexOf(marker);
+                if (markerIdx === -1) break;
+                const entryStart = result.lastIndexOf('{', markerIdx);
+                if (entryStart === -1) break;
+                let depth = 1;
+                let j = entryStart + 1;
+                while (j < result.length && depth > 0) {
+                    const c = result[j];
+                    if (c === '{') depth++;
+                    else if (c === '}') depth--;
+                    if (depth > 0) j++;
+                }
+                let entryEnd = j + 1;
+                if (result[entryEnd] === ',') entryEnd++;
+                while (entryEnd < result.length && (result[entryEnd] === '\n' || result[entryEnd] === ' ')) {
+                    if (result[entryEnd] === '\n' && result[entryEnd + 1] !== ' ' && result[entryEnd + 1] !== '\n') break;
+                    entryEnd++;
+                }
+                result = result.slice(0, entryStart) + result.slice(entryEnd);
+            }
+            return result;
+        }
+
         function renderWeeklyReportContent(reportId) {
             const report = WEEKLY_REPORTS.find(r => r.id === reportId);
             const contentEl = document.getElementById('weeklyReportContent');
             if (!report || !contentEl) return;
 
+            // undefined/null 방어 — LLM이 delta 빠뜨려도 'undefined' 표시 안 되게
             const kpisHtml = report.kpis.map(k => `
                 <div class="weekly-kpi-box">
-                    <div class="weekly-kpi-label">${k.label}</div>
-                    <div class="weekly-kpi-value">${k.value}</div>
-                    <div class="weekly-kpi-delta ${k.trend}">${k.delta}</div>
+                    <div class="weekly-kpi-label">${k.label || ''}</div>
+                    <div class="weekly-kpi-value">${k.value != null ? k.value : '-'}</div>
+                    <div class="weekly-kpi-delta ${k.trend || 'neutral'}">${k.delta != null ? k.delta : ''}</div>
                 </div>
             `).join('');
 

@@ -1275,11 +1275,57 @@
   }
 
   function insertEntry(html, entry) {
+    // 1. 기존 entries의 isLatest=true → false (새 entry만 latest)
     let out = html.replace(/isLatest:\s*true/g, 'isLatest: false');
+
+    // 2. 자동 덮어쓰기 — 동일 id 또는 동일 periodLabel 기존 entry 제거
+    out = dedupExistingEntries(out, entry);
+
+    // 3. 새 entry를 배열 앞에 prepend
     const marker = 'const WEEKLY_REPORTS = [';
     const idx = out.indexOf(marker);
     if (idx === -1) throw new Error('WEEKLY_REPORTS를 찾을 수 없습니다.');
     return out.slice(0, idx+marker.length) + '\n' + buildEntryJS(entry) + ',' + out.slice(idx+marker.length);
+  }
+
+  // 동일 id 또는 동일 periodLabel의 기존 entry를 안전하게 제거 (bracket counting)
+  function dedupExistingEntries(html, newEntry) {
+    const idMarker = `id:${JSON.stringify(newEntry.id)}`;
+    const periodMarker = `periodLabel:${JSON.stringify(newEntry.periodLabel)}`;
+    let result = html;
+    result = removeEntryByMarker(result, idMarker);
+    result = removeEntryByMarker(result, periodMarker);
+    return result;
+  }
+
+  function removeEntryByMarker(text, marker) {
+    let result = text;
+    let safetyCounter = 0;  // 무한 루프 방지
+    while (safetyCounter++ < 50) {
+      const markerIdx = result.indexOf(marker);
+      if (markerIdx === -1) break;
+      const entryStart = result.lastIndexOf('{', markerIdx);
+      if (entryStart === -1) break;
+      // bracket counting으로 entry 끝 찾기
+      let depth = 1;
+      let j = entryStart + 1;
+      while (j < result.length && depth > 0) {
+        const c = result[j];
+        if (c === '{') depth++;
+        else if (c === '}') depth--;
+        if (depth > 0) j++;
+      }
+      let entryEnd = j + 1;  // '}' 다음
+      // 뒤따르는 ',' 와 줄바꿈·공백 제거 (정리)
+      if (result[entryEnd] === ',') entryEnd++;
+      while (entryEnd < result.length && (result[entryEnd] === '\n' || result[entryEnd] === ' ' || result[entryEnd] === '\t')) {
+        // 다음 entry 시작 위치까지만 정리 (다른 entry 침범 방지)
+        if (result[entryEnd] === '\n' && result[entryEnd + 1] !== ' ' && result[entryEnd + 1] !== '\n') break;
+        entryEnd++;
+      }
+      result = result.slice(0, entryStart) + result.slice(entryEnd);
+    }
+    return result;
   }
 
   function buildEntryJS(e) {
