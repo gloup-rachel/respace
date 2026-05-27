@@ -218,8 +218,60 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
 @keyframes spin { to{transform:rotate(360deg)} }
 .loading-text { font-size:13px; color:var(--text-secondary); }
 
-@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.hist-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
-@media(max-width:700px){.main{padding:16px}.kpi-grid{grid-template-columns:1fr 1fr}.hist-grid{grid-template-columns:1fr}.sim-row{grid-template-columns:1fr}}
+/* ── 상태 배너 (최상단 신호등) */
+.status-banner { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 22px; display:flex; flex-direction:column; gap:10px; }
+.status-banner.no-goal { flex-direction:row; align-items:center; justify-content:space-between; }
+.status-row { display:flex; align-items:center; gap:10px; }
+.status-signal { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+.sig-green  { background:var(--success); box-shadow:0 0 7px var(--success); }
+.sig-yellow { background:var(--warning); box-shadow:0 0 7px var(--warning); }
+.sig-red    { background:var(--deal);    box-shadow:0 0 7px var(--deal); }
+.status-type { font-size:11px; font-weight:700; width:32px; flex-shrink:0; }
+.status-type.deal { color:var(--deal); }
+.status-type.lead { color:var(--lead); }
+.status-bar-track { flex:1; background:var(--border); border-radius:4px; height:6px; overflow:hidden; max-width:200px; }
+.status-bar-fill { height:100%; border-radius:4px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.status-nums { font-size:13px; font-weight:700; min-width:90px; }
+.status-pct  { font-size:12px; color:var(--text-muted); min-width:38px; }
+.pace-badge  { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; margin-right:6px; }
+.pace-green  { background:rgba(82,214,138,.14); color:var(--success); }
+.pace-yellow { background:rgba(255,179,71,.14); color:var(--warning); }
+.pace-red    { background:rgba(255,107,107,.14); color:var(--deal); }
+.status-need { font-size:11px; color:var(--text-secondary); }
+.status-need .hi { color:var(--text-primary); font-weight:700; }
+.status-footer { display:flex; gap:18px; padding-top:8px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.status-stat { font-size:11px; color:var(--text-muted); }
+.status-stat strong { color:var(--text-primary); font-weight:700; }
+
+/* ── 채널 트렌드 배지 */
+.trend-up   { font-size:10px; font-weight:700; color:var(--success); margin-left:5px; }
+.trend-dn   { font-size:10px; font-weight:700; color:var(--deal); margin-left:5px; }
+.trend-flat { font-size:10px; color:var(--text-muted); margin-left:5px; }
+
+/* ── 추이 + 페이스카드 2컬럼 */
+.trend-section { display:grid; grid-template-columns:3fr 1fr; gap:14px; align-items:start; }
+.pace-cards { display:flex; flex-direction:column; gap:10px; }
+.pace-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+.pace-card-lbl { font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.pace-card-val { font-size:22px; font-weight:700; line-height:1.1; margin-bottom:3px; }
+.pace-card-sub { font-size:10px; color:var(--text-muted); line-height:1.5; }
+.pace-card-sub .ok   { color:var(--success); font-weight:600; }
+.pace-card-sub .warn { color:var(--warning); font-weight:600; }
+.pace-card-sub .bad  { color:var(--deal); font-weight:600; }
+
+/* ── 아코디언 */
+.accordion { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.accordion-head { display:flex; align-items:center; gap:10px; padding:14px 20px; background:var(--surface); cursor:pointer; user-select:none; transition:background .15s; }
+.accordion-head:hover { background:var(--surface2); }
+.acc-icon { font-size:10px; color:var(--text-muted); transition:transform .25s; width:10px; flex-shrink:0; }
+.accordion.open .acc-icon { transform:rotate(90deg); }
+.acc-title { font-size:12px; font-weight:700; color:var(--text-secondary); flex:1; }
+.acc-summary { font-size:11px; color:var(--text-muted); }
+.accordion-body { display:none; border-top:1px solid var(--border); }
+.accordion.open .accordion-body { display:block; }
+
+@media(max-width:1100px){ .trend-section{grid-template-columns:1fr} .hist-grid{grid-template-columns:1fr 1fr} .two-col{grid-template-columns:1fr} }
+@media(max-width:700px){ .main{padding:16px} .hist-grid{grid-template-columns:1fr} .sim-row{grid-template-columns:1fr} .status-row{flex-wrap:wrap} .status-bar-track{max-width:120px} }
 </style>
 </head>
 <body>
@@ -253,59 +305,18 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
   <!-- 에러 배너 -->
   <div id="error-banner" style="display:none"></div>
 
-  <!-- ① 과거 2개월 실적 -->
+  <!-- ① 상태 배너 — 항상 노출 -->
+  <div id="status-banner-wrap"></div>
+
+  <!-- ② 채널별 전환 기여도 — 항상 노출 -->
   <div>
-    <div class="sec-label" id="hist-label">📊 과거 2개월 실적 요약</div>
-    <div class="hist-grid" id="hist-grid"></div>
-  </div>
-
-  <!-- ② 목표 시뮬레이션 -->
-  <div class="sim-wrap">
-    <div class="section-header">
-      <div class="sec-label" style="margin-bottom:0" id="sim-label">🔮 이번달 목표 시뮬레이션</div>
-      <div style="font-size:11px;color:var(--text-muted)">과거 2개월 평균 기반 — 시나리오 선택 후 저장</div>
-    </div>
-    <div class="sim-row">
-      <div>
-        <div class="sim-scenarios" id="sim-scenarios"></div>
-        <div class="goal-inputs">
-          <div class="goal-fg"><label>딜 목표 (상담문의)</label><input type="number" id="goal-deal" placeholder="건" min="0"></div>
-          <div class="goal-fg"><label>리드 목표 (소개서)</label><input type="number" id="goal-lead" placeholder="건" min="0"></div>
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveGoal()">✓ 이 목표로 트래킹 시작</button>
-          <button class="btn btn-ghost" onclick="resetGoal()">초기화</button>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">시나리오 예상 결과</div>
-        <div class="sim-preview" id="sim-preview"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ③ 이번달 KPI -->
-  <div>
-    <div class="section-header">
-      <div class="sec-label" id="kpi-label">🎯 이번달 KPI 트래킹</div>
-      <div id="goal-badge" style="font-size:12px;color:var(--text-muted)"></div>
-    </div>
-    <div id="no-goal-msg" class="no-goal-banner" style="display:none">
-      목표가 아직 설정되지 않았습니다. 위 시뮬레이션에서 목표를 설정하면 달성률이 활성화됩니다.
-    </div>
-    <div class="kpi-grid" id="kpi-grid"></div>
-  </div>
-
-  <!-- ④ 페이싱 -->
-  <div class="pacing-bar" id="pacing-bar"></div>
-
-  <!-- ⑤ 채널별 기여도 -->
-  <div>
-    <div class="sec-label">📡 채널별 전환 기여도 (이번달 · GA4 이벤트 기준)</div>
+    <div class="sec-label" id="ch-sec-label">📡 채널별 전환 기여도 — <span id="ch-period-label"></span> · GA4 이벤트 기준</div>
     <div class="two-col">
       <div class="card"><canvas id="ch-chart" height="220"></canvas></div>
       <div class="card">
-        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">채널별 상세</div>
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">채널별 상세
+          <span style="font-weight:400;font-size:9px;margin-left:6px">▲▼ = 전월 동기 대비</span>
+        </div>
         <table class="ch-table" id="ch-table"></table>
         <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">
           리드↓: click_project_inquiry + click_download_intro &nbsp;|&nbsp;
@@ -316,23 +327,77 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
     </div>
   </div>
 
-  <!-- ⑥ 퍼널 -->
-  <div class="funnel-card">
-    <div class="sec-label">⬇ 전환 퍼널 (이번달)</div>
-    <div class="funnel-wrap" id="funnel-wrap"></div>
+  <!-- ③ 추이 차트 + 페이스 카드 — 항상 노출 -->
+  <div class="trend-section">
+    <div class="chart-card">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="sec-label" style="margin-bottom:0">📈 딜·리드 누적 추이 (이번달)</div>
+        <div class="toggle-bar">
+          <button class="on" onclick="switchChart('deal',this)">딜</button>
+          <button onclick="switchChart('lead',this)">리드</button>
+        </div>
+      </div>
+      <canvas id="trend-chart" height="240"></canvas>
+    </div>
+    <div class="pace-cards" id="pace-cards"></div>
   </div>
 
-  <!-- ⑦ 누적 추이 -->
-  <div class="chart-card">
-    <div class="section-header" style="margin-bottom:16px">
-      <div class="sec-label" style="margin-bottom:0">📈 딜·리드 누적 추이 (이번달)</div>
-      <div class="toggle-bar">
-        <button class="on" onclick="switchChart('deal',this)">딜</button>
-        <button onclick="switchChart('lead',this)">리드</button>
+  <!-- ④ 아코디언: 과거 2개월 실적 — 기본 접힘 -->
+  <div class="accordion" id="acc-hist">
+    <div class="accordion-head" onclick="toggleAcc('acc-hist')">
+      <span class="acc-icon">▶</span>
+      <span class="acc-title" id="hist-label">📊 과거 2개월 실적 요약</span>
+      <span class="acc-summary" id="acc-hist-summary"></span>
+    </div>
+    <div class="accordion-body">
+      <div style="padding:20px">
+        <div class="hist-grid" id="hist-grid"></div>
       </div>
     </div>
-    <canvas id="trend-chart" height="240"></canvas>
   </div>
+
+  <!-- ⑤ 아코디언: 목표 시뮬레이션 + 퍼널 — 기본 접힘 -->
+  <div class="accordion" id="acc-sim">
+    <div class="accordion-head" onclick="toggleAcc('acc-sim')">
+      <span class="acc-icon">▶</span>
+      <span class="acc-title" id="sim-label">🔮 목표 시뮬레이션 · 전환 퍼널</span>
+      <span class="acc-summary">목표 조정 또는 분석 시 사용</span>
+    </div>
+    <div class="accordion-body">
+      <!-- 시뮬레이션 -->
+      <div class="sim-wrap" style="border:none;border-radius:0;border-bottom:1px solid var(--border)">
+        <div class="section-header" style="margin-bottom:14px">
+          <div class="sec-label" style="margin-bottom:0">목표 시뮬레이션</div>
+          <div style="font-size:11px;color:var(--text-muted)">과거 2개월 평균 기반 · 시나리오 선택 후 저장</div>
+        </div>
+        <div class="sim-row">
+          <div>
+            <div class="sim-scenarios" id="sim-scenarios"></div>
+            <div class="goal-inputs">
+              <div class="goal-fg"><label>딜 목표 (상담문의)</label><input type="number" id="goal-deal" placeholder="건" min="0"></div>
+              <div class="goal-fg"><label>리드 목표 (소개서)</label><input type="number" id="goal-lead" placeholder="건" min="0"></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="saveGoal()">✓ 이 목표로 트래킹 시작</button>
+              <button class="btn btn-ghost" onclick="resetGoal()">초기화</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">시나리오 예상 결과</div>
+            <div class="sim-preview" id="sim-preview"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 퍼널 -->
+      <div style="padding:20px 22px">
+        <div class="sec-label" style="margin-bottom:14px">⬇ 전환 퍼널 (이번달)</div>
+        <div class="funnel-wrap" id="funnel-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 숨김: 목표 배지 (헤더 상태 유지용) -->
+  <div id="goal-badge" style="display:none"></div>
 
 </div>
 
@@ -431,8 +496,8 @@ function applyTheme(t) {
   const label = document.getElementById('theme-label');
   if (icon)  icon.textContent  = t === 'light' ? '🌙' : '☀️';
   if (label) label.textContent = t === 'light' ? '다크'  : '라이트';
-  // 차트 다시 그리기 (색상 반영)
-  if (Object.keys(monthly).length) { renderChannelSection(); renderTrendChart(chartMode); }
+  // 차트 + 배너 다시 그리기 (색상 반영)
+  if (Object.keys(monthly).length) { renderStatusBanner(); renderChannelSection(); renderPaceCards(); renderTrendChart(chartMode); }
 }
 function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
 
@@ -729,22 +794,33 @@ function aggregateMonthly() {
 // ═══════════════════════════════════════════════════════════
 function render() {
   updatePeriodLabels();
-  renderHistorical();
-  renderSimulation();
-  renderKPI();
-  renderPacing();
-  renderChannelSection();
-  renderFunnel();
-  renderTrendChart(chartMode);
+  renderStatusBanner();      // ① 최상단 신호등 배너
+  renderChannelSection();    // ② 채널별 현황 (전월 대비 배지 포함)
+  renderPaceCards();         // ③ 우측 페이스 카드
+  renderTrendChart(chartMode); // ③ 추이 차트
+  renderHistorical();        // ④ 아코디언 내부
+  renderSimulation();        // ⑤ 아코디언 내부
+  renderFunnel();            // ⑤ 아코디언 내부
   updateGoalBadge();
 }
 
 function updatePeriodLabels() {
-  document.getElementById('period-label').textContent = `${ymLabel(MR.cur)} KPI`;
-  document.getElementById('kpi-label').textContent    = `🎯 ${ymLabel(MR.cur)} KPI 트래킹`;
-  document.getElementById('sim-label').textContent    = `🔮 ${ymLabel(MR.cur)} 목표 시뮬레이션`;
-  document.getElementById('hist-label').textContent   = `📊 ${ymLabel(MR.prev2)} · ${ymLabel(MR.prev1)} 실적 요약`;
-  document.getElementById('modal-desc').textContent   = `${ymLabel(MR.cur)} 목표를 저장하면 KPI 트래킹이 활성화됩니다.`;
+  document.getElementById('period-label').textContent   = `${ymLabel(MR.cur)} KPI`;
+  document.getElementById('ch-period-label').textContent = ymLabel(MR.cur);
+  document.getElementById('hist-label').textContent     = `📊 ${ymLabel(MR.prev2)} · ${ymLabel(MR.prev1)} 실적 요약`;
+  document.getElementById('sim-label').textContent      = `🔮 ${ymLabel(MR.cur)} 목표 시뮬레이션 · 전환 퍼널`;
+  document.getElementById('modal-desc').textContent     = `${ymLabel(MR.cur)} 목표를 저장하면 KPI 트래킹이 활성화됩니다.`;
+  // 아코디언 헤더 요약 (전전월·전월 실적 미리보기)
+  const m1 = monthly[MR.prev2] || {}, m2 = monthly[MR.prev1] || {};
+  const sumEl = document.getElementById('acc-hist-summary');
+  if (sumEl) sumEl.textContent =
+    `${ymLabel(MR.prev2)} 딜 ${safeNum(m1.deals)}건 · 리드 ${safeNum(m1.leads)}건 / ${ymLabel(MR.prev1)} 딜 ${safeNum(m2.deals)}건 · 리드 ${safeNum(m2.leads)}건`;
+}
+
+// ── 아코디언 토글
+function toggleAcc(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
 }
 
 // ── 히스토리컬 카드
@@ -909,7 +985,141 @@ function resetGoal() {
   render();
 }
 
-// ── KPI 카드
+// ── 상태 배너 (최상단 신호등 + 달성률)
+function renderStatusBanner() {
+  const cur = monthly[MR.cur];
+  const el  = document.getElementById('status-banner-wrap');
+  if (!el) return;
+
+  const hasGoal = goal.deal > 0 || goal.lead > 0;
+
+  if (!hasGoal) {
+    el.innerHTML = `
+      <div class="status-banner no-goal">
+        <span style="font-size:13px;color:var(--text-secondary)">
+          🎯 목표가 설정되지 않았습니다. 목표를 설정하면 달성률과 페이스 신호등이 활성화됩니다.
+        </span>
+        <button class="btn btn-primary" style="padding:7px 16px;font-size:12px" onclick="toggleAcc('acc-sim');document.getElementById('acc-sim').scrollIntoView({behavior:'smooth'})">목표 설정하기 →</button>
+      </div>`;
+    return;
+  }
+
+  const elapsed = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const dealAct  = cur ? safeNum(cur.deals) : 0;
+  const leadAct  = cur ? safeNum(cur.leads) : 0;
+
+  // 이상 누적 = 목표 × (경과일/총일)
+  function paceStatus(actual, g) {
+    if (!g) return { pct: 0, signal: 'gray', label: '목표 미설정', need: 0, proj: 0 };
+    const ideal = g * (elapsed / total);
+    const pacePct = ideal > 0 ? (actual / ideal) * 100 : 100;
+    const signal  = pacePct >= 90 ? 'green' : pacePct >= 70 ? 'yellow' : 'red';
+    const label   = pacePct >= 90 ? '정상 페이스' : pacePct >= 70 ? '속도 주의' : '즉시 액션';
+    const rate    = elapsed > 0 ? actual / elapsed : 0;
+    const proj    = safeRound(rate * total);
+    const need    = g > actual && rem > 0 ? Math.ceil((g - actual) / rem) : 0;
+    return { pct: Math.min(100, safePct(actual, g)), signal, label, need, proj };
+  }
+
+  const dp = paceStatus(dealAct, goal.deal);
+  const lp = paceStatus(leadAct, goal.lead);
+
+  function rowHtml(type, act, g, p) {
+    if (!g) return '';
+    const color = type === 'deal' ? 'var(--deal)' : 'var(--lead)';
+    const name  = type === 'deal' ? '딜' : '리드';
+    const needTxt = p.need > 0
+      ? `일 <span class="hi">${p.need}건</span> 추가 필요`
+      : `<span class="hi">달성 페이스 ✓</span>`;
+    return `
+      <div class="status-row">
+        <div class="status-signal sig-${p.signal}"></div>
+        <div class="status-type ${type}">${name}</div>
+        <div class="status-bar-track">
+          <div class="status-bar-fill" style="width:${p.pct}%;background:${color}"></div>
+        </div>
+        <div class="status-nums" style="color:${color}">${act}건 / ${g}건</div>
+        <div class="status-pct">(${p.pct}%)</div>
+        <div class="status-need">
+          <span class="pace-badge pace-${p.signal}">${p.label}</span>
+          잔여 ${rem}일 · ${needTxt}
+        </div>
+      </div>`;
+  }
+
+  const dealRate = elapsed > 0 ? dealAct / elapsed : 0;
+  const leadRate = elapsed > 0 ? leadAct / elapsed : 0;
+
+  el.innerHTML = `
+    <div class="status-banner">
+      ${rowHtml('deal', dealAct, goal.deal, dp)}
+      ${rowHtml('lead', leadAct, goal.lead, lp)}
+      <div class="status-footer">
+        <span class="status-stat">경과 <strong>${elapsed}일</strong> / ${total}일</span>
+        ${goal.deal  ? `<span class="status-stat">딜 월말 예상 <strong>${dp.proj}건</strong></span>` : ''}
+        ${goal.lead  ? `<span class="status-stat">리드 월말 예상 <strong>${lp.proj}건</strong></span>` : ''}
+        <span class="status-stat">리드 일평균 <strong>${leadRate.toFixed(1)}건</strong></span>
+      </div>
+    </div>`;
+}
+
+// ── 페이스 카드 (추이 차트 우측)
+function renderPaceCards() {
+  const el  = document.getElementById('pace-cards');
+  const cur = monthly[MR.cur];
+  if (!el) return;
+
+  const elapsed  = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const dealAct  = cur ? safeNum(cur.deals) : 0;
+  const leadAct  = cur ? safeNum(cur.leads) : 0;
+  const dealRate = elapsed > 0 ? dealAct / elapsed : 0;
+  const leadRate = elapsed > 0 ? leadAct / elapsed : 0;
+  const dealProj = safeRound(dealRate * total);
+  const leadProj = safeRound(leadRate * total);
+
+  function statusCls(actual, g) {
+    if (!g) return '';
+    const ideal = g * (elapsed / total);
+    const p = ideal > 0 ? (actual / ideal) * 100 : 100;
+    return p >= 90 ? 'ok' : p >= 70 ? 'warn' : 'bad';
+  }
+  function statusTxt(actual, g) {
+    if (!g) return '목표 미설정';
+    const ideal = g * (elapsed / total);
+    const p = ideal > 0 ? (actual / ideal) * 100 : 100;
+    return p >= 90 ? '정상 페이스 ✓' : p >= 70 ? '속도 주의 ⚠' : '즉시 액션 필요 ❗';
+  }
+
+  const dealNeed = goal.deal > dealAct && rem > 0 ? Math.ceil((goal.deal - dealAct) / rem) : 0;
+  const leadNeed = goal.lead > leadAct && rem > 0 ? Math.ceil((goal.lead - leadAct) / rem) : 0;
+
+  el.innerHTML = `
+    <div class="pace-card">
+      <div class="pace-card-lbl">잔여 일수</div>
+      <div class="pace-card-val" style="color:var(--accent)">${rem}<span style="font-size:13px;font-weight:400"> 일</span></div>
+      <div class="pace-card-sub">총 ${total}일 중 ${elapsed}일 경과</div>
+    </div>
+    <div class="pace-card">
+      <div class="pace-card-lbl">딜 페이스</div>
+      <div class="pace-card-val" style="color:var(--deal)">${dealProj}<span style="font-size:13px;font-weight:400"> 건</span></div>
+      <div class="pace-card-sub">
+        월말 예상 · 일평균 ${dealRate.toFixed(1)}건<br>
+        <span class="${statusCls(dealAct, goal.deal)}">${statusTxt(dealAct, goal.deal)}</span>
+        ${dealNeed > 0 ? `<br>일 <strong>${dealNeed}건</strong> 추가 필요` : ''}
+      </div>
+    </div>
+    <div class="pace-card">
+      <div class="pace-card-lbl">리드 페이스</div>
+      <div class="pace-card-val" style="color:var(--lead)">${leadProj}<span style="font-size:13px;font-weight:400"> 건</span></div>
+      <div class="pace-card-sub">
+        월말 예상 · 일평균 ${leadRate.toFixed(1)}건<br>
+        <span class="${statusCls(leadAct, goal.lead)}">${statusTxt(leadAct, goal.lead)}</span>
+        ${leadNeed > 0 ? `<br>일 <strong>${leadNeed}건</strong> 추가 필요` : ''}
+      </div>
+    </div>`;
+}
+
+// ── KPI 카드 (레거시 — render()에서 호출 제거됨, 호환성 유지)
 function renderKPI() {
   const cur = monthly[MR.cur]; if (!cur) return;
   const hasGoal = goal.deal > 0 || goal.lead > 0;
@@ -1036,6 +1246,23 @@ function renderChannelSection() {
     }
   });
 
+  // 전월 대비 트렌드 배지 계산
+  const prev = monthly[MR.prev1];
+  const prevGl = prev?.ga4Lead || makeCh();
+  const prevDays = daysInMonth(MR.prev1), curElapsed = todayDay();
+
+  function trendBadge(curVal, prevVal) {
+    if (!prevVal || prevDays === 0) return '';
+    // 일평균 기준 비교 (경과일 보정)
+    const curRate  = curElapsed > 0 ? curVal / curElapsed : 0;
+    const prevRate = prevVal / prevDays;
+    if (prevRate === 0) return '';
+    const chg = ((curRate - prevRate) / prevRate) * 100;
+    if (chg >= 10)  return `<span class="trend-up">▲${Math.round(chg)}%</span>`;
+    if (chg <= -10) return `<span class="trend-dn">▼${Math.abs(Math.round(chg))}%</span>`;
+    return `<span class="trend-flat">→</span>`;
+  }
+
   // 테이블
   const totLead = gl.total, totDeal = gd.total, totInd = gid.total, totIL = gir.total;
   const totSpend = safeNum(sp.meta) + safeNum(sp.naver) + safeNum(sp.google);
@@ -1103,11 +1330,13 @@ function renderChannelSection() {
         </td>
       </tr>` : '';
 
+    const badge = k !== 'etc' ? trendBadge(lead, prevGl[k]) : '';
+
     return `
       <tr class="${isEtc?'etc-row':''}" ${isEtc?'onclick="toggleEtc()"':''} title="${isEtc?'클릭하여 소스 상세 보기':''}">
         <td>
           <span class="ch-badge ${CH_CFG[k].badgeCls}">${CH_CFG[k].label}</span>
-          ${isEtc ? `<span class="etc-toggle-icon" id="etc-icon">▼</span>` : ''}
+          ${isEtc ? `<span class="etc-toggle-icon" id="etc-icon">▼</span>` : badge}
         </td>
         <td class="v-lead">${lead}<span class="v-muted" style="font-size:9px"> ${shareStr(lead,totLead)}</span></td>
         <td class="v-deal">${deal}</td>
