@@ -263,6 +263,86 @@
     .step-content .action-box ul { padding-left: 1.1rem; margin: .2rem 0; }
     .step-content .action-box li { font-size: .78rem; margin-bottom: .2rem; line-height: 1.6; }
 
+    /* 섹션별 인라인 피드백 */
+    .section-feedback-btn {
+      font-size: .68rem;
+      font-weight: 700;
+      padding: .15rem .55rem;
+      background: #fff;
+      border: 1px solid #d8d8d4;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      color: #666;
+      transition: all .12s;
+      margin-right: .4rem;
+    }
+    .section-feedback-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .section-feedback-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .section-feedback-zone {
+      padding: .85rem 1.1rem 1rem;
+      background: #f8f9fc;
+      border-top: 1px dashed #d8d8e0;
+    }
+    .section-feedback-zone-label {
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #3d6be8;
+      margin-bottom: .35rem;
+    }
+    .section-feedback-input {
+      width: 100%;
+      min-height: 64px;
+      padding: .55rem .75rem;
+      border: 1.5px solid #d8d8e0;
+      border-radius: 6px;
+      font-size: .8rem;
+      font-family: inherit;
+      resize: vertical;
+      line-height: 1.6;
+      background: #fff;
+    }
+    .section-feedback-input:focus { outline: none; border-color: #3d6be8; }
+    .section-feedback-actions { display: flex; gap: .4rem; margin-top: .55rem; align-items: center; }
+    .section-refine-btn {
+      padding: .45rem 1rem;
+      background: #3d6be8;
+      color: #fff;
+      font-size: .77rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .section-refine-btn:hover { opacity: .88; }
+    .section-refine-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .section-cancel-btn {
+      padding: .45rem .85rem;
+      background: #fff;
+      color: #777;
+      font-size: .77rem;
+      font-weight: 700;
+      border: 1.5px solid #d8d8e0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .section-feedback-status {
+      font-size: .73rem;
+      color: #3d6be8;
+      margin-left: .35rem;
+    }
+    .section-feedback-status.error { color: #dc2626; }
+    .section-modified-badge {
+      font-size: .62rem; font-weight: 800;
+      color: #fff; background: #3d6be8;
+      padding: .1rem .4rem; border-radius: 3px;
+      margin-left: .35rem; letter-spacing: .04em;
+    }
+
     .step-content .delta-pos { color: #00b894; font-weight: 700; }
     .step-content .delta-neg { color: #e74c3c; font-weight: 700; }
     .step-content p { margin-bottom: .45rem; }
@@ -489,9 +569,12 @@
   <div class="feedback-panel">
     <div class="feedback-scroll">
 
-      <div class="feedback-label">피드백 입력</div>
+      <div class="feedback-label">전체 인사이트 피드백 <span style="font-weight:600;color:#aaa;letter-spacing:0;text-transform:none">(모든 섹션 영향 — 큰 변경·톤 조정용)</span></div>
+      <p style="font-size:.72rem;color:#888;margin:-.3rem 0 .5rem;line-height:1.6">
+        ※ 한 섹션만 고치고 싶다면 각 섹션 카드의 <strong style="color:#1a1a2e">✏ 이 섹션 피드백</strong> 버튼을 사용하세요 — 토큰 70~90% 절약, 더 빠른 응답.
+      </p>
       <textarea class="feedback-textarea" id="feedbackInput" disabled
-        placeholder="STEP 3까지 완료된 후 피드백을 입력할 수 있습니다."></textarea>
+        placeholder="STEP 3까지 완료된 후 피드백을 입력할 수 있습니다.&#10;여러 섹션을 동시에 수정하거나 전체 톤을 바꿀 때 사용하세요."></textarea>
       <div class="feedback-disabled-note" id="feedbackDisabledNote">STEP 3 완료 후 활성화됩니다.</div>
 
       <div class="feedback-hints">
@@ -1170,15 +1253,118 @@
       </div>`;
     }).join('');
 
+    // 어떤 섹션이 직전 버전에서 수정됐는지 표시 — UX 가독성
+    const modifiedIdx = versions[vIdx]?._modifiedSectionIndex;
+    const sectionRefineEnabled = currentStep === 'done';
+
     document.getElementById('sectionsContainer').innerHTML = entry.sections.map((s,i)=>`
       <div class="step-card" id="step-${i}">
-        <div class="step-card-header" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')">
-          <span class="step-num-tag">${i+1}</span>
-          <span class="step-title-text">${s.title}</span>
-          <span class="step-toggle">▼</span>
+        <div class="step-card-header">
+          <span class="step-num-tag" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')" style="cursor:pointer">${i+1}</span>
+          <span class="step-title-text" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')" style="cursor:pointer">
+            ${s.title}${modifiedIdx === i ? '<span class="section-modified-badge">UPDATED</span>' : ''}
+          </span>
+          <button class="section-feedback-btn" onclick="toggleSectionFeedback(${i})" ${sectionRefineEnabled ? '' : 'disabled title="STEP 3 완료 후 활성화됩니다."'}>
+            ✏ 이 섹션 피드백
+          </button>
+          <span class="step-toggle" onclick="document.getElementById('step-${i}').classList.toggle('collapsed')" style="cursor:pointer">▼</span>
         </div>
         <div class="step-content">${s.html}</div>
+        <div class="section-feedback-zone" id="sfz-${i}" style="display:none">
+          <div class="section-feedback-zone-label">이 섹션 수정 요청</div>
+          <textarea class="section-feedback-input" id="sfi-${i}" placeholder="이 섹션에서만 바뀌어야 할 내용을 작성해 주세요. (다른 섹션은 그대로 유지됩니다)"></textarea>
+          <div class="section-feedback-actions">
+            <button class="section-refine-btn" id="sfb-${i}" onclick="refineSection(${i})">↩ 이 섹션만 반영</button>
+            <button class="section-cancel-btn" onclick="toggleSectionFeedback(${i})">취소</button>
+            <span class="section-feedback-status" id="sfs-${i}"></span>
+          </div>
+        </div>
       </div>`).join('');
+  }
+
+  // ── 섹션별 피드백 토글 ────────────────────────────────────────
+  function toggleSectionFeedback(i) {
+    const zone = document.getElementById(`sfz-${i}`);
+    if (!zone) return;
+    const opening = zone.style.display === 'none' || !zone.style.display;
+    zone.style.display = opening ? 'block' : 'none';
+    if (opening) {
+      // 다른 섹션 피드백 zone은 닫기 (동시 작업 방지)
+      document.querySelectorAll('[id^="sfz-"]').forEach(z => { if (z.id !== `sfz-${i}`) z.style.display = 'none'; });
+      const ta = document.getElementById(`sfi-${i}`);
+      if (ta) ta.focus();
+      // 섹션 펼치기 (접혀있으면)
+      const card = document.getElementById(`step-${i}`);
+      if (card) card.classList.remove('collapsed');
+    } else {
+      // 입력 초기화
+      const ta = document.getElementById(`sfi-${i}`);
+      if (ta) ta.value = '';
+      const status = document.getElementById(`sfs-${i}`);
+      if (status) { status.textContent = ''; status.className = 'section-feedback-status'; }
+    }
+  }
+
+  // ── 섹션별 피드백 반영 ────────────────────────────────────────
+  async function refineSection(i) {
+    const ta = document.getElementById(`sfi-${i}`);
+    const btn = document.getElementById(`sfb-${i}`);
+    const status = document.getElementById(`sfs-${i}`);
+    const feedback = ta?.value.trim();
+    if (!feedback) {
+      status.textContent = '피드백 내용을 입력해주세요.';
+      status.className = 'section-feedback-status error';
+      return;
+    }
+
+    const prev = versions[currentVerIdx].entry;
+    const currentSection = prev.sections[i];
+    if (!currentSection) {
+      status.textContent = '해당 섹션을 찾을 수 없습니다.';
+      status.className = 'section-feedback-status error';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ 반영 중...';
+    status.textContent = '이 섹션만 재생성 중...';
+    status.className = 'section-feedback-status';
+
+    try {
+      const evt = await callAPI({
+        mode: 'refine-section',
+        weekInfo: weekInfoCache,
+        rawData: collectedData,
+        userInputs: userInputsCache,
+        sectionIndex: i,
+        currentSection,
+        allSections: prev.sections,
+        feedback
+      }, null);
+
+      const updated = evt.result?.section;
+      if (!updated || !updated.title) throw new Error('수정된 섹션을 받지 못했습니다.');
+
+      // 새 entry 생성 (deep copy + 해당 섹션만 교체 + 리넘버링)
+      const newEntry = JSON.parse(JSON.stringify(prev));
+      newEntry.sections[i] = updated;
+      newEntry.sections = renumberSections(newEntry.sections);
+
+      versions = versions.slice(0, currentVerIdx + 1);
+      versions.push({ entry: newEntry, feedback: `[섹션 ${i + 1}] ${feedback}`, _modifiedSectionIndex: i });
+      currentVerIdx = versions.length - 1;
+
+      await loadDashboardHTML(newEntry);
+      renderInsightPanel(currentVerIdx);
+      renderVersionTabs();
+      addHistory(`<strong>섹션 ${i + 1}: ${currentSection.title.replace(/^\d+(-[a-z])?\.\s*/, '')}</strong><br>${feedback}`, currentVerIdx);
+    } catch (e) {
+      const status2 = document.getElementById(`sfs-${i}`);
+      if (status2) { status2.textContent = `실패: ${e.message}`; status2.className = 'section-feedback-status error'; }
+    } finally {
+      const btn2 = document.getElementById(`sfb-${i}`);
+      if (btn2) { btn2.disabled = false; btn2.textContent = '↩ 이 섹션만 반영'; }
+    }
   }
 
   function renderVersionTabs() {

@@ -307,7 +307,7 @@ const STEP3_SCHEMA = `
 `;
 
 const REFINE_SCHEMA = `
-# 피드백 반영 출력 스키마
+# 전체 피드백 반영 출력 스키마 (mode: refine)
 
 반드시 아래 JSON만 출력. 다른 텍스트 일절 금지.
 
@@ -327,6 +327,27 @@ const REFINE_SCHEMA = `
 - 분석 원칙(단일 KPI · 펀넬 분해 · 3단계 시퀀스)은 절대 깨지 말 것.
 `;
 
+const SECTION_REFINE_SCHEMA = `
+# 섹션별 피드백 반영 출력 스키마 (mode: refine-section)
+
+반드시 아래 JSON만 출력. 다른 텍스트 일절 금지.
+
+{
+  "section": {
+    "title": "수정된 섹션 제목 (원본 번호 유지)",
+    "html": "수정된 섹션 HTML"
+  }
+}
+
+## 작성 지침
+- 사용자 피드백이 가리키는 부분만 정확히 수정 — 단일 섹션 1개 출력.
+- 다른 섹션은 절대 출력하지 말 것.
+- 섹션 제목의 앞 번호(예: "4. ", "4-a. ")는 그대로 유지 — 클라이언트에서 자동 리넘버링.
+- 다른 섹션과의 맥락 일관성은 유지 (제공된 다른 섹션 요약 참고).
+- 분석 원칙(단일 KPI · 펀넬 분해 · 3단계 시퀀스)은 절대 깨지 말 것.
+- HTML 클래스 규칙(weekly-summary-card / weekly-table / channel-card / insight-block / action-grid 등) 그대로 유지.
+`;
+
 
 // ────────────────────────────────────────────────────────────────────
 // 5. 시스템 프롬프트 빌더 (step별)
@@ -342,6 +363,7 @@ function buildSystemPrompt(mode) {
     mode === 'step2' ? STEP2_SCHEMA :
     mode === 'step3' ? STEP3_SCHEMA :
     mode === 'refine' ? REFINE_SCHEMA :
+    mode === 'refine-section' ? SECTION_REFINE_SCHEMA :
     STEP1_SCHEMA;
 
   const rules = `
@@ -396,7 +418,13 @@ export default async function handler(req) {
     });
   }
 
-  const { mode = 'step1', weekInfo, rawData, userInputs, previousResult, previousEntry, feedback } = body;
+  const {
+    mode = 'step1',
+    weekInfo, rawData, userInputs,
+    previousResult, previousEntry, feedback,
+    // refine-section 전용
+    sectionIndex, currentSection, allSections
+  } = body;
 
   if (!weekInfo || !rawData) {
     return new Response(JSON.stringify({ error: '주차 정보(weekInfo)와 데이터(rawData)가 필요합니다.' }), {
@@ -410,6 +438,11 @@ export default async function handler(req) {
   }
   if (mode === 'refine' && (!previousEntry || !feedback)) {
     return new Response(JSON.stringify({ error: 'refine 모드: previousEntry와 feedback 필요.' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+  if (mode === 'refine-section' && (sectionIndex == null || !currentSection || !feedback)) {
+    return new Response(JSON.stringify({ error: 'refine-section 모드: sectionIndex, currentSection, feedback 필요.' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
@@ -441,15 +474,18 @@ export default async function handler(req) {
   else if (mode === 'step2') userMessage = buildStep2Message(weekInfo, rawData, userInputs, computed, previousResult);
   else if (mode === 'step3') userMessage = buildStep3Message(weekInfo, rawData, userInputs, computed, previousResult);
   else if (mode === 'refine') userMessage = buildRefineMessage(weekInfo, rawData, userInputs, computed, previousEntry, feedback);
+  else if (mode === 'refine-section') userMessage = buildSectionRefineMessage(weekInfo, rawData, userInputs, computed, sectionIndex, currentSection, allSections || [], feedback);
 
   // max_tokens — step별로 다르게
   // 시뮬레이션 결과 (2026-05-27): 한국어+JSON+HTML escape 감안 1자당 ~1.2토큰으로 재산정.
   //   STEP 1 시뮬 응답 2,901자 ≈ 3,481 토큰 — 기존 3500은 한계 근접이라 잘림 발생.
   //   STEP 2 이상 매체 2~3개 시나리오에서 분량 3배 증가 가능 → 6000으로 상향.
+  //   refine-section: 가장 무거운 섹션(딥다이브)이 ~1,631 토큰. 3500이면 2.1배 여유.
   const maxTokens =
     mode === 'step1' ? 6000 :
     mode === 'step2' ? 6000 :
     mode === 'step3' ? 4500 :
+    mode === 'refine-section' ? 3500 :
     10000; // refine은 전체 entry 재생성이므로 가장 큰 한도
 
   const systemPrompt = buildSystemPrompt(mode);
@@ -559,8 +595,9 @@ export default async function handler(req) {
           return;
         }
 
-        // refine은 entry 전체, 그 외는 부분 결과
+        // 응답 형식 분기
         if (mode === 'refine') {
+          // 전체 entry 재생성
           const entry = {
             id: weekInfo.id,
             weekLabel: weekInfo.weekLabel,
@@ -575,6 +612,14 @@ export default async function handler(req) {
             _computed: computed,
           };
           send({ type: 'done', entry });
+        } else if (mode === 'refine-section') {
+          // 단일 섹션 결과 — { section: { title, html } }
+          if (!parsed.section || !parsed.section.title) {
+            send({ type: 'error', message: 'refine-section 응답에 section 객체가 없습니다.' });
+            controller.close();
+            return;
+          }
+          send({ type: 'done', result: { section: parsed.section, sectionIndex }, computed });
         } else {
           // step별 부분 결과 + computed 메타 함께 전송
           send({ type: 'done', result: parsed, computed });
@@ -797,8 +842,46 @@ function buildStep3Message(weekInfo, raw, inputs, c, prevResult) {
 
 
 // ────────────────────────────────────────────────────────────────────
-// 9. 피드백 refine 메시지 빌더
+// 9. 피드백 refine 메시지 빌더 (전체 + 섹션별)
 // ────────────────────────────────────────────────────────────────────
+function buildSectionRefineMessage(weekInfo, raw, inputs, computed, sectionIndex, currentSection, allSections, feedback) {
+  const lines = [];
+  lines.push(commonContext(weekInfo, raw, computed));
+  lines.push('');
+  lines.push(inputsBlock(inputs));
+  lines.push('');
+  lines.push(`## 수정 대상 — 섹션 #${sectionIndex + 1}`);
+  lines.push(`현재 title: ${currentSection.title}`);
+  lines.push('현재 html (전체):');
+  lines.push(currentSection.html || '(빈 섹션)');
+  lines.push('');
+
+  // 다른 섹션들은 짧은 요약만 컨텍스트로 (맥락 일관성용, 토큰 절약)
+  const others = (allSections || []).filter((_, i) => i !== sectionIndex);
+  if (others.length) {
+    lines.push('## 다른 섹션 요약 (맥락 참고용 — 수정 대상 아님)');
+    others.forEach((s, idx) => {
+      const realIdx = (allSections || []).indexOf(s);
+      const stripped = String(s.html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
+      lines.push(`  - ${s.title} — ${stripped}${stripped.length >= 180 ? '...' : ''}`);
+    });
+    lines.push('');
+  }
+
+  lines.push('## 사용자 피드백');
+  lines.push(feedback);
+  lines.push('');
+  lines.push('---');
+  lines.push('## 작성 지시');
+  lines.push('- 위 "수정 대상 섹션" 한 개만 피드백 반영해 재작성.');
+  lines.push('- 다른 섹션은 절대 출력하지 말 것.');
+  lines.push('- 섹션 제목의 앞 번호(예: "4. ", "4-a. ")는 그대로 유지 — 리넘버링은 클라이언트가 처리.');
+  lines.push('- HTML 클래스 규칙 유지 (weekly-summary-card, channel-card, insight-block, action-grid 등).');
+  lines.push('- 분석 원칙(단일 KPI · 펀넬 분해 · 3단계 시퀀스) 유지.');
+  lines.push('- 응답은 { "section": { "title": "...", "html": "..." } } JSON 한 개로만.');
+  return lines.join('\n');
+}
+
 function buildRefineMessage(weekInfo, raw, inputs, computed, prev, feedback) {
   return [
     commonContext(weekInfo, raw, computed),
