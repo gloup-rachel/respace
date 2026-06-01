@@ -89,24 +89,6 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
 .hist-spend { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
 .hist-spend-lbl { font-size:11px; color:var(--text-muted); }
 .hist-spend-val { font-size:13px; font-weight:600; color:var(--text-secondary); }
-/* 과거 etc 상세 토글 */
-.hist-etc-toggle { margin-top:8px; font-size:10px; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; }
-.hist-etc-toggle:hover { color:var(--text-secondary); }
-.hist-etc-body { display:none; margin-top:6px; }
-.hist-etc-body.open { display:block; }
-.hist-etc-src { display:flex; justify-content:space-between; font-size:10px; padding:2px 0; border-bottom:1px solid var(--border); }
-.hist-etc-src:last-child { border-bottom:none; }
-.hist-etc-src-name { color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px; }
-.hist-etc-src-vals { display:flex; gap:8px; flex-shrink:0; }
-.hist-etc-src-vals span { font-weight:600; }
-/* 기준일 피커 */
-.date-picker-wrap { display:flex; align-items:center; gap:6px; }
-.date-picker-wrap label { font-size:10px; color:var(--text-muted); white-space:nowrap; }
-.date-picker-input { font-size:11px; border:1px solid var(--border); border-radius:6px; padding:4px 8px; background:var(--surface2); color:var(--text-primary); cursor:pointer; outline:none; }
-.date-picker-input:focus { border-color:var(--accent); }
-.date-picker-clear { font-size:11px; color:var(--text-muted); cursor:pointer; padding:2px 5px; border-radius:5px; border:1px solid var(--border); background:var(--surface2); }
-.date-picker-clear:hover { color:var(--text-primary); }
-.base-date-badge { font-size:10px; color:var(--warning); font-weight:600; background:var(--warning)18; border:1px solid var(--warning)44; border-radius:5px; padding:2px 7px; }
 
 /* SIM */
 .sim-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; }
@@ -314,11 +296,6 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="라이트/다크 모드 전환">
       <span id="theme-icon">☀️</span><span id="theme-label">라이트</span>
     </button>
-    <div class="date-picker-wrap" title="기준일 설정: 해당 날짜 기준으로 월·누적 데이터를 봅니다">
-      <label>📅 기준일</label>
-      <input type="date" class="date-picker-input" id="base-date-input" onchange="onBaseDateChange(this.value)">
-      <button class="date-picker-clear" id="base-date-clear" onclick="clearBaseDate()" title="오늘 기준으로 초기화" style="display:none">✕</button>
-    </div>
     <button class="btn btn-ghost" onclick="loadData()">↻ 새로고침</button>
     <button class="btn btn-primary" onclick="openGoalModal()">🎯 목표 설정</button>
   </div>
@@ -492,10 +469,7 @@ function nowKST() {
 }
 
 function getMonthRange() {
-  // customBaseDate가 있으면 해당 날짜 기준, 없으면 KST 오늘
-  const kst = customBaseDate
-    ? new Date(customBaseDate.y, customBaseDate.m - 1, customBaseDate.d)
-    : nowKST();
+  const kst = nowKST();
   function ymOf(d) {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   }
@@ -528,36 +502,6 @@ function applyTheme(t) {
 }
 function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
 
-// ─── 기준일 설정
-function onBaseDateChange(val) {
-  if (!val) { clearBaseDate(); return; }
-  const [y, m, d] = val.split('-').map(Number);
-  customBaseDate = { y, m, d };
-  MR = getMonthRange();
-  // 목표 재복원 (새 기준월 기준)
-  try {
-    const s = localStorage.getItem(goalKey());
-    if (s) { const g = JSON.parse(s); goal.deal = g.deal||0; goal.lead = g.lead||0; }
-    else { goal = { deal:0, lead:0 }; }
-  } catch(e) { goal = { deal:0, lead:0 }; }
-  document.getElementById('base-date-clear').style.display = 'inline-block';
-  render();
-  showToast(`📅 기준일: ${y}년 ${m}월 ${d}일 기준으로 표시 중`);
-}
-function clearBaseDate() {
-  customBaseDate = null;
-  MR = getMonthRange();
-  document.getElementById('base-date-input').value = '';
-  document.getElementById('base-date-clear').style.display = 'none';
-  try {
-    const s = localStorage.getItem(goalKey());
-    if (s) { const g = JSON.parse(s); goal.deal = g.deal||0; goal.lead = g.lead||0; }
-    else { goal = { deal:0, lead:0 }; }
-  } catch(e) { goal = { deal:0, lead:0 }; }
-  render();
-  showToast('📅 오늘 기준으로 초기화됐어요');
-}
-
 /** CSS 변수 값 읽기 (차트 색상 동적 적용) */
 function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -566,15 +510,14 @@ function cssVar(name) {
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let rawData        = {};
-let monthly        = {};
-let customBaseDate = null;  // null = 오늘 기준 / {y,m,d} = 사용자 지정 기준일
-let MR             = getMonthRange();  // { cur, prev1, prev2 }
-let goal           = { deal: 0, lead: 0 };
-let chartMode      = 'deal';
-let trendChart     = null, chChart = null;
-let etcOpen        = false;
-let fetchErrors    = [];
+let rawData     = {};
+let monthly     = {};
+let MR          = getMonthRange();  // { cur, prev1, prev2 }
+let goal        = { deal: 0, lead: 0 };
+let chartMode   = 'deal';
+let trendChart  = null, chChart = null;
+let etcOpen     = false;
+let fetchErrors = [];
 
 // localStorage: 키에 현재 월 포함 → 월 변경 시 자동으로 새 목표
 function goalKey() { return `respace_kpi_goal_${MR.cur}`; }
@@ -663,11 +606,7 @@ function getYM(v) {
 }
 
 function getDay(v) { const d = parseDate(v); return d ? d.getDate() : null; }
-// KST 기준 오늘 날짜 — customBaseDate 설정 시 해당 일자 반환
-function todayDay() {
-  if (customBaseDate) return customBaseDate.d;
-  return nowKST().getDate();
-}
+function todayDay() { return nowKST().getDate(); }  // KST 기준 오늘 날짜
 function daysInMonth(ym) { const [y,m]=ym.split('-').map(Number); return new Date(y,m,0).getDate(); }
 
 // ═══════════════════════════════════════════════════════════
@@ -886,56 +825,6 @@ function toggleAcc(id) {
 }
 
 // ── 히스토리컬 카드
-// 과거 카드용 etc 소스 상세 토글 섹션
-function histEtcSection(leadSrcs, dealSrcs, indDealSrcs, indLeadSrcs, cardCls) {
-  const all = {};
-  function merge(obj) {
-    if (!obj) return;
-    Object.entries(obj).forEach(([k, v]) => { all[k] = (all[k]||{lead:0,deal:0,indDeal:0,indLead:0}); });
-  }
-  merge(leadSrcs); merge(dealSrcs); merge(indDealSrcs); merge(indLeadSrcs);
-  const keys = Object.keys(all);
-  keys.forEach(k => {
-    all[k].lead    = safeNum(leadSrcs?.[k]);
-    all[k].deal    = safeNum(dealSrcs?.[k]);
-    all[k].indDeal = safeNum(indDealSrcs?.[k]);
-    all[k].indLead = safeNum(indLeadSrcs?.[k]);
-  });
-  const sorted = keys
-    .map(k => ({ k, total: all[k].lead + all[k].deal + all[k].indDeal + all[k].indLead }))
-    .filter(x => x.total > 0)
-    .sort((a,b) => b.total - a.total)
-    .slice(0, 10);
-  if (!sorted.length) return '';
-  const uid = `hist-etc-${cardCls}`;
-  const rows = sorted.map(({k}) => {
-    const v = all[k];
-    return `<div class="hist-etc-src">
-      <span class="hist-etc-src-name" title="${k}">${k}</span>
-      <span class="hist-etc-src-vals">
-        <span style="color:var(--lead)" title="리드">${v.lead||'—'}</span>
-        <span style="color:var(--deal)" title="딜">${v.deal||'—'}</span>
-        <span style="color:var(--warning)" title="간접딜">${v.indDeal||'—'}</span>
-      </span>
-    </div>`;
-  }).join('');
-  return `
-    <div class="hist-etc-toggle" onclick="toggleHistEtc('${uid}', this)">
-      <span class="etc-toggle-icon">▶</span>
-      <span>etc 소스 상세 (상위 ${sorted.length}개)</span>
-      <span style="font-size:9px;margin-left:4px;color:var(--text-muted)">리드 · 딜 · 간접딜</span>
-    </div>
-    <div class="hist-etc-body" id="${uid}">
-      ${rows}
-    </div>`;
-}
-function toggleHistEtc(uid, el) {
-  const body = document.getElementById(uid);
-  if (!body) return;
-  const isOpen = body.classList.toggle('open');
-  el.querySelector('.etc-toggle-icon').textContent = isOpen ? '▼' : '▶';
-}
-
 function renderHistorical() {
   const m1 = monthly[MR.prev2] || {};
   const m2 = monthly[MR.prev1] || {};
@@ -999,7 +888,6 @@ function renderHistorical() {
       </div>
       <div class="evt-section" style="color:var(--lead)">▶ 리드 채널별 <span style="color:var(--text-muted);font-weight:400">(GA4 ${safeNum(d.ga4Lead?.total)}건)</span></div>
       <div class="ch-bars">${chBars(d.ga4Lead)}</div>
-      ${histEtcSection(d.ga4Lead?.etcSources, d.ga4Deal?.etcSources, d.ga4IndirectDeal?.etcSources, d.ga4IndirectLead?.etcSources, c.cls)}
       <div class="evt-section" style="color:var(--deal);margin-top:9px">▶ 딜 채널별 <span style="color:var(--text-muted);font-weight:400">(GA4 ${safeNum(d.ga4Deal?.total)}건)</span></div>
       <div class="ch-bars">${chBars(d.ga4Deal)}</div>
       <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
@@ -1526,11 +1414,9 @@ function renderFunnel() {
   document.getElementById('funnel-wrap').innerHTML = steps.map((s, i) => {
     const fromPrev = i===0 ? null : steps[i-1].val>0
       ? ((s.val/steps[i-1].val)*100).toFixed(1)+'%' : '0%';
-    // clip-path: 첫 단계=오른쪽 화살표, 중간=양쪽 화살표, 마지막=왼쪽 노치만
-    const clipIdx = i === 0 ? 0 : i === steps.length - 1 ? 2 : 1;
     return `
       <div class="funnel-step">
-        <div class="funnel-block" style="background:${s.color};clip-path:${clips[clipIdx]}">
+        <div class="funnel-block" style="background:${s.color};clip-path:${clips[Math.min(i,2)]}">
           <div class="funnel-num">${s.val.toLocaleString('ko-KR')}</div>
           <div class="funnel-name">${s.name}</div>
         </div>
