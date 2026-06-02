@@ -4496,12 +4496,43 @@
         // ============================================================
         const WEEKLY_REPORTS = [
             {
+                id:"2026-W22",
+                weekLabel:"W22 (05/25~05/31)",
+                meetingDate:"2026-06-02 (화)",
+                periodLabel:"2026-05-25 ~ 2026-05-31",
+                comparePeriod:"지난 주 W21",
+                isLatest:true,
+                oneLineSummary:"W22 CPD ₩77,972(+56.5%), 딜 9건(-30.8%) — Google 예산 조기 소진(노출 손실률 84~90%+)이 핵심 원인. 이번 주 내 Google 일 예산 상향 최우선.",
+                kpis:[
+                { label:"CPD (Primary · 딜당 비용)", value:"₩77,972", delta:"+56.5% vs 전주", trend:"neg" },
+                { label:"리캐치 딜", value:"9건", delta:"-30.8% vs 전주", trend:"neg" },
+                { label:"총 광고비", value:"₩701,750", delta:"+8.3% vs 전주", trend:"neg" },
+                { label:"리캐치 리드", value:"13건", delta:"-18.7% vs 전주", trend:"neg" },
+                { label:"CPL (보조)", value:"₩53,981", delta:"+33.3% vs 전주", trend:"neg" },
+                { label:"광고 전환 합계", value:"104.32건", delta:"-9.9% vs 전주", trend:"neg" }
+                ],
+                sections:[
+                {
+                    title:"1. 통합 총평 Summary",
+                    html:`<table class="weekly-table"><thead><tr><th>매체</th><th>비용</th><th>전환</th><th>CPL</th><th>전주 대비 CPL</th><th>상태</th></tr></thead><tbody><tr><td><strong>네이버</strong></td><td class="num">₩248,442</td><td class="num">18건</td><td class="num">₩13,802</td><td class="num delta-pos">-3.8%</td><td>정상</td></tr><tr><td><strong>구글</strong></td><td class="num">₩274,682</td><td class="num">35.32건</td><td class="num">₩45,780</td><td class="num delta-neg">+74.9%</td><td>이상</td></tr><tr><td><strong>Meta</strong></td><td class="num">₩178,626</td><td class="num">51건</td><td class="num">₩3,502</td><td class="num delta-pos">-13.8%</td><td>정상</td></tr><tr style="background:#f5f7fa;font-weight:700"><td>합계</td><td class="num">₩701,750</td><td class="num">104.32건</td><td class="num">CPL ₩53,981</td><td class="num delta-neg">+33.3%</td><td>-</td></tr></tbody></table><div class="weekly-summary-card weekly-summary-card-highlight"><strong>W22 CPL ₩53,981 (전주 대비 +33.3%), CPD ₩77,972 (전주 대비 +56.5%)</strong> · 딜 9건(-30.8%). 광고비 +8.3% 소폭 증가 속 리드·딜 모두 감소 — Google 예산 조기 소진이 전체 효율 악화의 핵심 원인.</div><ul><li>전체 CPL ₩40,490 → ₩53,981(+33.3%), CPD ₩49,834 → ₩77,972(+56.5%) — 비용 효율 전반 악화.</li><li>Google CPL +74.9% 급등(₩45,780) — 노출 손실률 84~90%+, 핵심 전환 9건 → 6건(-33.3%). 주력 매체 구조적 이상.</li><li>Naver CPL -3.8%(₩13,802), Meta CPL -13.8%(₩3,502) — 두 매체 개선세이나 Google 악화를 상쇄하기에는 부족.</li><li>이번 주 최우선 액션: Google 일 예산 상향 및 예산 소진 패턴 점검.</li></ul>`
+                },
+                {
+                    title:"2. 매체별 성과 및 액션",
+                    html:`<div class="channel-block channel-google"><h4 class="channel-block-title">구글 — CPL ₩45,780 (+74.9%)</h4><div class="insight-block"><p class="fact"><strong>이슈</strong> W22 Google CPL ₩24,853 → ₩45,780(+74.9%), 핵심 전환 9건 → 6건(-33.3%), 노출 2,485 → 1,700(-31.6%) — 전주 대비 실질 성과 전반 악화.</p><p class="cause"><strong>원인</strong></p><ul class="cause-list"><li><span class="cause-tag confirmed">확인됨</span> W22 전 기간(5/25~29) 노출 손실률 84~90%+ 지속 — 하루 예산이 오전 중 조기 소진되어 오후 시간대 노출이 차단됨. 노출 -31.6% 감소의 직접 원인.</li><li><span class="cause-tag confirmed">확인됨</span> W1(5/19~21)에도 노출 점유율 84~85% 수준으로, 순위 경쟁 열위 상태가 이미 존재했으며 W22 예산 소진 구조와 복합 작용해 손실 심화.</li><li><span class="cause-tag estimated">추정</span> 5월 팝업 성수기 경쟁사 광고 집행 증가로 CPC 상승 압력 가능성 — Auction Insights 노출 점유율 손실 원인(예산 기인 vs 순위 기인) 비율 확인으로 검증 필요.</li></ul></div><div class="action-grid" style="grid-template-columns:1fr"><div class="action-box immediate"><div class="action-head">진행 액션</div><span class="action-title-chip">Google 일 예산 상향 및 소진 패턴 점검</span><ul><li><strong>How:</strong> Google SA 캠페인의 예산 소진 시각 로그 확인 후, 오전 소진 확인 시 일 예산을 현재 대비 30~50% 상향 또는 광고 일정(ad scheduling) 균등 배분 적용. 상향 폭은 목표 CPL ₩24,853 이하 복귀 기준으로 역산.</li><li><strong>Why:</strong> [확인됨] W22 전 기간 노출 손실률 84~90%+, 예산 오전 조기 소진으로 오후 노출 차단 — 핵심 전환 -33.3%, CPL +74.9% 악화의 직접 원인.</li><li><strong>Due Date:</strong> 이번 주</li></ul></div><div class="action-box immediate"><div class="action-head">진행 액션</div><span class="action-title-chip">Auction Insights 노출 손실 원인 분리</span><ul><li><strong>How:</strong> Google Auction Insights에서 경쟁사 노출 점유율 변화 및 상단 노출 손실률 중 예산 기인 vs 순위 기인 비율 확인. 순위 기인 손실 비중이 크다면 입찰가 조정 병행 검토.</li><li><strong>Why:</strong> [확인됨] W1(5/19~21)에도 노출 점유율 84~85%로 순위 경쟁 열위 상태 존재. W22에서 예산 소진과 복합 작용해 손실 심화된 구조 파악 필요.</li><li><strong>Due Date:</strong> 이번 주</li></ul></div><div class="action-box verify"><div class="action-head">진행 액션</div><span class="action-title-chip">예산 상향 후 CPL 회복 여부 검증</span><ul><li><strong>How:</strong> 예산 조정 후 W23 Google CPL 및 핵심 전환 수(등록완료) 추이 모니터링. CPL ₩24,853 이하 복귀 여부를 기준으로 추가 입찰 조정 필요성 판단.</li><li><strong>Why:</strong> [추정] 예산 소진 해소 후에도 CPL이 회복되지 않을 경우 랜딩페이지 또는 키워드 Quality Score 이슈 가능성 별도 검토 필요.</li><li><strong>Due Date:</strong> 다음 주 리뷰 전(W23 종료 후)</li></ul></div></div></div>`
+                },
+                {
+                    title:"3. 이 외 논의 필요 사항",
+                    html:`<ul><li><strong>외부 요인 체크:</strong> Naver 키워드 '팝업대행사', '팝업스토어' CPC 5/28 ₩4,500 → ₩5,000 상향 조정 — W22 Naver CPL -3.8% 개선과 공존, 전환 효율 개선이 비용 증가를 상쇄한 것으로 파악. 이상 신호 없음. 5월 팝업 성수기 진입으로 Google 검색 경쟁 심화 가능성 [추정] — Auction Insights 확인으로 검증 예정.</li><li><strong>다음 주 모니터링(W23):</strong><ul><li>Google CPL ₩24,853 이하 복귀 여부 — 예산 조정 효과 검증</li><li>Google 노출 손실률 84~90%+ 지속 여부 — 예산 소진 구조 해소 확인</li><li>Google 핵심 전환 주 6건 초과 여부 — 전환 회복 추세 확인</li><li>전체 CPL ₩40,490 이하 회복 여부 — W21 수준 복귀 목표</li><li>Naver CPL ₩14,344 이하 유지, Meta CPL ₩3,502 이하 유지 — 개선 추세 지속 확인</li></ul></li><li><strong>미팅 안건:</strong> 별도 논의 안건 없음.</li></ul>`
+                }
+                ]
+            },
+            {
                 id:"2026-W21",
                 weekLabel:"W21 (05/18~05/24)",
                 meetingDate:"2026-05-27 (수)",
                 periodLabel:"2026-05-18 ~ 2026-05-24",
                 comparePeriod:"지난 주 W20",
-                isLatest:true,
+                isLatest: false,
                 oneLineSummary:"W21 CPD ₩49,816 전주 대비 -13% 개선, 딜 13건 유지 — 단 CPL +44.6% 급등·리드 급감 원인인 Naver 비전환 그룹 예산 즉시 차단이 다음 주 최우선 과제",
                 kpis:[
                 { label:"CPD (Primary · 딜당 비용)", value:"₩49,816", delta:"-13% vs 전주", trend:"pos" },
