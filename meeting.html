@@ -212,6 +212,22 @@
     .results-title { font-size: 1rem; font-weight: 700; }
     .results-actions { display: flex; gap: .4rem; }
 
+    /* ── Archive status banner ── */
+    .archive-status {
+      display: none;
+      margin-bottom: 1.2rem;
+      padding: .7rem 1rem;
+      border-radius: 8px;
+      font-size: .84rem;
+      align-items: center;
+      gap: .5rem;
+    }
+    .archive-status.show { display: flex; }
+    .archive-status.ok   { background: #f0faf7; color: #00876a; border: 1px solid #cdeee3; }
+    .archive-status.pending { background: #fffaf0; color: #9a6b00; border: 1px solid #f0e3c0; }
+    .archive-status.fail { background: #fdecea; color: #b71c1c; border: 1px solid #f5cfca; }
+    .archive-status a { color: inherit; font-weight: 700; text-decoration: underline; }
+
     /* ── Markdown styles ── */
     .md h1, .md h2 {
       font-size: .97rem; font-weight: 700;
@@ -244,6 +260,90 @@
     .md td { padding: .55rem .7rem; border: 1px solid #e5e5e5; vertical-align: top; line-height: 1.55; }
     .md tr:hover td { background: #fafafa; }
 
+    /* ── Top view nav (미팅 정리 / 액션 아카이브) ── */
+    .view-nav {
+      max-width: 800px; margin: 1.5rem auto 0; padding: 0 1.5rem;
+      display: flex; gap: .5rem;
+    }
+    .view-tab {
+      padding: .6rem 1.2rem;
+      border: 1.5px solid #e0e0e0; border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      font-size: .88rem; font-weight: 700;
+      background: #ececea; color: #999;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .view-tab.active { background: #fff; color: #111; border-color: #e0e0e0; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Archive: stats ── */
+    .stats { display: flex; gap: .8rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+    .stat {
+      flex: 1; min-width: 120px;
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+      padding: 1rem 1.2rem;
+    }
+    .stat-num { font-size: 1.7rem; font-weight: 800; color: #111; line-height: 1.1; }
+    .stat-label { font-size: .74rem; color: #999; margin-top: .25rem; letter-spacing: .03em; }
+
+    /* ── Archive: filter bar ── */
+    .filters { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.4rem; align-items: center; }
+    .filter-group { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .chip {
+      padding: .4rem .85rem; border: 1.5px solid #e0e0e0; border-radius: 20px;
+      font-size: .8rem; font-weight: 600; background: #fff; color: #888;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .chip.active { background: #111; color: #fff; border-color: #111; }
+    .filter-search {
+      margin-left: auto; padding: .45rem .8rem;
+      border: 1.5px solid #e5e5e5; border-radius: 8px;
+      font-size: .82rem; font-family: inherit; min-width: 160px;
+    }
+    .filter-search:focus { outline: none; border-color: #00b894; }
+
+    /* ── Archive: week card ── */
+    .week {
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+      padding: 1.5rem 1.75rem; margin-bottom: 1.1rem;
+    }
+    .week-head {
+      display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap;
+      margin-bottom: 1.1rem; padding-bottom: .85rem; border-bottom: 1.5px solid #f0f0f0;
+    }
+    .week-title { font-size: 1.05rem; font-weight: 800; }
+    .week-date { font-size: .82rem; color: #999; }
+    .week-next { font-size: .76rem; color: #00b894; margin-left: auto; }
+    .week-count { font-size: .76rem; color: #bbb; }
+
+    .action {
+      display: grid; grid-template-columns: 130px 78px 1fr 90px;
+      gap: .7rem; align-items: start;
+      padding: .7rem 0; border-bottom: 1px solid #f5f5f5;
+    }
+    .action:last-child { border-bottom: none; }
+    .a-cat { font-size: .74rem; color: #777; font-weight: 600; line-height: 1.4; }
+    .a-main { font-size: .9rem; color: #111; }
+    .a-main .ctx { display: block; font-size: .78rem; color: #aaa; margin-top: .2rem; }
+    .a-due { font-size: .76rem; color: #888; text-align: right; white-space: nowrap; }
+
+    .owner {
+      display: inline-block; font-size: .72rem; font-weight: 700;
+      padding: .18rem .5rem; border-radius: 5px; white-space: nowrap;
+    }
+    .owner-글로업    { background: #e6f7f2; color: #00876a; }
+    .owner-리스페이스 { background: #ede9fe; color: #6d28d9; }
+    .owner-공동      { background: #fef3c7; color: #92670c; }
+    .owner-기타      { background: #f0f0f0; color: #666; }
+
+    .state-box {
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+      padding: 3rem 2rem; text-align: center; color: #999; font-size: .9rem;
+    }
+    .state-box .big { font-size: 2rem; margin-bottom: .6rem; }
+    .state-box.err { color: #b71c1c; }
+
     /* ── Footer ── */
     footer {
       text-align: center; padding: 2rem;
@@ -253,8 +353,14 @@
     @media (max-width: 600px) {
       header { padding: 1rem 1.25rem; flex-wrap: wrap; gap: .6rem; }
       .system-badge { display: none; }
+      .view-nav { padding: 0 1rem; margin-top: 1rem; }
+      .view-tab { padding: .5rem .9rem; font-size: .82rem; }
       .container { padding: 1.5rem 1rem 3rem; }
       .card { padding: 1.35rem 1.25rem; }
+      .week { padding: 1.25rem 1.25rem; }
+      .action { grid-template-columns: 1fr; gap: .25rem; }
+      .a-due { text-align: left; }
+      .filter-search { margin-left: 0; width: 100%; }
     }
   </style>
 </head>
@@ -264,11 +370,18 @@
   <a href="/" class="back-btn">← 홈</a>
   <span class="header-divider">|</span>
   <div class="logo">RESPACE</div>
-  <div class="header-sub">주간 미팅 정리</div>
+  <div class="header-sub">주간 미팅 OS</div>
   <div class="system-badge">SYSTEM 02</div>
 </header>
 
-<div class="container">
+<!-- 상단 뷰 탭 -->
+<nav class="view-nav">
+  <button class="view-tab active" id="vt-meeting" onclick="switchView('meeting')">📋 미팅 정리</button>
+  <button class="view-tab" id="vt-archive" onclick="switchView('archive')">🗂 액션 아카이브</button>
+</nav>
+
+<!-- ════ VIEW: 미팅 정리 ════ -->
+<div class="container view active" id="view-meeting">
 
   <!-- Step 1: 미팅 정보 입력 -->
   <div class="card">
@@ -278,6 +391,9 @@
     <div class="date-row">
       <label for="meeting-date">미팅 날짜</label>
       <input type="date" id="meeting-date" />
+      <label for="next-meeting-date" style="margin-left:.6rem;">다음 미팅</label>
+      <input type="date" id="next-meeting-date" />
+      <span class="textarea-hint" style="margin-top:0;">비워두면 노트 내용 또는 다음 화요일 자동 적용</span>
     </div>
 
     <!-- 탭 -->
@@ -340,15 +456,40 @@
       <div class="results-actions">
         <button class="btn-sm" onclick="copyMd()">📋 복사</button>
         <button class="btn-sm" onclick="downloadMd()">⬇ 다운로드</button>
+        <button class="btn-sm" onclick="switchView('archive')">🗂 아카이브</button>
       </div>
     </div>
+    <div class="archive-status" id="archive-status"></div>
     <div class="md" id="results-body"></div>
   </div>
 
 </div>
+<!-- ════ /VIEW: 미팅 정리 ════ -->
+
+<!-- ════ VIEW: 액션 아카이브 ════ -->
+<div class="container view" id="view-archive">
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters" id="filters" style="display:none;">
+    <div class="filter-group" id="owner-filters">
+      <button class="chip active" data-owner="전체">전체</button>
+      <button class="chip" data-owner="글로업">글로업</button>
+      <button class="chip" data-owner="리스페이스">리스페이스</button>
+      <button class="chip" data-owner="공동">공동</button>
+    </div>
+    <input class="filter-search" id="search" type="text" placeholder="🔍 액션·카테고리 검색" />
+  </div>
+
+  <div id="archive-list">
+    <div class="state-box"><div class="big">🗂</div>아카이브 탭을 처음 열면 이곳에 누적 액션이 표시됩니다.</div>
+  </div>
+
+</div>
+<!-- ════ /VIEW: 액션 아카이브 ════ -->
 
 <footer>
-  RESPACE AI 시스템 — System 02 주간 미팅 정리 &nbsp;|&nbsp; Powered by Claude AI (Anthropic) &nbsp;|&nbsp; Built by 글로업(GLOUP)
+  RESPACE AI 시스템 — System 02 주간 미팅 OS &nbsp;|&nbsp; Powered by Claude AI (Anthropic) &nbsp;|&nbsp; Built by 글로업(GLOUP)
 </footer>
 
 <script>
@@ -428,6 +569,7 @@ async function runAnalysis() {
     : parsedText;
   const model = document.getElementById('model-select').value;
   const meetingDate = document.getElementById('meeting-date').value;
+  const nextMeetingDate = document.getElementById('next-meeting-date').value;
 
   hideError();
 
@@ -438,12 +580,13 @@ async function runAnalysis() {
 
   setLoading(true);
   document.getElementById('results-section').style.display = 'none';
+  document.getElementById('archive-status').className = 'archive-status';
 
   try {
     const res = await fetch('/api/meeting', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ content, model, meetingDate })
+      body: JSON.stringify({ content, model, meetingDate, nextMeetingDate })
     });
 
     const data = await res.json();
@@ -453,14 +596,72 @@ async function runAnalysis() {
     }
 
     lastMarkdown = data.result;
-    document.getElementById('results-body').innerHTML = marked.parse(lastMarkdown);
+
+    // Next Action JSON 추출 → 화면에는 JSON 펜스를 숨기고, 추출본은 아카이빙에 사용
+    const actionData = extractActionJson(lastMarkdown);
+    const displayMd  = actionData
+      ? lastMarkdown.replace(/```json\s*[\s\S]*?```/, '').replace(/\n{3,}$/, '\n').trimEnd()
+      : lastMarkdown;
+
+    document.getElementById('results-body').innerHTML = marked.parse(displayMd);
     document.getElementById('results-section').style.display = 'block';
     document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // 자동 아카이빙
+    archiveActions(actionData);
 
   } catch (err) {
     showError(err.message);
   } finally {
     setLoading(false);
+  }
+}
+
+/* ── Next Action JSON 추출 ── */
+function extractActionJson(md) {
+  const m = md.match(/```json\s*([\s\S]*?)```/);
+  if (!m) return null;
+  try {
+    const obj = JSON.parse(m[1].trim());
+    if (obj && Array.isArray(obj.actions) && obj.actions.length > 0) return obj;
+  } catch (_) { /* 파싱 실패 → 아카이빙 생략 */ }
+  return null;
+}
+
+/* ── 자동 아카이빙 ── */
+async function archiveActions(actionData) {
+  const el = document.getElementById('archive-status');
+
+  if (!actionData) {
+    el.className = 'archive-status'; // 숨김
+    return;
+  }
+  if (!actionData.meeting_date) {
+    actionData.meeting_date = document.getElementById('meeting-date').value || '';
+  }
+
+  el.className = 'archive-status pending show';
+  el.innerHTML = '⏳ 액션 ' + actionData.actions.length + '건 아카이빙 중...';
+
+  try {
+    const res  = await fetch('/api/archive-meeting', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(actionData)
+    });
+    const data = await res.json();
+
+    if (!res.ok || data.error) throw new Error(data.error || `서버 오류 (${res.status})`);
+
+    archiveDirty = true; // 다음에 아카이브 탭 열 때 최신본 재로드
+    el.className = 'archive-status ok show';
+    el.innerHTML = '✅ ' + data.message +
+      ' (누적 ' + data.total_weeks + '주차) — ' +
+      '<a href="#" onclick="switchView(\'archive\'); return false;">아카이브 보기 →</a>';
+  } catch (err) {
+    el.className = 'archive-status fail show';
+    el.innerHTML = '⚠️ 자동 아카이빙 실패: ' + err.message +
+      ' · 결과는 정상 표시됩니다. (복사/다운로드는 사용 가능)';
   }
 }
 
@@ -499,6 +700,151 @@ function downloadMd() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+/* ═══════════════════════════════════════════════
+   액션 아카이브 뷰 (같은 페이지 내 탭)
+   ═══════════════════════════════════════════════ */
+let WEEKS         = [];
+let ownerFilter   = '전체';
+let searchTerm    = '';
+let archiveLoaded = false;   // 최초 1회 로드
+let archiveDirty  = false;   // 새 아카이빙 후 강제 재로드
+
+const OWNERS = ['글로업', '리스페이스', '공동'];
+function ownerClass(o) { return OWNERS.includes(o) ? o : '기타'; }
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ── 뷰 전환 ── */
+function switchView(view) {
+  const isArchive = view === 'archive';
+  document.getElementById('view-meeting').classList.toggle('active', !isArchive);
+  document.getElementById('view-archive').classList.toggle('active',  isArchive);
+  document.getElementById('vt-meeting').classList.toggle('active', !isArchive);
+  document.getElementById('vt-archive').classList.toggle('active',  isArchive);
+
+  // URL 동기화 (공유·새로고침 시 탭 유지)
+  const path = isArchive ? '/meeting-archive' : '/meeting';
+  if (location.pathname !== path) history.replaceState(null, '', path);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (isArchive && (!archiveLoaded || archiveDirty)) loadArchive();
+}
+
+/* ── 아카이브 데이터 로드 ── */
+async function loadArchive() {
+  const list = document.getElementById('archive-list');
+  list.innerHTML = '<div class="state-box"><div class="big">⏳</div>아카이브를 불러오는 중...</div>';
+  try {
+    const res = await fetch('/data/meeting-actions.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    WEEKS = Array.isArray(data) ? data : [];
+    WEEKS.sort((a, b) => (b.meeting_date || '').localeCompare(a.meeting_date || ''));
+    archiveLoaded = true;
+    archiveDirty  = false;
+    renderStats();
+    renderArchive();
+  } catch (err) {
+    list.innerHTML =
+      '<div class="state-box err"><div class="big">⚠️</div>아카이브를 불러오지 못했습니다.<br>' +
+      esc(err.message) + '</div>';
+    document.getElementById('stats').innerHTML = '';
+  }
+}
+
+function renderStats() {
+  const totalActions = WEEKS.reduce((n, w) => n + (w.actions ? w.actions.length : 0), 0);
+  const latest = WEEKS[0];
+  const latestCount = latest && latest.actions ? latest.actions.length : 0;
+  document.getElementById('stats').innerHTML =
+    statCard(WEEKS.length, '누적 주차') +
+    statCard(totalActions, '총 액션') +
+    statCard(latestCount, (latest ? esc(latest.week || latest.meeting_date) : '최근') + ' 액션');
+}
+function statCard(num, label) {
+  return '<div class="stat"><div class="stat-num">' + num +
+         '</div><div class="stat-label">' + label + '</div></div>';
+}
+
+function renderArchive() {
+  const list = document.getElementById('archive-list');
+
+  if (WEEKS.length === 0) {
+    document.getElementById('filters').style.display = 'none';
+    list.innerHTML = '<div class="state-box"><div class="big">🗂</div>' +
+      '아직 아카이브된 미팅이 없습니다.<br>' +
+      '미팅 정리를 실행하면 액션이 매주 자동으로 저장됩니다.</div>';
+    return;
+  }
+
+  document.getElementById('filters').style.display = 'flex';
+
+  const term = searchTerm.trim().toLowerCase();
+  let visibleWeeks = 0;
+  let html = '';
+
+  WEEKS.forEach(w => {
+    const acts = (w.actions || []).filter(a => {
+      if (ownerFilter !== '전체' && a.owner !== ownerFilter) return false;
+      if (term) {
+        const hay = ((a.action || '') + ' ' + (a.category || '') + ' ' + (a.context || '')).toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
+    });
+    if (acts.length === 0) return;
+    visibleWeeks++;
+
+    html += '<div class="week"><div class="week-head">';
+    html += '<span class="week-title">' + esc(w.week || w.meeting_date) + '</span>';
+    html += '<span class="week-date">' + esc(w.meeting_date || '') + '</span>';
+    html += '<span class="week-count">· 액션 ' + acts.length + '건</span>';
+    if (w.next_meeting_date)
+      html += '<span class="week-next">다음 미팅 ' + esc(w.next_meeting_date) + '</span>';
+    html += '</div>';
+
+    acts.forEach(a => {
+      html += '<div class="action">';
+      html += '<div class="a-cat">' + esc(a.category || '기타') + '</div>';
+      html += '<div><span class="owner owner-' + ownerClass(a.owner) + '">' + esc(a.owner || '기타') + '</span></div>';
+      html += '<div class="a-main">' + esc(a.action || '') +
+              (a.context ? '<span class="ctx">' + esc(a.context) + '</span>' : '') + '</div>';
+      html += '<div class="a-due">' + esc(a.due || '') + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  list.innerHTML = visibleWeeks
+    ? html
+    : '<div class="state-box"><div class="big">🔍</div>조건에 맞는 액션이 없습니다.</div>';
+}
+
+/* ── 아카이브 필터 이벤트 ── */
+document.getElementById('owner-filters').addEventListener('click', e => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('#owner-filters .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  ownerFilter = btn.dataset.owner;
+  renderArchive();
+});
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderArchive();
+});
+
+/* ── 딥링크: /meeting-archive 또는 #archive 로 진입 시 아카이브 탭 활성화 ── */
+(function() {
+  if (location.pathname.indexOf('meeting-archive') !== -1 || location.hash === '#archive') {
+    switchView('archive');
+  }
+})();
 </script>
 </body>
 </html>
