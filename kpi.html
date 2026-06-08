@@ -337,7 +337,7 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
       <div class="card"><canvas id="ch-chart" height="220"></canvas></div>
       <div class="card">
         <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">채널별 상세
-          <span style="font-weight:400;font-size:9px;margin-left:6px">▲▼ = 전월 일평균 대비</span>
+          <span style="font-weight:400;font-size:9px;margin-left:6px">▲▼ = 딜 기준 · 전월 일평균 대비</span>
         </div>
         <table class="ch-table" id="ch-table"></table>
         <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">
@@ -1325,7 +1325,8 @@ function renderChannelSection() {
 
   // 전월 대비 트렌드 배지 계산
   const prev = monthly[MR.prev1];
-  const prevGl = prev?.ga4Lead || makeCh();
+  const prevGl = prev?.ga4Lead  || makeCh();
+  const prevGd = prev?.ga4Deal  || makeCh();  // 전월 딜 채널별 (배지 기준)
   const prevDays = daysInMonth(MR.prev1), curElapsed = todayDay();
 
   function trendBadge(curVal, prevVal) {
@@ -1411,7 +1412,7 @@ function renderChannelSection() {
         </td>
       </tr>` : '';
 
-    const badge = k !== 'etc' ? trendBadge(lead, prevGl[k]) : '';
+    const badge = k !== 'etc' ? trendBadge(deal, prevGd[k]) : '';  // 딜 기준 배지
 
     return `
       <tr class="${isEtc?'etc-row':''}" ${isEtc?'onclick="toggleEtc()"':''} title="${isEtc?'클릭하여 소스 상세 보기':''}">
