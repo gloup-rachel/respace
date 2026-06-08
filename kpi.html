@@ -653,6 +653,24 @@ function getDay(v) { const d = parseDate(v); return d ? d.getDate() : null; }
 function todayDay() { return customBaseDate ? customBaseDate.d : nowKST().getDate(); }
 function daysInMonth(ym) { const [y,m]=ym.split('-').map(Number); return new Date(y,m,0).getDate(); }
 
+// B2B 딜 페이스: 주말 제외 평일 기준 계산
+function weekdaysInMonth(ym) {
+  const [y,m] = ym.split('-').map(Number);
+  const total = daysInMonth(ym);
+  let cnt = 0;
+  for (let d=1; d<=total; d++) { const dow=new Date(y,m-1,d).getDay(); if(dow!==0&&dow!==6) cnt++; }
+  return cnt;
+}
+function weekdaysUpTo(ym, day) {
+  const [y,m] = ym.split('-').map(Number);
+  let cnt = 0;
+  for (let d=1; d<=day; d++) { const dow=new Date(y,m-1,d).getDay(); if(dow!==0&&dow!==6) cnt++; }
+  return cnt;
+}
+function weekdaysRemaining(ym, day) {
+  return weekdaysInMonth(ym) - weekdaysUpTo(ym, day);
+}
+
 // ═══════════════════════════════════════════════════════════
 // FETCH — 개별 실패 허용 (Promise.allSettled)
 // ═══════════════════════════════════════════════════════════
@@ -1068,32 +1086,39 @@ function renderStatusBanner() {
     return;
   }
 
-  const elapsed = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const elapsed  = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const wElapsed = weekdaysUpTo(MR.cur, elapsed);      // 경과 평일 수
+  const wTotal   = weekdaysInMonth(MR.cur);            // 이번달 총 평일 수
+  const wRem     = weekdaysRemaining(MR.cur, elapsed); // 잔여 평일 수
   const dealAct  = cur ? safeNum(cur.deals) : 0;
   const leadAct  = cur ? safeNum(cur.leads) : 0;
 
-  // 이상 누적 = 목표 × (경과일/총일)
-  function paceStatus(actual, g) {
+  // 딜: 평일 기준 페이스 / 리드: 캘린더 기준 페이스
+  function paceStatus(actual, g, isWeekday) {
     if (!g) return { pct: 0, signal: 'gray', label: '목표 미설정', need: 0, proj: 0 };
-    const ideal = g * (elapsed / total);
+    const el_ = isWeekday ? wElapsed : elapsed;
+    const tot_ = isWeekday ? wTotal  : total;
+    const rem_ = isWeekday ? wRem    : rem;
+    const ideal   = tot_ > 0 ? g * (el_ / tot_) : 0;
     const pacePct = ideal > 0 ? (actual / ideal) * 100 : 100;
     const signal  = pacePct >= 90 ? 'green' : pacePct >= 70 ? 'yellow' : 'red';
     const label   = pacePct >= 90 ? '정상 페이스' : pacePct >= 70 ? '속도 주의' : '즉시 액션';
-    const rate    = elapsed > 0 ? actual / elapsed : 0;
-    const proj    = safeRound(rate * total);
-    const need    = g > actual && rem > 0 ? Math.ceil((g - actual) / rem) : 0;
-    return { pct: Math.min(100, safePct(actual, g)), signal, label, need, proj };
+    const rate    = el_ > 0 ? actual / el_ : 0;
+    const proj    = safeRound(rate * tot_);
+    const need    = g > actual && rem_ > 0 ? Math.ceil((g - actual) / rem_) : 0;
+    return { pct: Math.min(100, safePct(actual, g)), signal, label, need, proj, rate, rem: rem_ };
   }
 
-  const dp = paceStatus(dealAct, goal.deal);
-  const lp = paceStatus(leadAct, goal.lead);
+  const dp = paceStatus(dealAct, goal.deal, true);   // 딜 = 평일 기준
+  const lp = paceStatus(leadAct, goal.lead, false);  // 리드 = 캘린더 기준
 
   function rowHtml(type, act, g, p) {
     if (!g) return '';
     const color = type === 'deal' ? 'var(--deal)' : 'var(--lead)';
     const name  = type === 'deal' ? '딜' : '리드';
+    const remLabel = type === 'deal' ? `잔여 ${p.rem}평일` : `잔여 ${rem}일`;
     const needTxt = p.need > 0
-      ? `일 <span class="hi">${p.need}건</span> 추가 필요`
+      ? `${remLabel} · <span class="hi">${p.need}건/일</span> 추가 필요`
       : `<span class="hi">달성 페이스 ✓</span>`;
     return `
       <div class="status-row">
@@ -1106,13 +1131,13 @@ function renderStatusBanner() {
         <div class="status-pct">(${p.pct}%)</div>
         <div class="status-need">
           <span class="pace-badge pace-${p.signal}">${p.label}</span>
-          잔여 ${rem}일 · ${needTxt}
+          ${p.need > 0 ? needTxt : needTxt}
         </div>
       </div>`;
   }
 
-  const dealRate = elapsed > 0 ? dealAct / elapsed : 0;
-  const leadRate = elapsed > 0 ? leadAct / elapsed : 0;
+  const dealAvg = wElapsed > 0 ? (dealAct / wElapsed).toFixed(1) : '0.0';
+  const leadAvg = elapsed  > 0 ? (leadAct / elapsed ).toFixed(1) : '0.0';
 
   el.innerHTML = `
     <div class="status-banner">
@@ -1120,9 +1145,10 @@ function renderStatusBanner() {
       ${rowHtml('lead', leadAct, goal.lead, lp)}
       <div class="status-footer">
         <span class="status-stat">경과 <strong>${elapsed}일</strong> / ${total}일</span>
-        ${goal.deal  ? `<span class="status-stat">딜 월말 예상 <strong>${dp.proj}건</strong></span>` : ''}
-        ${goal.lead  ? `<span class="status-stat">리드 월말 예상 <strong>${lp.proj}건</strong></span>` : ''}
-        <span class="status-stat">리드 일평균 <strong>${leadRate.toFixed(1)}건</strong></span>
+        <span class="status-stat" title="주말 제외">평일 경과 <strong>${wElapsed}일</strong> / ${wTotal}일</span>
+        ${goal.deal ? `<span class="status-stat">딜 월말 예상 <strong>${dp.proj}건</strong> <span style="font-size:9px;color:var(--text-muted)">(평일 기준)</span></span>` : ''}
+        ${goal.lead ? `<span class="status-stat">리드 월말 예상 <strong>${lp.proj}건</strong></span>` : ''}
+        <span class="status-stat">딜 평일평균 <strong>${dealAvg}건</strong> · 리드 일평균 <strong>${leadAvg}건</strong></span>
       </div>
     </div>`;
 }
@@ -1134,42 +1160,51 @@ function renderPaceCards() {
   if (!el) return;
 
   const elapsed  = todayDay(), total = daysInMonth(MR.cur), rem = total - elapsed;
+  const wElapsed = weekdaysUpTo(MR.cur, elapsed);
+  const wTotal   = weekdaysInMonth(MR.cur);
+  const wRem     = weekdaysRemaining(MR.cur, elapsed);
   const dealAct  = cur ? safeNum(cur.deals) : 0;
   const leadAct  = cur ? safeNum(cur.leads) : 0;
-  const dealRate = elapsed > 0 ? dealAct / elapsed : 0;
-  const leadRate = elapsed > 0 ? leadAct / elapsed : 0;
-  const dealProj = safeRound(dealRate * total);
+
+  // 딜: 평일 기준 / 리드: 캘린더 기준
+  const dealRate = wElapsed > 0 ? dealAct / wElapsed : 0;
+  const leadRate = elapsed  > 0 ? leadAct / elapsed  : 0;
+  const dealProj = safeRound(dealRate * wTotal);
   const leadProj = safeRound(leadRate * total);
 
-  function statusCls(actual, g) {
+  function statusCls(actual, g, isWeekday) {
     if (!g) return '';
-    const ideal = g * (elapsed / total);
+    const el_ = isWeekday ? wElapsed : elapsed;
+    const tot_ = isWeekday ? wTotal : total;
+    const ideal = tot_ > 0 ? g * (el_ / tot_) : 0;
     const p = ideal > 0 ? (actual / ideal) * 100 : 100;
     return p >= 90 ? 'ok' : p >= 70 ? 'warn' : 'bad';
   }
-  function statusTxt(actual, g) {
+  function statusTxt(actual, g, isWeekday) {
     if (!g) return '목표 미설정';
-    const ideal = g * (elapsed / total);
+    const el_ = isWeekday ? wElapsed : elapsed;
+    const tot_ = isWeekday ? wTotal : total;
+    const ideal = tot_ > 0 ? g * (el_ / tot_) : 0;
     const p = ideal > 0 ? (actual / ideal) * 100 : 100;
     return p >= 90 ? '정상 페이스 ✓' : p >= 70 ? '속도 주의 ⚠' : '즉시 액션 필요 ❗';
   }
 
-  const dealNeed = goal.deal > dealAct && rem > 0 ? Math.ceil((goal.deal - dealAct) / rem) : 0;
-  const leadNeed = goal.lead > leadAct && rem > 0 ? Math.ceil((goal.lead - leadAct) / rem) : 0;
+  const dealNeed = goal.deal > dealAct && wRem > 0 ? Math.ceil((goal.deal - dealAct) / wRem) : 0;
+  const leadNeed = goal.lead > leadAct && rem  > 0 ? Math.ceil((goal.lead - leadAct) / rem)  : 0;
 
   el.innerHTML = `
     <div class="pace-card">
       <div class="pace-card-lbl">잔여 일수</div>
       <div class="pace-card-val" style="color:var(--accent)">${rem}<span style="font-size:13px;font-weight:400"> 일</span></div>
-      <div class="pace-card-sub">총 ${total}일 중 ${elapsed}일 경과</div>
+      <div class="pace-card-sub">총 ${total}일 중 ${elapsed}일 경과<br>평일 ${wElapsed}일 경과 / 잔여 ${wRem}평일</div>
     </div>
     <div class="pace-card">
-      <div class="pace-card-lbl">딜 페이스</div>
+      <div class="pace-card-lbl">딜 페이스 <span style="font-size:9px;color:var(--text-muted)">평일 기준</span></div>
       <div class="pace-card-val" style="color:var(--deal)">${dealProj}<span style="font-size:13px;font-weight:400"> 건</span></div>
       <div class="pace-card-sub">
-        월말 예상 · 일평균 ${dealRate.toFixed(1)}건<br>
-        <span class="${statusCls(dealAct, goal.deal)}">${statusTxt(dealAct, goal.deal)}</span>
-        ${dealNeed > 0 ? `<br>일 <strong>${dealNeed}건</strong> 추가 필요` : ''}
+        월말 예상 · 평일평균 ${dealRate.toFixed(1)}건<br>
+        <span class="${statusCls(dealAct, goal.deal, true)}">${statusTxt(dealAct, goal.deal, true)}</span>
+        ${dealNeed > 0 ? `<br>평일 <strong>${dealNeed}건</strong> 추가 필요` : ''}
       </div>
     </div>
     <div class="pace-card">
@@ -1177,7 +1212,7 @@ function renderPaceCards() {
       <div class="pace-card-val" style="color:var(--lead)">${leadProj}<span style="font-size:13px;font-weight:400"> 건</span></div>
       <div class="pace-card-sub">
         월말 예상 · 일평균 ${leadRate.toFixed(1)}건<br>
-        <span class="${statusCls(leadAct, goal.lead)}">${statusTxt(leadAct, goal.lead)}</span>
+        <span class="${statusCls(leadAct, goal.lead, false)}">${statusTxt(leadAct, goal.lead, false)}</span>
         ${leadNeed > 0 ? `<br>일 <strong>${leadNeed}건</strong> 추가 필요` : ''}
       </div>
     </div>`;
@@ -1514,12 +1549,46 @@ function renderTrendChart(mode) {
     cum += safeNum(byDay[i+1]);
     return cum;
   });
-  const rate = today > 0 ? cum/today : 0;
-  const paceLine = labels.map((_,i) => {
-    if (i+1 < today) return null;
-    return +((cum + rate*(i+1-today)).toFixed(1));
-  });
-  const goalLine = g>0 ? labels.map((_,i) => +((g/total*(i+1)).toFixed(1))) : null;
+
+  // 딜 페이스: 평일 기준 일평균 → 주말은 증가 없이 평탄
+  // 리드 페이스: 캘린더 기준 일평균 (선형)
+  let paceLine;
+  if (mode === 'deal') {
+    const wEl = weekdaysUpTo(MR.cur, today);
+    const dealDayRate = wEl > 0 ? cum / wEl : 0;  // 평일 1일당 딜 수
+    paceLine = labels.map((_,i) => {
+      const day = i+1;
+      if (day < today) return null;
+      const [y,m] = MR.cur.split('-').map(Number);
+      // today부터 각 날짜까지 평일 수 추가
+      let extraWd = 0;
+      for (let d = today+1; d <= day; d++) {
+        const dow = new Date(y, m-1, d).getDay();
+        if (dow !== 0 && dow !== 6) extraWd++;
+      }
+      return +((cum + dealDayRate * extraWd).toFixed(1));
+    });
+  } else {
+    const rate = today > 0 ? cum / today : 0;
+    paceLine = labels.map((_,i) => {
+      if (i+1 < today) return null;
+      return +((cum + rate*(i+1-today)).toFixed(1));
+    });
+  }
+
+  // 목표선: 딜은 평일 비례, 리드는 선형
+  let goalLine = null;
+  if (g > 0) {
+    if (mode === 'deal') {
+      const wTot = weekdaysInMonth(MR.cur);
+      goalLine = labels.map((_,i) => {
+        const wUp = weekdaysUpTo(MR.cur, i+1);
+        return +((g / wTot * wUp).toFixed(1));
+      });
+    } else {
+      goalLine = labels.map((_,i) => +((g/total*(i+1)).toFixed(1)));
+    }
+  }
 
   const datasets = [
     { label:'실적', data:actualLine, borderColor:color, backgroundColor:color+'22', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:color, fill:false, tension:0.15, spanGaps:false },
