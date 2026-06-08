@@ -263,6 +263,7 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
 .trend-up   { font-size:10px; font-weight:700; color:var(--success); margin-left:5px; }
 .trend-dn   { font-size:10px; font-weight:700; color:var(--deal); margin-left:5px; }
 .trend-flat { font-size:10px; color:var(--text-muted); margin-left:5px; }
+.trend-base { font-size:9px; color:var(--text-muted); margin-left:3px; font-weight:400; }
 
 /* ── 추이 + 페이스카드 2컬럼 */
 .trend-section { display:grid; grid-template-columns:3fr 1fr; gap:14px; align-items:start; }
@@ -336,7 +337,7 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
       <div class="card"><canvas id="ch-chart" height="220"></canvas></div>
       <div class="card">
         <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">채널별 상세
-          <span style="font-weight:400;font-size:9px;margin-left:6px">▲▼ = 전월 동기 대비</span>
+          <span style="font-weight:400;font-size:9px;margin-left:6px">▲▼ = 전월 일평균 대비</span>
         </div>
         <table class="ch-table" id="ch-table"></table>
         <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">
@@ -1329,14 +1330,18 @@ function renderChannelSection() {
 
   function trendBadge(curVal, prevVal) {
     if (!prevVal || prevDays === 0) return '';
-    // 일평균 기준 비교 (경과일 보정)
     const curRate  = curElapsed > 0 ? curVal / curElapsed : 0;
     const prevRate = prevVal / prevDays;
     if (prevRate === 0) return '';
     const chg = ((curRate - prevRate) / prevRate) * 100;
-    if (chg >= 10)  return `<span class="trend-up">▲${Math.round(chg)}%</span>`;
-    if (chg <= -10) return `<span class="trend-dn">▼${Math.abs(Math.round(chg))}%</span>`;
-    return `<span class="trend-flat">→</span>`;
+    // 전월 일평균 표시 (소수점 1자리)
+    const prevAvgStr = prevRate >= 10
+      ? `${Math.round(prevRate)}건/일`
+      : `${prevRate.toFixed(1)}건/일`;
+    const baseInfo = `<span class="trend-base" title="전월(${ymLabel(MR.prev1)}) 일평균">${prevAvgStr}</span>`;
+    if (chg >= 10)  return `<span class="trend-up">▲${Math.round(chg)}%</span>${baseInfo}`;
+    if (chg <= -10) return `<span class="trend-dn">▼${Math.abs(Math.round(chg))}%</span>${baseInfo}`;
+    return `<span class="trend-flat">→</span>${baseInfo}`;
   }
 
   // 테이블
