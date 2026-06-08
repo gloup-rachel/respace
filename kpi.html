@@ -197,14 +197,14 @@ body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif
 .v-warn { color:var(--warning); }
 
 /* FUNNEL */
-.funnel-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px 22px 42px; }
-.funnel-wrap { display:flex; align-items:center; margin-top:14px; }
-.funnel-step { flex:1; position:relative; }
-.funnel-block { height:74px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:filter .2s; cursor:default; }
+.funnel-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; }
+.funnel-wrap { display:flex; align-items:flex-start; margin-top:14px; }
+.funnel-step { flex:1; display:flex; flex-direction:column; align-items:center; }
+.funnel-block { width:100%; height:74px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:filter .2s; cursor:default; }
 .funnel-block:hover { filter:brightness(1.15); }
 .funnel-num { font-size:19px; font-weight:700; color:#fff; }
 .funnel-name { font-size:10px; color:rgba(255,255,255,.7); margin-top:1px; }
-.funnel-rate { position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); font-size:10px; color:var(--text-muted); white-space:nowrap; text-align:center; }
+.funnel-rate { margin-top:8px; font-size:10px; color:var(--text-muted); white-space:nowrap; text-align:center; }
 
 /* CHART */
 .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; }
