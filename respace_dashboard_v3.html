@@ -712,6 +712,43 @@
         .weekly-table .delta-pos { color: #27ae60; font-weight: 600; }
         .weekly-table .delta-neg { color: #e74c3c; font-weight: 600; }
 
+        /* Budget Management */
+        .budget-header { display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; margin:4px 0 18px; }
+        .budget-header h2 { font-size:18px; font-weight:800; color:#2c3e50; margin:0; }
+        .budget-meta { display:flex; flex-wrap:wrap; gap:8px 14px; font-size:12.5px; color:#5a6b7b; }
+        .budget-meta b { color:#2c3e50; font-variant-numeric:tabular-nums; }
+        .budget-note { font-size:11.5px; color:#94a3b8; margin-left:auto; }
+        .budget-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:20px; }
+        .budget-card { border:1px solid #e6eaef; border-radius:12px; padding:16px 16px 14px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04); position:relative; overflow:hidden; }
+        .budget-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
+        .budget-card.sig-green::before { background:#27ae60; }
+        .budget-card.sig-yellow::before { background:#f39c12; }
+        .budget-card.sig-red::before { background:#e74c3c; }
+        .budget-card.sig-wait::before { background:#cbd5e1; }
+        .budget-card.total { background:#f8fafc; border-color:#dde3ea; }
+        .budget-card .bc-channel { font-size:13px; font-weight:700; color:#2c3e50; margin-bottom:2px; }
+        .budget-card .bc-signal { font-size:12px; font-weight:700; margin-bottom:12px; }
+        .budget-card .bc-pace { font-size:30px; font-weight:800; line-height:1; color:#2c3e50; font-variant-numeric:tabular-nums; }
+        .budget-card .bc-pace small { font-size:13px; font-weight:600; color:#94a3b8; margin-left:3px; }
+        .budget-card .bc-rows { margin-top:12px; font-size:12px; color:#5a6b7b; }
+        .budget-card .bc-rows div { display:flex; justify-content:space-between; padding:3px 0; border-top:1px dashed #eef1f4; }
+        .budget-card .bc-rows div:first-child { border-top:none; }
+        .budget-card .bc-rows b { color:#2c3e50; font-variant-numeric:tabular-nums; font-weight:600; }
+        .budget-card .bc-catchup { margin-top:10px; padding:8px 10px; background:#f1f5f9; border-radius:8px; font-size:11.5px; color:#475569; display:flex; justify-content:space-between; }
+        .budget-card .bc-catchup b { color:#2c3e50; }
+        .sig-green-t { color:#27ae60; }
+        .sig-yellow-t { color:#f39c12; }
+        .sig-red-t { color:#e74c3c; }
+        .sig-wait-t { color:#94a3b8; }
+        .budget-table-wrap { border:1px solid #e6eaef; border-radius:12px; overflow:hidden; }
+        .budget-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+        .budget-table th { background:#f8fafc; text-align:right; padding:10px 12px; font-weight:700; color:#5a6b7b; border-bottom:1px solid #e6eaef; }
+        .budget-table th:first-child, .budget-table td:first-child { text-align:left; }
+        .budget-table td { padding:10px 12px; border-bottom:1px solid #f1f4f7; text-align:right; font-variant-numeric:tabular-nums; color:#2c3e50; }
+        .budget-table tr:last-child td { border-bottom:none; }
+        .budget-table tr.total-row td { font-weight:700; background:#f8fafc; }
+        .budget-fallback { background:#fef3cd; border:1px solid #f7e08a; color:#8a6d1a; padding:9px 13px; border-radius:8px; font-size:12px; margin-bottom:16px; }
+
         .weekly-callout {
             background: #fef9e7;
             border-left: 4px solid #f39c12;
@@ -1641,6 +1678,7 @@
             <button class="tab-button active" data-tab="analytics">트래픽/리드</button>
             <button class="tab-button" data-tab="search">검색광고</button>
             <button class="tab-button" data-tab="meta">Meta 광고</button>
+            <button class="tab-button" data-tab="budget">예산 관리</button>
             <button class="tab-button" data-tab="weekly">주간 인사이트</button>
         </div>
     </div>
@@ -2180,6 +2218,11 @@
         </div>
     </div>
 
+    <!-- Budget Management Tab -->
+    <div class="tab-content" id="budgetTab">
+        <div id="budgetContent"></div>
+    </div>
+
     <!-- Weekly Insights Tab -->
     <div class="tab-content" id="weeklyTab">
         <div class="weekly-layout">
@@ -2210,8 +2253,18 @@
             deals: '리캐치_딜',
             ga4Traffic: 'GA4 트래픽',
             ga4Conversion: 'GA4 전환이벤트',
-            insights: '인사이트'
+            insights: '인사이트',
+            budget: '예산설정'
         };
+
+        // 예산 관리: 채널별 월 고정 예산 + 공휴일. '예산설정' 시트가 source of truth, 없으면 아래 기본값 fallback
+        const BUDGET_CHANNELS = [
+            { key: 'naver',  label: '네이버 검색광고' },
+            { key: 'google', label: '구글 검색광고' },
+            { key: 'meta',   label: 'Meta 광고' }
+        ];
+        const DEFAULT_BUDGET = { '네이버 검색광고': 1710000, '구글 검색광고': 990000, 'Meta 광고': 630000 };
+        let budgetConfig = { budgets: { ...DEFAULT_BUDGET }, holidays: [], targetLeads: 100 };
 
         // Global state
         let rawData = {};
@@ -2355,11 +2408,42 @@
             });
         }
 
+        // 예산설정 시트 파싱: 구분(예산/공휴일/설정) | 키 | 값  (raw .v 사용)
+        function parseBudgetConfig(table) {
+            const cfg = { budgets: { ...DEFAULT_BUDGET }, holidays: [], targetLeads: 100 };
+            if (!table || !table.rows || !table.cols) {
+                console.warn("'예산설정' 시트를 찾을 수 없어 기본 예산값을 사용합니다.");
+                budgetConfig = cfg;
+                return;
+            }
+            const labels = table.cols.map(c => (c.label || '').trim());
+            const iG = labels.indexOf('구분'), iK = labels.indexOf('키'), iV = labels.indexOf('값');
+            const sv = (cell) => String(cell?.v ?? '').trim();
+            table.rows.forEach(row => {
+                const c = row.c || [];
+                const gubun = sv(c[iG]);
+                const key = sv(c[iK]);
+                const valS = sv(c[iV]);
+                if (!gubun) return;
+                if (gubun === '예산') {
+                    const num = parseFloat(valS.replace(/[^0-9.]/g, ''));
+                    if (key && !isNaN(num)) cfg.budgets[key] = num;
+                } else if (gubun === '공휴일') {
+                    const d = parseGvizDate(valS) || parseGvizDate(key);
+                    if (d) cfg.holidays.push(toDateInputValue(d));
+                } else if (gubun === '설정') {
+                    const num = parseFloat(valS.replace(/[^0-9.]/g, ''));
+                    if (key.includes('리드') && !isNaN(num)) cfg.targetLeads = num;
+                }
+            });
+            budgetConfig = cfg;
+        }
+
         // Load all data
         async function loadData() {
             updateStatus('loading', '데이터 로딩 중...');
             try {
-                const [naverTable, googleTable, metaTable, leadsTable, dealsTable, ga4TrafficTable, ga4ConversionTable, insightsTable] = await Promise.all([
+                const [naverTable, googleTable, metaTable, leadsTable, dealsTable, ga4TrafficTable, ga4ConversionTable, insightsTable, budgetTable] = await Promise.all([
                     fetchSheet(SHEETS.naver),
                     fetchSheet(SHEETS.google),
                     fetchSheet(SHEETS.meta),
@@ -2367,7 +2451,8 @@
                     fetchSheet(SHEETS.deals),
                     fetchSheet(SHEETS.ga4Traffic),
                     fetchSheet(SHEETS.ga4Conversion),
-                    fetchSheet(SHEETS.insights)
+                    fetchSheet(SHEETS.insights),
+                    fetchSheet(SHEETS.budget)
                 ]);
 
                 rawData = {
@@ -2380,6 +2465,7 @@
                     ga4Conversion: parseTable(ga4ConversionTable),
                     insights: parseTable(insightsTable)
                 };
+                parseBudgetConfig(budgetTable);
 
                 setInitialDateRange();
                 updateAnalyticsSourceView('ga4');
@@ -2555,9 +2641,175 @@
                 renderMetaTab();
             } else if (currentFilter.currentTab === 'analytics') {
                 renderAnalyticsTab();
+            } else if (currentFilter.currentTab === 'budget') {
+                renderBudgetTab();
             }
 
             renderInsights();
+        }
+
+        // ===== 예산 관리: 평일 기준 페이싱 =====
+        function countBusinessDays(start, end, holidaySet) {
+            if (!start || !end || end < start) return 0;
+            let count = 0;
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            const last = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            while (d <= last) {
+                const dow = d.getDay();
+                if (dow !== 0 && dow !== 6 && !holidaySet.has(toDateInputValue(d))) count++;
+                d.setDate(d.getDate() + 1);
+            }
+            return count;
+        }
+
+        function budgetSignal(pace, hasTarget, hasActual) {
+            if (!hasTarget || !hasActual) return { txt: '⚪ 대기', cls: 'sig-wait' };
+            if (pace < 0.8)   return { txt: '🔴 과소집행', cls: 'sig-red' };
+            if (pace < 0.9)   return { txt: '🟡 과소주의', cls: 'sig-yellow' };
+            if (pace <= 1.1)  return { txt: '🟢 정상', cls: 'sig-green' };
+            if (pace <= 1.15) return { txt: '🟡 과다주의', cls: 'sig-yellow' };
+            return { txt: '🔴 과다집행', cls: 'sig-red' };
+        }
+
+        function renderBudgetTab() {
+            const el = document.getElementById('budgetContent');
+            if (!el) return;
+            const cfg = budgetConfig;
+            const today = new Date();
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const refDate = today < monthEnd ? today : monthEnd;
+            const holidaySet = new Set(cfg.holidays);
+
+            const totalBiz = countBusinessDays(monthStart, monthEnd, holidaySet);
+            const elapsedBiz = countBusinessDays(monthStart, refDate, holidaySet);
+            const remainBiz = Math.max(totalBiz - elapsedBiz, 0);
+            const paceRatio = totalBiz ? elapsedBiz / totalBiz : 0;
+
+            const kStart = toDateInputValue(monthStart);
+            const kRef = toDateInputValue(refDate);
+            // 운영일(평일&비공휴일) 외 = 주말/공휴일. 자사 상호명 등 소액이 주말에도 소진되므로 분리 집계
+            const totalDays = monthEnd.getDate();
+            const elapsedDays = refDate.getDate();
+            const totalNonOp = Math.max(totalDays - totalBiz, 0);
+            const elapsedNonOp = Math.max(elapsedDays - elapsedBiz, 0);
+            const remainNonOp = Math.max(totalNonOp - elapsedNonOp, 0);
+
+            let sumBudget = 0, sumTargetCum = 0, sumActual = 0, sumProj = 0, sumWeekend = 0;
+            const rows = BUDGET_CHANNELS.map(ch => {
+                const budget = cfg.budgets[ch.label] || 0;
+                const data = rawData[ch.key] || [];
+                let opSpend = 0, nonOpSpend = 0;
+                data.forEach(r => {
+                    const d = parseGvizDate(r['날짜']); if (!d) return;
+                    const k = toDateInputValue(d);
+                    if (k < kStart || k > kRef) return;
+                    const cost = r['비용'] || 0;
+                    const isOp = (d.getDay() !== 0 && d.getDay() !== 6 && !holidaySet.has(k));
+                    if (isOp) opSpend += cost; else nonOpSpend += cost;
+                });
+                const actual = opSpend + nonOpSpend;           // 실제 소진 = 평일 + 주말/공휴일 전체
+                const dailyTarget = totalBiz ? budget / totalBiz : 0;
+                const targetCum = budget * paceRatio;
+                const pace = targetCum ? actual / targetCum : 0;
+                const sig = budgetSignal(pace, targetCum > 0, actual > 0);
+                const catchup = remainBiz > 0 ? Math.max(budget - actual, 0) / remainBiz : 0;
+                // 월말 예상 = 평일 런레이트 + 주말 런레이트 (각각 따로 추정해 왜곡 방지)
+                const projOp = elapsedBiz > 0 ? opSpend / elapsedBiz * totalBiz : 0;
+                const projNonOp = elapsedNonOp > 0 ? nonOpSpend / elapsedNonOp * totalNonOp : nonOpSpend;
+                const projMonth = projOp + projNonOp;
+                sumBudget += budget; sumTargetCum += targetCum; sumActual += actual; sumProj += projMonth; sumWeekend += nonOpSpend;
+                return { ch, budget, dailyTarget, targetCum, actual, opSpend, weekend: nonOpSpend, pace, sig, catchup, projMonth };
+            });
+            const totPace = sumTargetCum ? sumActual / sumTargetCum : 0;
+            const totSig = budgetSignal(totPace, sumTargetCum > 0, sumActual > 0);
+            const totCatchup = remainBiz > 0 ? Math.max(sumBudget - sumActual, 0) / remainBiz : 0;
+            const totProj = sumProj;
+
+            const usingDefault = cfg.holidays.length === 0 && JSON.stringify(cfg.budgets) === JSON.stringify(DEFAULT_BUDGET);
+            const monthLabel = `${monthStart.getFullYear()}년 ${monthStart.getMonth() + 1}월`;
+
+            const pacePct = (p, hasT, hasA) => (!hasT || !hasA) ? '–' : (p * 100).toFixed(0);
+
+            const card = (c, isTotal) => {
+                const hasT = c.targetCum > 0, hasA = c.actual > 0;
+                const channelLabel = isTotal ? '전체 합계' : c.ch.label;
+                return `
+                <div class="budget-card ${c.sig.cls}${isTotal ? ' total' : ''}">
+                    <div class="bc-channel">${channelLabel}</div>
+                    <div class="bc-signal ${c.sig.cls + '-t'}">${c.sig.txt}</div>
+                    <div class="bc-pace">${pacePct(c.pace, hasT, hasA)}<small>% 페이스</small></div>
+                    <div class="bc-rows">
+                        <div><span>월 예산</span><b>${formatCurrency(c.budget)}</b></div>
+                        <div><span>목표 누적 (오늘까지)</span><b>${formatCurrency(Math.round(c.targetCum))}</b></div>
+                        <div><span>실제 누적 소진</span><b>${formatCurrency(Math.round(c.actual))}</b></div>
+                        ${(c.weekend > 0) ? `<div><span style="color:#94a3b8">└ 주말·공휴일 소진</span><b style="color:#94a3b8">${formatCurrency(Math.round(c.weekend))}</b></div>` : ''}
+                        <div><span>월말 예상 소진</span><b>${formatCurrency(Math.round(c.projMonth))}</b></div>
+                    </div>
+                    <div class="bc-catchup"><span>잔여 평일 캐치업 일예산</span><b>${formatCurrency(Math.round(c.catchup))}</b></div>
+                </div>`;
+            };
+
+            el.innerHTML = `
+                ${usingDefault ? `<div class="budget-fallback">⚠️ '예산설정' 시트를 아직 못 읽어 기본 예산값으로 표시 중입니다. 구글시트에 예산설정 탭을 추가하면 자동 반영됩니다.</div>` : ''}
+                <div class="budget-header">
+                    <h2>${monthLabel} 예산 페이싱</h2>
+                    <div class="budget-meta">
+                        <span>총 운영일 <b>${totalBiz}일</b></span>
+                        <span>경과 <b>${elapsedBiz}일</b></span>
+                        <span>잔여 <b>${remainBiz}일</b></span>
+                        <span>진행률 <b>${(paceRatio * 100).toFixed(0)}%</b></span>
+                    </div>
+                    <span class="budget-note">기준일 ${kRef} · 평일(월~금) 기준, 공휴일 제외</span>
+                </div>
+                <div class="budget-cards">
+                    ${rows.map(r => card(r, false)).join('')}
+                    ${card({ budget: sumBudget, targetCum: sumTargetCum, actual: sumActual, weekend: sumWeekend, pace: totPace, sig: totSig, catchup: totCatchup, projMonth: totProj }, true)}
+                </div>
+                <div class="budget-table-wrap">
+                    <table class="budget-table">
+                        <thead><tr>
+                            <th>채널</th><th>월 예산</th><th>일 목표</th><th>목표 누적</th>
+                            <th>실제 누적</th><th>차이</th><th>페이스</th><th>신호</th>
+                            <th>월말 예상</th><th>캐치업 일예산</th>
+                        </tr></thead>
+                        <tbody>
+                            ${rows.map(r => {
+                                const hasT = r.targetCum > 0, hasA = r.actual > 0;
+                                const diff = r.actual - r.targetCum;
+                                const diffCls = diff < 0 ? 'sig-red-t' : (diff > 0 ? 'sig-yellow-t' : '');
+                                return `<tr>
+                                    <td>${r.ch.label}</td>
+                                    <td>${formatCurrency(r.budget)}</td>
+                                    <td>${formatCurrency(Math.round(r.dailyTarget))}</td>
+                                    <td>${formatCurrency(Math.round(r.targetCum))}</td>
+                                    <td>${formatCurrency(Math.round(r.actual))}</td>
+                                    <td class="${diffCls}">${(diff >= 0 ? '+' : '') + formatCurrency(Math.round(diff))}</td>
+                                    <td>${pacePct(r.pace, hasT, hasA)}${(hasT && hasA) ? '%' : ''}</td>
+                                    <td class="${r.sig.cls + '-t'}">${r.sig.txt}</td>
+                                    <td>${formatCurrency(Math.round(r.projMonth))}</td>
+                                    <td>${formatCurrency(Math.round(r.catchup))}</td>
+                                </tr>`;
+                            }).join('')}
+                            <tr class="total-row">
+                                <td>전체</td>
+                                <td>${formatCurrency(sumBudget)}</td>
+                                <td>${formatCurrency(Math.round(totalBiz ? sumBudget / totalBiz : 0))}</td>
+                                <td>${formatCurrency(Math.round(sumTargetCum))}</td>
+                                <td>${formatCurrency(Math.round(sumActual))}</td>
+                                <td class="${(sumActual - sumTargetCum) < 0 ? 'sig-red-t' : 'sig-yellow-t'}">${((sumActual - sumTargetCum) >= 0 ? '+' : '') + formatCurrency(Math.round(sumActual - sumTargetCum))}</td>
+                                <td>${pacePct(totPace, sumTargetCum > 0, sumActual > 0)}${(sumTargetCum > 0 && sumActual > 0) ? '%' : ''}</td>
+                                <td class="${totSig.cls + '-t'}">${totSig.txt}</td>
+                                <td>${formatCurrency(Math.round(totProj))}</td>
+                                <td>${formatCurrency(Math.round(totCatchup))}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size:11.5px;color:#94a3b8;margin-top:10px;line-height:1.6;">
+                    · 목표 페이싱은 평일(운영일) 기준이며, <b>실제 누적·월말 예상은 주말·공휴일 소액 집행분(예: 네이버 자사 상호명)까지 포함</b>합니다.<br>
+                    · 월말 예상 = 평일 런레이트 + 주말 런레이트를 각각 추정해 합산.
+                </div>`;
         }
 
         function renderMainKpis() {
